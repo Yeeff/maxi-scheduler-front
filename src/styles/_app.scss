@@ -1,0 +1,64 @@
+@import "./variables.scss";
+@import "./mixins.scss";
+@import "./styles.scss";
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: "RubikMedium", sans-serif;
+  // font-size: 16px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  .link {
+    color: var(--color-theme-1) !important;
+    text-decoration: underline !important;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+hr {
+  margin-top: 8px;
+  margin-bottom: 8px;
+
+  position: relative;
+  color: var(--color-theme-1);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.weight-900 {
+  font-weight: 900;
+}
+
+.not-margin-padding {
+  padding: 0;
+  margin: 0;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+div[id="single-spa-application:@horizonx/payroll"] {
+  height: 100%;
+}
+.grid {
+  display: grid;
+
+  &.gap-25 {
+    gap: 25px;
+  }
+}
