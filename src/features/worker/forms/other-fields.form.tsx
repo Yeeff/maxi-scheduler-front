@@ -9,7 +9,6 @@ import {
 import { SelectComponent } from "../../../common/components/Form/select.component";
 import { InputComponent } from "../../../common/components/Form/input.component";
 import { AppContext } from "../../../common/contexts/app.context";
-import useEmploymentsData from "../hooks/employment.hook";
 import { IVinculation } from "../../../common/interfaces/payroll.interfaces";
 
 interface IOtherInformationProp {
