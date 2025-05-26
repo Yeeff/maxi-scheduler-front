@@ -22,6 +22,7 @@ export function usePayrollService() {
   const baseURL: string = process.env.urlApiPayroll;
   const authUrl: string = "/api/v1/vinculation";
   const payrollUrl: string = "/api/v1/payroll";
+  const formPeriodsUrl: string = "/api/v1/form-period";
 
   const { get, post, put } = useCrudService(baseURL);
 
@@ -260,7 +261,7 @@ export function usePayrollService() {
   async function getPeriods(): Promise<ApiResponse<IFormPeriod[]>> {
     try {
       const endpoint: string = `/available`;
-      return await get(`${payrollUrl}${endpoint}`);
+      return await get(`${formPeriodsUrl}${endpoint}`);
     } catch (error) {
       return new ApiResponse(
         {} as IFormPeriod[],

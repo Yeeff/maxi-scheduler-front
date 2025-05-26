@@ -63,10 +63,10 @@ export default function useSearchDeductionsHook() {
       name: "Eventuales",
       value: "Eventual",
     },
-    {
-      name: "Cíclicas",
-      value: "Ciclica",
-    },
+    //{
+    //  name: "Cíclicas",
+    //  value: "Ciclica",
+    //},
   ];
 
   // carga combos

@@ -56,10 +56,10 @@ const useCreateAndUpdateDeductions = ({
       name: "Eventuales",
       value: "Eventual",
     },
-    {
-      name: "Cíclicas",
-      value: "Ciclica",
-    },
+    //{
+    //  name: "Cíclicas",
+    //  value: "Ciclica",
+    //},
   ];
 
   //use form
