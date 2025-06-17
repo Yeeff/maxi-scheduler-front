@@ -655,6 +655,11 @@ export interface IReport {
   typeReport: number;
 }
 
+export interface IPublicReport {
+  period: string;
+  employeeId: string;
+}
+
 export interface IReportResponse {
   bufferFile: {
     type: string;

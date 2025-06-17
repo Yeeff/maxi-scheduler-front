@@ -24,29 +24,32 @@ function ApplicationProvider({
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    getTokenAuthorization();
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      getTokenAuthorization(token);
+    }
 
     subscribe("token-refresh", () => {
-      getTokenAuthorization();
+      if (token) {
+        getTokenAuthorization(token);
+      }
     });
 
     return () => {
-      unsubscribe("token-refresh", () => {});
+      unsubscribe("token-refresh", () => { });
     };
   }, []);
 
-  async function getTokenAuthorization() {
+  async function getTokenAuthorization(token: string) {
     setLoading(true);
-    const token = localStorage.getItem("token");
-    if (token) {
-      const res = await getAuthorization(token);
-      setLoading(false);
-      if (res.operation.code == EResponseCodes.OK) {
-        setAuthorization({
-          ...res.data,
-          token: token,
-        });
-      }
+    const res = await getAuthorization(token);
+    setLoading(false);
+    if (res.operation.code == EResponseCodes.OK) {
+      setAuthorization({
+        ...res.data,
+        token: token,
+      });
     }
   }
 

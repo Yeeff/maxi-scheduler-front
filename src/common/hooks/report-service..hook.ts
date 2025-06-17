@@ -2,6 +2,7 @@ import { EResponseCodes } from "../constants/api.enum";
 
 import {
   IFilterVinculation,
+  IPublicReport,
   IReport,
   IReportResponse,
 } from "../interfaces/payroll.interfaces";
@@ -31,6 +32,21 @@ export function useReportService() {
     }
   }
 
+  async function generatePublicReport(
+    data: IPublicReport
+  ): Promise<ApiResponse<IReportResponse>> {
+    try {
+      const endpoint: string = `/generatePublicReport`;
+      return await post(`${authUrl}${endpoint}`, data);
+    } catch (error) {
+      return new ApiResponse(
+        {} as IReportResponse,
+        EResponseCodes.FAIL,
+        "Error no controlado"
+      );
+    }
+  }
+
   async function downloadVinculationReport(
     data: IFilterVinculation
   ): Promise<ApiResponse<any>> {
@@ -44,7 +60,8 @@ export function useReportService() {
 
   return {
     generateReport,
-    downloadVinculationReport
+    downloadVinculationReport,
+    generatePublicReport
   };
 }
 

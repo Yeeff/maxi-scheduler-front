@@ -20,6 +20,7 @@ import useAppCominicator from "./common/hooks/app-communicator.hook";
 import ChargeRoutes from "./features/charges/charge-routes";
 import ReportRoutes from "./features/reports/report-routes";
 import SpinnerComponent from "./common/components/spinner.component";
+import ReportPublicRoutes from "./features/public-reports/report-public-routes";
 
 function App() {
   const { publish } = useAppCominicator();
@@ -42,6 +43,8 @@ function App() {
         <Router>
           <Suspense fallback={<p>Loading...</p>}>
             <Routes>
+              <Route path={"/report/*"} element={ <ReportPublicRoutes /> } />;
+
               <Route path={"/nomina/"} element={<HomePage />} />;
               <Route
                 path={"/nomina/vacaciones/*"}

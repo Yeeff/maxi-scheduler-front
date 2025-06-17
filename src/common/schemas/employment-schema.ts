@@ -468,3 +468,13 @@ export const generateReporSchema = yup.object({
     .typeError("El campo es obligatorio")
     .required("El campo es obligatorio"),
 });
+
+export const generatePublicReporSchema = yup.object({
+  period: yup
+    .string()
+    .max(4, "Solo se permiten 4 caracteres")
+    .required("El campo es obligatorio"),
+  employeeId: yup.string()
+    .typeError("El campo es obligatorio")
+    .required("El campo es obligatorio"),
+});
