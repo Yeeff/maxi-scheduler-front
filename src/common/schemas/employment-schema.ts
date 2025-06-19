@@ -115,7 +115,7 @@ const personalInformationLocalizationEdit = yup.object({
     gender: yup.string().required("El campo es obligatorio"),
     bloodType: yup.string().optional().nullable(),
     birthDate: yup
-      .date()
+      .string()
       .required("El campo es obligatorio")
       .typeError("Fecha invalida")
       .test("mayor-edad", "Debe ser mayor de edad", calculateMayorEdad)
@@ -145,6 +145,9 @@ export const familiarValidator = yup.object({
         .required("El campo es obligatorio")
         .min(8, "Ingrese al menos 8 caracteres"),
       relationship: yup.string().required("El campo es obligatorio"),
+      gender: yup.string().required("El campo es obligatorio"),
+      age: yup.number().required("El campo es obligatorio"),
+      birthDate: yup.string().required("El campo es obligatorio"),
       dependent: yup.boolean().typeError("El campo es obligatorio"),
       typeDocument: yup.string().required("El campo es obligatorio"),
       numberDocument: yup
@@ -165,11 +168,11 @@ const contractualInformation = yup.object({
     state: yup.string().required("El campo es obligatorio"),
     idCharge: yup.string().required("El campo es obligatorio"),
     startDate: yup
-      .date()
+      .string()
       .required("El campo es obligatorio")
       .typeError("Fecha invalida"),
     endDate: yup
-      .date()
+      .string()
       .when("idTypeContract", ([idTypeContract], schema) => {
         if (idTypeContract === "4") {
           return schema.required("El campo es obligatorio");
@@ -192,7 +195,9 @@ const contractualInformation = yup.object({
       .string()
       .required("El campo es obligatorio")
       .email("El correo es invalido"),
-    totalValue: yup.string().optional().nullable(),
+    totalValue: yup.number().optional().nullable(),
+    idReasonRetirement: yup.string().optional(),
+    codDependence: yup.number().optional(),
   }),
 });
 
@@ -215,14 +220,14 @@ export const formsPayroll = [
   personalInformationLocalization,
   familiarValidator,
   contractualInformation,
-  afiliaciones,
+  //afiliaciones,
 ];
 
 export const formsPayrollEdit = [
-  personalInformationLocalizationEdit,
-  familiarValidator,
+  //personalInformationLocalizationEdit,
+  //familiarValidator,
   contractualInformation,
-  afiliaciones,
+  //afiliaciones,
 ];
 
 export const createAndUpdateIncapacity = yup.object({

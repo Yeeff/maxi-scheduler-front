@@ -6,6 +6,7 @@ import "./styles/_theme-prime.css";
 import "primereact/resources/primereact.min.css";
 import ModalMessageComponent from "./common/components/modal-message.component";
 import ApplicationProvider from "./application-provider";
+import WorkerRoutes from "./features/worker/worker-routes";
 import VacationRoutes from "./features/vacation/vacation-routes";
 import IncapacityRoutes from "./features/incapacity/incapacity-routes";
 import WithDrawalRoutes from "./features/withdrawal/withdrawal-routes";
@@ -46,6 +47,12 @@ function App() {
               <Route path={"/report/*"} element={ <ReportPublicRoutes /> } />;
 
               <Route path={"/nomina/"} element={<HomePage />} />;
+
+              <Route
+                path={"/nomina/trabajadores/*"}
+                element={<WorkerRoutes />}
+              />
+
               <Route
                 path={"/nomina/vacaciones/*"}
                 element={<VacationRoutes />}

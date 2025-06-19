@@ -1,20 +1,20 @@
 
 export interface IEmployment {
   id?: number;
-  idCharge: string;
-  institutionalMail: string;
-  idTypeContract: string;
-  contractNumber: string;
-  startDate: string;
-  endDate: string;
+  idCharge?: string;
+  institutionalMail?: string;
+  idTypeContract?: string;
+  contractNumber?: string;
+  startDate?: string;
+  endDate?: string;
   specificObligations?: string;
   contractualObject?: string;
-  state: string;
+  state?: string;
   settlementPaid?: string;
-  idReasonRetirement: string;
+  idReasonRetirement?: string;
   retirementDate?: string;
-  codDependence: number;
-  isResponsibleForDependency: boolean;
+  codDependence?: number;
+  isResponsibleForDependency?: boolean;
   salary?: number;
   totalValue?: number;
   charges?: ICharge[];
@@ -44,34 +44,34 @@ export interface IEmploymentWorker extends IEmployment {
 }
 
 export interface IRelative {
-  name: string;
-  relationship: string;
-  gender: string;
-  age: number;
-  birthDate: string;
-  dependent: boolean;
-  typeDocument: string;
-  numberDocument: string;
+  name?: string;
+  relationship?: string;
+  gender?: string;
+  age?: number;
+  birthDate?: string;
+  dependent?: boolean;
+  typeDocument?: string;
+  numberDocument?: string;
 }
 
 export interface IWorker {
   id?: number;
-  typeDocument: string;
-  numberDocument: string;
-  firstName: string;
+  typeDocument?: string;
+  numberDocument?: string;
+  firstName?: string;
   secondName?: string;
-  surname: string;
+  surname?: string;
   secondSurname?: string;
-  birthDate: string;
-  gender: string;
-  bloodType: string;
-  nationality: string;
+  birthDate?: string;
+  gender?: string;
+  bloodType?: string;
+  nationality?: string;
   email?: string;
-  contactNumber: string;
-  department: string;
-  municipality: string;
-  neighborhood: string;
-  address: string;
+  contactNumber?: string;
+  department?: string;
+  municipality?: string;
+  neighborhood?: string;
+  address?: string;
   housingType?: string;
   socioEconomic?: string;
   fiscalIdentification?: string;
@@ -92,9 +92,9 @@ export interface IWorker {
 }
 
 export interface IVinculation {
-  worker: IWorker;
-  relatives: IRelative[];
-  employment: IEmployment;
+  worker?: IWorker;
+  relatives?: IRelative[];
+  employment?: IEmployment;
 }
 
 export interface IGetVinculation {
