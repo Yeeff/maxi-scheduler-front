@@ -136,8 +136,7 @@ const useEmployments = ({ action }: IPropsUseEmployments) => {
   const { getDependences } = useDependenceService();
 
   //react-hook-form
-  //const currentValidationSchema = action == "new" ? formsPayroll[step] : formsPayrollEdit[step];
-  const currentValidationSchema =  formsPayrollEdit[step];
+  const currentValidationSchema = action == "new" ? formsPayroll[step] : formsPayrollEdit[step];
 
   const {
     register,
@@ -152,7 +151,7 @@ const useEmployments = ({ action }: IPropsUseEmployments) => {
     getFieldState,
   } = useForm<IVinculation>({
     defaultValues: vinculation,
-    resolver: yupResolver(currentValidationSchema),
+    //resolver: yupResolver(currentValidationSchema),
     mode: "all",
   });
 
@@ -176,7 +175,7 @@ const useEmployments = ({ action }: IPropsUseEmployments) => {
 
   //Validar tipo de contrato
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (Number(idTypeContract) === 4) {
       if (idCharge) {
         const infoChargeSelected = chargesInfo.find(
@@ -215,13 +214,13 @@ const useEmployments = ({ action }: IPropsUseEmployments) => {
         setValueRegister("employment.salary", 0);
       }
     }
-  }, [idTypeContract, idCharge, startDate, endDate, salary]);
+  }, [idTypeContract, idCharge, startDate, endDate, salary]);*/
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (dirtyFields.employment?.idTypeContract) {
       setValueRegister("employment.endDate", null, { shouldValidate: true });
     }
-  }, [idTypeContract]);
+  }, [idTypeContract]);*/
 
   useEffect(() => {
     const { worker } = getValueRegister();
@@ -850,6 +849,23 @@ const useEmployments = ({ action }: IPropsUseEmployments) => {
   };
 
   const handleCreateWorker = async (data: IVinculation) => {
+  
+    data.worker.birthDate="1982/07/19";
+    data.worker.gender="M";
+    data.worker.municipality= "1";
+    data.worker.department="5";
+    data.worker.nationality="COL";
+    data.worker.address="calle x # 5 -7"
+
+    data.employment.idCharge="1";
+    data.employment.codDependence=5;
+    data.employment.isResponsibleForDependency=false;
+    data.employment.contractNumber="123456";
+    data.employment.idTypeContract= "3";
+    data.employment.institutionalMail="testEntity@gmail.com";
+    
+    console.log(data);
+    
     setSending(true);
     setSpinner({
       active: true,
@@ -910,7 +926,7 @@ const useEmployments = ({ action }: IPropsUseEmployments) => {
       duration: ".5",
       hidden: false,
     });
-    await updateWorker(data)
+    /*await updateWorker(data)
       .then((response: ApiResponse<IVinculation>) => {
         if (response && response?.operation?.code === EResponseCodes.OK) {
           handleModal();
@@ -949,7 +965,7 @@ const useEmployments = ({ action }: IPropsUseEmployments) => {
           duration: ".5",
           hidden: false,
         });
-      });
+      });*/
   };
 
   const handleModal = () => {
