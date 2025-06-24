@@ -71,7 +71,8 @@ const InformationPersonalForm = ({
               </div>
             </div>
 
-            <InputComponent
+            
+             {/* <InputComponent
               idInput="worker.fiscalIdentification"
               className="input-basic medium"
               typeInput="text"
@@ -81,7 +82,9 @@ const InformationPersonalForm = ({
               placeholder={""}
               label={<>Código de identificación fiscal</>}
               disabled={disabledFields}
-            />
+            />  */}
+
+            
           </div>
         </div>
         <InputComponent
@@ -134,7 +137,8 @@ const InformationPersonalForm = ({
         />
 
         <div className="fields-container gap-25">
-          <SelectComponent
+          
+          {/*  <SelectComponent
             idInput={"worker.bloodType"}
             control={control}
             errors={errors}
@@ -148,7 +152,8 @@ const InformationPersonalForm = ({
             classNameLabel="text-black big bold"
             placeholder="Seleccione."
             disabled={disabledFields}
-          />
+          /> 
+          
           <SelectComponent
             idInput={"worker.gender"}
             control={control}
@@ -163,8 +168,10 @@ const InformationPersonalForm = ({
             classNameLabel="text-black big bold"
             placeholder="Seleccione."
             disabled={disabledFields}
-          />
+          />*/}
         </div>
+        {/*   */}
+        {/*  
         <DatePickerComponent
           idInput={"worker.birthDate"}
           control={control}
@@ -195,8 +202,9 @@ const InformationPersonalForm = ({
           classNameLabel="text-black big bold"
           placeholder="Seleccione."
           disabled={disabledFields}
-        />
+        /> */}
       </div>
+      {/* 
       <div className="grid-form-4-container gap-25 container-sections-forms">
         <span className="text-black large bold grid-span-4-columns ">
           Información de localización
@@ -308,7 +316,7 @@ const InformationPersonalForm = ({
           disabled={disabledFields}
         />
         <div />
-      </div>
+      </div>*/}
     </>
   );
 };

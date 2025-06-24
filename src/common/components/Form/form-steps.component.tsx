@@ -13,7 +13,7 @@ interface IFormStepsProp {
   titleForm: string;
   stebs: FormStebs[];
   classFormSteb?: string;
-  handleSubmit: UseFormHandleSubmit<FieldValues, undefined>;
+  handleSubmit: UseFormHandleSubmit<FieldValues, FieldValues>;
   validForm: boolean;
   handleNextStep: () => Promise<void>;
   handleBackStep: () => Promise<void>;

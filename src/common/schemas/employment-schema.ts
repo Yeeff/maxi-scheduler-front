@@ -58,10 +58,11 @@ const personalInformationLocalization = yup.object({
         .string()
         .optional()
         .max(50, "Solo se permiten 50 caracteres"),
-      gender: yup.string().required("El campo es obligatorio"),
+      /*gender: yup.string()
+      //.required("El campo es obligatorio"),
       bloodType: yup.string().optional().nullable(),
       birthDate: yup
-        .date()
+        .string()
         .required("El campo es obligatorio")
         .typeError("Fecha invalida")
         .test("mayor-edad", "Debe ser mayor de edad", calculateMayorEdad)
@@ -79,7 +80,7 @@ const personalInformationLocalization = yup.object({
         .string()
         .matches(/^[0-9]+$/, "Solo se permiten numeros")
         .max(10, "Solo se permiten 10 caracteres")
-        .required(),
+        .required(),*/
     }),
 });
 
@@ -115,7 +116,7 @@ const personalInformationLocalizationEdit = yup.object({
     gender: yup.string().required("El campo es obligatorio"),
     bloodType: yup.string().optional().nullable(),
     birthDate: yup
-      .date()
+      .string()
       .required("El campo es obligatorio")
       .typeError("Fecha invalida")
       .test("mayor-edad", "Debe ser mayor de edad", calculateMayorEdad)
@@ -145,6 +146,9 @@ export const familiarValidator = yup.object({
         .required("El campo es obligatorio")
         .min(8, "Ingrese al menos 8 caracteres"),
       relationship: yup.string().required("El campo es obligatorio"),
+      gender: yup.string().required("El campo es obligatorio"),
+      age: yup.number().required("El campo es obligatorio"),
+      birthDate: yup.string().required("El campo es obligatorio"),
       dependent: yup.boolean().typeError("El campo es obligatorio"),
       typeDocument: yup.string().required("El campo es obligatorio"),
       numberDocument: yup
@@ -157,28 +161,28 @@ export const familiarValidator = yup.object({
 
 const contractualInformation = yup.object({
   employment: yup.object({
-    idTypeContract: yup.string().required("El campo es obligatorio"),
+    /*idTypeContract: yup.string().required("El campo es obligatorio"),
     contractNumber: yup
       .string()
       .required("El campo es obligatorio")
-      .max(10, "Solo se permiten 10 caracteres"),
+      .max(10, "Solo se permiten 10 caracteres"),*/
     state: yup.string().required("El campo es obligatorio"),
-    idCharge: yup.string().required("El campo es obligatorio"),
+    //idCharge: yup.string().required("El campo es obligatorio"),
     startDate: yup
-      .date()
+      .string()
       .required("El campo es obligatorio")
       .typeError("Fecha invalida"),
     endDate: yup
-      .date()
-      .when("idTypeContract", ([idTypeContract], schema) => {
-        if (idTypeContract === "4") {
-          return schema.required("El campo es obligatorio");
-        } else {
-          return schema.nullable();
-        }
-      })
+      .string()
+      //.when("idTypeContract", ([idTypeContract], schema) => {
+      //  if (idTypeContract === "4") {
+      //    return schema.required("El campo es obligatorio");
+      //  } else {
+      //    return schema.nullable();
+      //  }
+      //})
       .typeError("Fecha invalida"),
-    specificObligations: yup
+    /*specificObligations: yup
       .string()
       .nullable()
       .optional()
@@ -191,8 +195,11 @@ const contractualInformation = yup.object({
     institutionalMail: yup
       .string()
       .required("El campo es obligatorio")
-      .email("El correo es invalido"),
-    totalValue: yup.string().optional().nullable(),
+      .email("El correo es invalido"),*/
+    //totalValue: yup.number().optional().nullable(),
+    totalValue: yup.number().required(),
+    //idReasonRetirement: yup.string().optional(),
+    //codDependence: yup.number().optional(),
   }),
 });
 
@@ -215,14 +222,14 @@ export const formsPayroll = [
   personalInformationLocalization,
   familiarValidator,
   contractualInformation,
-  afiliaciones,
+  //afiliaciones,
 ];
 
 export const formsPayrollEdit = [
   personalInformationLocalizationEdit,
   familiarValidator,
   contractualInformation,
-  afiliaciones,
+  //afiliaciones,
 ];
 
 export const createAndUpdateIncapacity = yup.object({
@@ -465,6 +472,16 @@ export const generateReporSchema = yup.object({
   codEmployment: yup.string().optional().nullable(),
   typeReport: yup
     .number()
+    .typeError("El campo es obligatorio")
+    .required("El campo es obligatorio"),
+});
+
+export const generatePublicReporSchema = yup.object({
+  period: yup
+    .string()
+    .max(4, "Solo se permiten 4 caracteres")
+    .required("El campo es obligatorio"),
+  employeeId: yup.string()
     .typeError("El campo es obligatorio")
     .required("El campo es obligatorio"),
 });

@@ -56,7 +56,8 @@ const ContractualInformationForm = ({
         <span className="text-black large bold grid-span-4-columns">
           Información contractual
         </span>
-        <SelectComponent
+
+        {/* <SelectComponent
           idInput={"employment.idTypeContract"}
           control={control}
           errors={errors}
@@ -84,7 +85,8 @@ const ContractualInformationForm = ({
           classNameLabel="text-black big bold"
           className="input-basic medium"
           disabled={disabledFields}
-        />
+        />*/}
+
         <SelectComponent
           idInput={"employment.state"}
           control={control}
@@ -100,8 +102,7 @@ const ContractualInformationForm = ({
           placeholder="Seleccione."
           disabled={disabledFields}
         />
-
-        <SelectComponent
+        {/*<SelectComponent
           idInput={"employment.codDependence"}
           control={control}
           errors={errors}
@@ -145,7 +146,8 @@ const ContractualInformationForm = ({
           classNameLabel="text-black big bold"
           placeholder="Seleccione."
           disabled={disabledFields}
-        />
+        /> */}
+
         <DatePickerComponent
           idInput={"employment.startDate"}
           control={control}
@@ -178,11 +180,11 @@ const ContractualInformationForm = ({
           errors={errors}
           classNameLabel="text-black big bold"
           className="dataPicker-basic  medium "
-          disabled={
-            String(watch("employment.idTypeContract")) === "4"
-              ? disabledFields
-              : true
-          }
+          //disabled={
+          //  String(watch("employment.idTypeContract")) === "4"
+          //    ? disabledFields
+          //    : true
+          //}
           placeholder="DD/MM/YYYY"
           dateFormat="dd/mm/yy"
           minDate={new Date(startDate)}
@@ -193,11 +195,10 @@ const ContractualInformationForm = ({
             typeInput="text"
             label="Antiguedad"
             errors={errors}
-            value={`${
-              startDate && endDate
-                ? calculateDifferenceYear(startDate, endDate)
-                : "0"
-            }
+            value={`${startDate && endDate
+              ? calculateDifferenceYear(startDate, endDate)
+              : "0"
+              }
   `}
             classNameLabel="text-black big bold"
             className="input-basic medium"
@@ -207,7 +208,7 @@ const ContractualInformationForm = ({
           <></>
         )}
 
-        <InputComponent
+        {/* <InputComponent
           idInput="employment.institutionalMail"
           typeInput="email"
           label={
@@ -221,7 +222,9 @@ const ContractualInformationForm = ({
           className="input-basic medium"
           disabled={disabledFields}
         />
+ 
 
+        
         <InputNumberComponent
           idInput="employment.salary"
           control={control}
@@ -229,33 +232,34 @@ const ContractualInformationForm = ({
           errors={errors}
           classNameLabel="text-black big bold"
           className="inputNumber-basic medium"
-          disabled={true}
+          disabled={false}
           mode="currency"
           currency="COP"
           locale="es-CO"
           minFractionDigits={2}
           maxFractionDigits={2}
-        />
+        />*/}
 
-        {String(watch("employment.idTypeContract")) === "4" && (
+        {/*{String(watch("employment.idTypeContract")) === "4" && (*/}
           <InputNumberComponent
             idInput="employment.totalValue"
             control={control}
-            label={<>Valor total</>}
+            //label={<>Valor total</>}
+            label={<>Salario</>}
             errors={errors}
             classNameLabel="text-black big bold"
             className="inputNumber-basic medium"
-            disabled={true}
+            disabled={false}
             mode="currency"
             currency="COP"
             locale="es-CO"
             minFractionDigits={2}
             maxFractionDigits={2}
           />
-        )}
+        {/* )}  */}
 
         <div className="grid-span-4-columns gap-25">
-          <TextAreaComponent
+          {/*<TextAreaComponent
             label={"Obligaciones especificas"}
             idInput={"employment.specificObligations"}
             disabled={disabledFields}
@@ -264,7 +268,8 @@ const ContractualInformationForm = ({
             register={register}
             errors={errors}
             rows={5}
-          />
+          />*/}
+          
           <div className="text-right">
             <span className="text-span ">Max. {10000} carácteres</span>
           </div>
@@ -277,8 +282,7 @@ const ContractualInformationForm = ({
             classNameLabel="text-black big bold"
           /> */}
         </div>
-
-        {String(watch("employment.idTypeContract")) === "4" && (
+        {/** {String(watch("employment.idTypeContract")) === "4" && (
           <div className="grid-span-4-columns">
             <TextAreaComponent
               label={"Objeto contractual"}
@@ -294,7 +298,8 @@ const ContractualInformationForm = ({
               <span className="text-span ">Max. {5000} carácteres</span>
             </div>
           </div>
-        )}
+        )}  */}
+        
       </div>
       {/* {action !== "new" ? (
         <div className="container-sections-forms">
