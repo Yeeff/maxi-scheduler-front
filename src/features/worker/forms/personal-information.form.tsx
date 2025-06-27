@@ -3,6 +3,8 @@ import { Control, FieldErrors, UseFormRegister } from "react-hook-form";
 import {
   SelectComponent,
   InputComponent,
+  SwitchComponent,
+  LabelComponent,
 } from "../../../common/components/Form";
 
 import { DatePickerComponent } from "../../../common/components/Form/input-date.component";
@@ -68,11 +70,27 @@ const InformationPersonalForm = ({
                   placeholder={""}
                   disabled={disabledFields}
                 />
+
+                <SwitchComponent
+                  idInput="worker.isPensioner"
+                  control={control}
+                  errors={errors}
+                  direction={EDirection.row}
+                  children={
+                    <>
+                      <LabelComponent
+                        value="Pensionado"
+                        className="text-black big bold"
+                        htmlFor="isExtension"
+                      />
+                    </>
+                  }
+                />
               </div>
             </div>
 
-            
-             {/* <InputComponent
+
+            {/* <InputComponent
               idInput="worker.fiscalIdentification"
               className="input-basic medium"
               typeInput="text"
@@ -84,7 +102,7 @@ const InformationPersonalForm = ({
               disabled={disabledFields}
             />  */}
 
-            
+
           </div>
         </div>
         <InputComponent
@@ -137,7 +155,7 @@ const InformationPersonalForm = ({
         />
 
         <div className="fields-container gap-25">
-          
+
           {/*  <SelectComponent
             idInput={"worker.bloodType"}
             control={control}

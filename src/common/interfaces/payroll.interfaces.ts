@@ -33,6 +33,7 @@ export interface IEmploymentResult {
   observation?: string;
   salary?: number;
   totalValue?: number;
+  workStationBonusValue?:number;
   idReasonRetirement: string;
   charges?: ICharge[];
   typesContracts?: ITypesContracts[];
@@ -58,6 +59,7 @@ export interface IWorker {
   id?: number;
   typeDocument?: string;
   numberDocument?: string;
+  isPensioner:boolean;
   firstName?: string;
   secondName?: string;
   surname?: string;

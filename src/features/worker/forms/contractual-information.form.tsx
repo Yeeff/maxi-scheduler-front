@@ -241,25 +241,40 @@ const ContractualInformationForm = ({
         />*/}
 
         {/*{String(watch("employment.idTypeContract")) === "4" && (*/}
-          <InputNumberComponent
-            idInput="employment.totalValue"
-            control={control}
-            //label={<>Valor total</>}
-            label={<>Salario</>}
-            errors={errors}
-            classNameLabel="text-black big bold"
-            className="inputNumber-basic medium"
-            disabled={false}
-            mode="currency"
-            currency="COP"
-            locale="es-CO"
-            minFractionDigits={2}
-            maxFractionDigits={2}
-          />
+        <InputNumberComponent
+          idInput="employment.totalValue"
+          control={control}
+          //label={<>Valor total</>}
+          label={<>Salario</>}
+          errors={errors}
+          classNameLabel="text-black big bold"
+          className="inputNumber-basic medium"
+          disabled={false}
+          mode="currency"
+          currency="COP"
+          locale="es-CO"
+          minFractionDigits={2}
+          maxFractionDigits={2}
+        />
         {/* )}  */}
 
-        <div className="grid-span-4-columns gap-25">
-          {/*<TextAreaComponent
+
+        <InputNumberComponent
+          idInput="employment.workStationBonusValue"
+          control={control}
+          //label={<>Valor total</>}
+          label={<>Valor Bonificacion Puesto de trabajo</>}
+          errors={errors}
+          classNameLabel="text-black big bold"
+          className="inputNumber-basic medium"
+          disabled={false}
+          mode="currency"
+          currency="COP"
+          locale="es-CO"
+          minFractionDigits={2}
+          maxFractionDigits={2}
+        />
+        {/*<TextAreaComponent
             label={"Obligaciones especificas"}
             idInput={"employment.specificObligations"}
             disabled={disabledFields}
@@ -268,12 +283,12 @@ const ContractualInformationForm = ({
             register={register}
             errors={errors}
             rows={5}
-          />*/}
+          />
           
           <div className="text-right">
             <span className="text-span ">Max. {10000} carácteres</span>
           </div>
-          {/* <InputEditorComponent
+          <InputEditorComponent
             control={control}
             label={"Obligaciones especificas"}
             idInput={"employment.specificObligations"}
@@ -281,7 +296,7 @@ const ContractualInformationForm = ({
             className="inputEditor-basic height-150"
             classNameLabel="text-black big bold"
           /> */}
-        </div>
+
         {/** {String(watch("employment.idTypeContract")) === "4" && (
           <div className="grid-span-4-columns">
             <TextAreaComponent
@@ -299,7 +314,7 @@ const ContractualInformationForm = ({
             </div>
           </div>
         )}  */}
-        
+
       </div>
       {/* {action !== "new" ? (
         <div className="container-sections-forms">
