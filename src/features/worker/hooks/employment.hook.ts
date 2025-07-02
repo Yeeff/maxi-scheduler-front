@@ -982,13 +982,15 @@ const useEmployments = ({ action }: IPropsUseEmployments) => {
       show: true,
       OkTitle: "Aceptar",
       onOk: () => {
-        navigate("../expedientes/");
+        //navigate("../expedientes/");
+        navigate("../vinculacion-laboral/");
         setMessage((prev) => {
           return { ...prev, show: false };
         });
       },
       onClose: () => {
-        navigate("../expedientes/");
+        //navigate("../expedientes/");
+        navigate("../vinculacion-laboral/");
         setMessage({});
       },
       background: true,
