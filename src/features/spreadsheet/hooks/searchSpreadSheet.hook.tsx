@@ -1,6 +1,6 @@
 import { useContext, useRef, useState } from "react";
 import { ProgressBar } from "primereact/progressbar";
-import { RiFileExcel2Line } from "react-icons/ri";
+import { RiFileExcel2Line, RiUpload2Line  } from "react-icons/ri";
 import { BsCheckCircle } from "react-icons/bs";
 import { FaGear } from "react-icons/fa6";
 import { useForm } from "react-hook-form";
@@ -370,6 +370,22 @@ export default function useSearchSpreadSheetHook() {
       },
       tooltipClass: "xlsxDownload",
       hide: !validateActionAccess("PLANILLA_DESCARGAR"),
+    },
+    {
+      onClick: (row) => {
+        console.log("Subir datos calculados", row);
+      },
+      customIcon: () => {
+        return (
+          <RiUpload2Line
+            color="#21A366"
+            className="xlsxDownload"
+            data-pr-tooltip="Subir datos calculados"
+          />
+        );
+      },
+      tooltipClass: "xlsxDownload",
+      hide: !validateActionAccess("PLANILLA_EDITAR"),
     },
   ];
 
