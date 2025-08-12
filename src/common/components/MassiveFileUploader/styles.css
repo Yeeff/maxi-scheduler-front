@@ -1,0 +1,201 @@
+.file-uploader {
+    width: 100%;
+    max-width: 1280px;
+    height: 330px;
+    border-radius: 6px;
+}
+
+.headerMassive {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem;
+    gap: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.custom-choose-btn,
+.custom-upload-btn,
+.custom-cancel-btn {
+    background: none;
+    border: 1px solid;
+    border-radius: 50%;
+    height: 3rem;
+    width: 3rem;
+    padding: 0.75rem 0;
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+.custom-choose-btn {
+    border-color: #533893;
+}
+
+.custom-upload-btn {
+    border-color: #22c55e;
+}
+
+.custom-upload-btn:disabled {
+    border-color: #E2E2E2;
+}
+
+.custom-cancel-btn {
+    border-color: #ef4444;
+}
+
+.custom-cancel-btn:disabled {
+    border-color: #E2E2E2;
+}
+
+.file-list {
+    height: 300px;
+    overflow-y: auto;
+    width: 100%;
+    padding-left: 2%;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5%;
+}
+
+.file-tag {
+    background: #094a90;
+    font-weight: normal;
+    font-size: 14px;
+    width: 150px;
+    height: 30px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.remove-button {
+    margin-right: 5%;
+    background: none;
+    border-radius: 50%;
+    height: 3rem;
+    width: 3rem;
+    padding: 0.75rem 0;
+    cursor: pointer;
+    border: 1px solid #f00;
+}
+
+.eye-button {
+    margin-right: 5%;
+    background: none;
+    border-radius: 50%;
+    height: 3rem;
+    width: 3rem;
+    padding: 0.75rem 0;
+    cursor: pointer;
+}
+
+.clip-ico {
+    display: flex;
+    justify-content: center;
+    padding-top: 3px;
+}
+
+.files-zone {
+    font-size: 1.2em;
+    color: var(--text-color-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 339px;
+}
+
+.txtDrop {
+    margin-top: 3%;
+    font-family: "RubikRegular", sans-serif !important;
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: normal;
+}
+
+.file-container {
+    padding: 0;
+}
+
+.file-name {
+    width: 160px;
+}
+
+.name-file-date {
+    display: flex;
+    flex-direction: column;
+    color: #000;
+    font-size: 14px;
+    word-break: break-all;
+}
+
+.modalMessageOk {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #00000080;
+    display: flex;
+}
+
+.containerMessageOk {
+    margin: auto;
+    background-color: #fff;
+    width: 96%;
+    max-width: 522px;
+    max-height: 23%;
+    overflow: hidden;
+    text-align: center;
+    padding-right: 1.5em;
+    padding-left: 1.5em;
+    padding-top: 1.5em;
+    padding-bottom: 2.5em;
+    border-radius: 16px;
+}
+
+span.titleMessage {
+    font-family: "RubikMedium";
+    font-size: 30px;
+    color: #533893;
+}
+
+p.textMessage {
+    font-family: "Rubik", sans-serif !important;
+    font-size: 20px;
+    color: #000;
+}
+
+button.buttonMessageOk {
+    border: none;
+    width: 100%;
+    max-width: 96px;
+    height: 43px;
+    max-height: 43px;
+    border-radius: 100px;
+    background-color: #533893;
+    color: #fff;
+    font-family: "RubikMedium";
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button.closeMessage {
+    border: none;
+    width: 100%;
+    background-color: #fff;
+    color: #533893;
+    font-family: "RubikMedium";
+    font-size: 30px;
+    display: flex;
+    justify-content: flex-end;
+    cursor: pointer;
+}
+
+.spc-common-table .p-paginator.between {
+    display: inherit !important;
+}
