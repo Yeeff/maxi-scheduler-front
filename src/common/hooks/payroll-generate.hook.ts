@@ -7,7 +7,7 @@ export function usePayrollGenerate() {
   const baseURL: string = process.env.urlApiPayroll;
   const authUrl: string = "/api/v1/payroll-generate";
 
-  const { get } = useCrudService(baseURL);
+  const { get, post } = useCrudService(baseURL);
 
   async function generatePayroll(id: number): Promise<ApiResponse<any>> {
     try {
@@ -49,11 +49,35 @@ export function usePayrollGenerate() {
       );
     }
   }
+
+  async function uploadCalculatedPayroll(
+  formData: FormData,
+  formIdSelectedToBeUpLoaded: number | null
+): Promise<ApiResponse<IIncomeType[]>> {
+  try {
+    const endpoint = `/upload-calculated-payroll`;
+
+    if (formIdSelectedToBeUpLoaded !== null) {
+      formData.append("formId", String(formIdSelectedToBeUpLoaded));
+    }
+
+    return await post<IIncomeType[]>(`${authUrl}${endpoint}`, formData);
+  } catch (error) {
+    return new ApiResponse(
+      {} as IIncomeType[],
+      EResponseCodes.FAIL,
+      "Error no controlado"
+    );
+  }
+}
+
+
   return {
     generatePayroll,
     downloadPayroll,
     getIncomeTypeByType,
-    authorizePayroll
+    authorizePayroll,
+    uploadCalculatedPayroll
   };
 }
 

@@ -6,7 +6,7 @@ import { EResponseCodes } from "../constants/api.enum";
 
 function useCrudService<T>(baseUrl: string) {
   const { authorization } = useContext(AppContext);
-  
+
   let errorMessage = "Hubo un error al cominicarse con la api.";
 
   const get = async <T>(
@@ -30,7 +30,7 @@ function useCrudService<T>(baseUrl: string) {
         {} as T,
         EResponseCodes.FAIL,
         JSON.parse(error?.response?.request?.response)?.operation?.message ||
-          errorMessage
+        errorMessage
       );
     }
   };
@@ -42,10 +42,15 @@ function useCrudService<T>(baseUrl: string) {
   ): Promise<ApiResponse<T>> => {
     try {
       const api = instanceApi(baseUrl, authorization.token);
+
+      const isFormData = data instanceof FormData;
+
       return await api({
         method: "post",
         headers: {
-          "Content-Type": "application/json",
+          ...(isFormData
+            ? {} // Let browser set "Content-Type" automatically for FormData
+            : { "Content-Type": "application/json" }),
           Accept: "application/json",
           permissions: authorization.encryptedAccess,
         },
@@ -58,7 +63,7 @@ function useCrudService<T>(baseUrl: string) {
         {} as T,
         EResponseCodes.FAIL,
         JSON.parse(error?.response?.request?.response)?.operation?.message ||
-          errorMessage
+        errorMessage
       );
     }
   };
@@ -86,7 +91,7 @@ function useCrudService<T>(baseUrl: string) {
         {} as T,
         EResponseCodes.FAIL,
         JSON.parse(error?.response?.request?.response)?.operation?.message ||
-          errorMessage
+        errorMessage
       );
     }
   };
@@ -112,7 +117,7 @@ function useCrudService<T>(baseUrl: string) {
         {} as T,
         EResponseCodes.FAIL,
         JSON.parse(error?.response?.request?.response)?.operation?.message ||
-          errorMessage
+        errorMessage
       );
     }
   };

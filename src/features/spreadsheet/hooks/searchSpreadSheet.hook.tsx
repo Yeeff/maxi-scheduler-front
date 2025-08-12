@@ -1,6 +1,6 @@
 import { useContext, useRef, useState } from "react";
 import { ProgressBar } from "primereact/progressbar";
-import { RiFileExcel2Line, RiUpload2Line  } from "react-icons/ri";
+import { RiFileExcel2Line, RiUpload2Line } from "react-icons/ri";
 import { BsCheckCircle } from "react-icons/bs";
 import { FaGear } from "react-icons/fa6";
 import { useForm } from "react-hook-form";
@@ -18,13 +18,18 @@ import useListData from "../../vacation/hooks/list.hook";
 import usePayrollGenerate from "../../../common/hooks/payroll-generate.hook";
 import { AppContext } from "../../../common/contexts/app.context";
 import { EResponseCodes } from "../../../common/constants/api.enum";
+import axios from "axios";
 
 export default function useSearchSpreadSheetHook() {
   // Context
   const { setMessage, validateActionAccess } = useContext(AppContext);
+  const [hideModal, setHideModal] = useState<boolean>(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [fomrIdSelectedToBeUpLoaded, setFormIdSelectedToBeUpLoaded] = useState<number | null>(null);
 
-  const { generatePayroll, downloadPayroll, authorizePayroll } =
-    usePayrollGenerate();
+
+
+  const { generatePayroll, downloadPayroll, authorizePayroll, uploadCalculatedPayroll } = usePayrollGenerate();
 
   //custom hooks
   const { typesSpreadSheetList, stateSpreadSheetList } = useListData();
@@ -91,9 +96,8 @@ export default function useSearchSpreadSheetHook() {
       title: `${authorize ? "Autorizar" : "Generar"} planilla`,
       description: (
         <div className="container-modal_load">
-          <h3>{`${
-            authorize ? "autorizando" : "Generando"
-          } ${typeSpreadSheet}`}</h3>
+          <h3>{`${authorize ? "autorizando" : "Generando"
+            } ${typeSpreadSheet}`}</h3>
           <ProgressBar
             mode="indeterminate"
             style={{ height: "6px" }}
@@ -119,9 +123,8 @@ export default function useSearchSpreadSheetHook() {
   ) => {
     setMessage({
       title: `${authorize ? "Autorizar" : "Generar"} planilla`,
-      description: `Se ha ${
-        authorize ? "autorizado" : "generado"
-      } planilla ${typeSpreadSheet} con éxito`,
+      description: `Se ha ${authorize ? "autorizado" : "generado"
+        } planilla ${typeSpreadSheet} con éxito`,
       // description: <div>{JSON.stringify(data)}</div>,
       show: true,
       OkTitle: "Aceptar",
@@ -154,6 +157,59 @@ export default function useSearchSpreadSheetHook() {
       background: true,
     });
   };
+
+  
+  const handleUpload = async () => {
+
+
+
+    const formData = new FormData();
+
+    files.filter((file, index) => files.findIndex((f) => f.name === file.name) === index).map((file, index) => {
+      formData.append(`files[${index}]`, file);
+    });
+
+    try {
+      
+      setHideModal(false);
+
+      //setLoading(true);
+      const response: any = await uploadCalculatedPayroll(formData, fomrIdSelectedToBeUpLoaded);
+      if (response.status === 'OK') {
+        //setProgress(100);
+        //setLoading(false);
+        setMessage({
+          title: "Finalización exitosa",
+          description: "Archivo(s) cargado(s) exitosamente",
+          show: true,
+          background: true,
+          OkTitle: "Aceptar",
+          style: "z-index-3300",
+          onOk: () => {
+            setMessage({});
+          },
+        });
+      } else {
+        throw "err";
+      }
+    } catch (error) {
+      //setProgress(100);
+      //setLoading(false);
+      setMessage({
+        style: "z-index-1200",
+        title: "Error",
+        description: "error",
+        show: true,
+        background: true,
+        OkTitle: "Aceptar",
+        onOk: () => {
+          setMessage({});
+        },
+      });
+      console.error("Error:", error);
+    }
+  };
+
 
   //variables
   const tableColumns: ITableElement<IFormPeriod>[] = [
@@ -268,7 +324,7 @@ export default function useSearchSpreadSheetHook() {
                   if (operation.code === EResponseCodes.OK) {
                     handleModalSuccess(data, row.formsType[0].name);
                   } else {
-                    handleModalError(operation.message == "No hay empleados para esta planilla" ? operation.message:"Error con el servicio");
+                    handleModalError(operation.message == "No hay empleados para esta planilla" ? operation.message : "Error con el servicio");
                   }
                 })
                 .catch((err) => {
@@ -293,13 +349,6 @@ export default function useSearchSpreadSheetHook() {
       hide: !validateActionAccess("PLANILLA_GENERAR"),
       tooltipClass: "generate",
     },
-    // {
-    //   icon: "Detail",
-    //   onClick: (row) => {
-    //     showDetailSpreadSheet(row);
-    //   },
-    //   hide: !validateActionAccess("PLANILLA_CONSULTAR"),
-    // },
     {
       icon: "Edit",
       onClick: (row) => {
@@ -373,7 +422,8 @@ export default function useSearchSpreadSheetHook() {
     },
     {
       onClick: (row) => {
-        console.log("Subir datos calculados", row);
+        setHideModal(true);
+        setFormIdSelectedToBeUpLoaded(row.id);
       },
       customIcon: () => {
         return (
@@ -402,5 +452,10 @@ export default function useSearchSpreadSheetHook() {
     redirectCreate,
     onSubmit,
     clearFields,
+    hideModal,
+    setHideModal,
+    files,
+    setFiles,
+    handleUpload,
   };
 }

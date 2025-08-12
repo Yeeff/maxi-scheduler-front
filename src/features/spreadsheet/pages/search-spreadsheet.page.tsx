@@ -20,9 +20,13 @@ const SearchSpreadSheetPage = (): React.JSX.Element => {
     onSubmit,
     redirectCreate,
     clearFields,
+    hideModal,
+    setHideModal,
+    files,
+    setFiles,
+    handleUpload
   } = useSearchSpreadSheetHook();
 
-  const [files, setFiles] = useState<File[]>([]);
 
   return (
     <div className="main-page">
@@ -32,26 +36,17 @@ const SearchSpreadSheetPage = (): React.JSX.Element => {
         </div>
 
         <Dialog
-          visible={true}
+          visible={hideModal}
           style={{ width: "100%", maxWidth: "80vh" }}
           header="Anexar nomina calculada"
-          onHide={() => console.log("On Close")}
-          pt={{
-            headerTitle: {
-              className: "text-title-modal text--black text-center",
-            },
-            closeButtonIcon: {
-              className: "color--primary close-button-modal",
-            },
-          }}
+          onHide={() => setHideModal(false)}
+  
         >
            <div style={{ marginTop: 20 }}>
             <MassiveFileUploader
               files={files}
               setFiles={setFiles}
-              handleUpload={() => {
-                console.log(files);
-              }}
+              handleUpload={() => handleUpload()}
               messageFileIndex={false}
               setHideModalIndex={() => { }}
               setMessageFileIndex={() => { }}
@@ -69,7 +64,7 @@ const SearchSpreadSheetPage = (): React.JSX.Element => {
               <ButtonComponent
                 value="Cancelar"
                 type="button"
-                action={() =>console.log( "setHideModalIndex false")}
+                action={() =>setHideModal(false)}
                 disabled={false}
               />
             </div>
