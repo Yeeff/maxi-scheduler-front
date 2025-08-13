@@ -161,13 +161,14 @@ export default function useSearchSpreadSheetHook() {
   
   const handleUpload = async () => {
 
-
-
     const formData = new FormData();
 
-    files.filter((file, index) => files.findIndex((f) => f.name === file.name) === index).map((file, index) => {
-      formData.append(`files[${index}]`, file);
-    });
+    //files.filter((file, index) => files.findIndex((f) => f.name === file.name) === index).map((file, index) => {
+    //  formData.append(`files[${index}]`, file);
+    //});
+
+    formData.append(`file`, files[0]);
+
 
     try {
       
