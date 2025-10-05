@@ -6,22 +6,9 @@ import "./styles/_theme-prime.css";
 import "primereact/resources/primereact.min.css";
 import ModalMessageComponent from "./common/components/modal-message.component";
 import ApplicationProvider from "./application-provider";
-import WorkerRoutes from "./features/worker/worker-routes";
-import VacationRoutes from "./features/vacation/vacation-routes";
-import IncapacityRoutes from "./features/incapacity/incapacity-routes";
-import WithDrawalRoutes from "./features/withdrawal/withdrawal-routes";
-import LicencesRoutes from "./features/Licences/licences-routes";
-import SalaryIncrementRoutes from "./features/salaryincrement/salary-increment-routes";
-import SuspensionContractRoutes from "./features/suspensioncontract/suspensioncontract-routes";
-import DeductionsRoutes from "./features/deductions/deductions-routes";
-import SpreadsSheetRoutes from "./features/spreadsheet/spreadsheet-routes";
-import OtherIncomeRoutes from "./features/otherIncome/otherIncome-routes";
-import IncomeDeductions from "./features/incomeDeductions/incomeDeductions-routes";
 import useAppCominicator from "./common/hooks/app-communicator.hook";
-import ChargeRoutes from "./features/charges/charge-routes";
-import ReportRoutes from "./features/reports/report-routes";
 import SpinnerComponent from "./common/components/spinner.component";
-import ReportPublicRoutes from "./features/public-reports/report-public-routes";
+import ScheduleRoutes from "./features/schedules/schedule-routes";
 
 function App() {
   const { publish } = useAppCominicator();
@@ -44,54 +31,8 @@ function App() {
         <Router>
           <Suspense fallback={<p>Loading...</p>}>
             <Routes>
-              <Route path={"/report/*"} element={ <ReportPublicRoutes /> } />;
-
-              <Route path={"/nomina/"} element={<HomePage />} />;
-
-              <Route
-                path={"/nomina/trabajadores/*"}
-                element={<WorkerRoutes />}
-              />
-
-              <Route
-                path={"/nomina/vacaciones/*"}
-                element={<VacationRoutes />}
-              />
-              <Route
-                path={"/nomina/incapacidades/*"}
-                element={<IncapacityRoutes />}
-              />
-              <Route
-                path={"/nomina/licencias/*"}
-                element={<LicencesRoutes />}
-              />
-              <Route path={"/nomina/retiro/*"} element={<WithDrawalRoutes />} />
-              <Route
-                path={"/nomina/incremento/salario/*"}
-                element={<SalaryIncrementRoutes />}
-              />
-              <Route
-                path={"/nomina/suspension/contrato/*"}
-                element={<SuspensionContractRoutes />}
-              />
-              <Route
-                path={"/nomina/deduccion/*"}
-                element={<DeductionsRoutes />}
-              />
-              <Route
-                path={"/nomina/planilla/*"}
-                element={<SpreadsSheetRoutes />}
-              />
-              <Route
-                path={"/nomina/ingresos/otros/*"}
-                element={<OtherIncomeRoutes />}
-              />
-              <Route
-                path={"/nomina/deduccion/renta/*"}
-                element={<IncomeDeductions />}
-              />
-              <Route path={"/nomina/cargos/*"} element={<ChargeRoutes />} />
-              <Route path={"/nomina/reportes/*"} element={<ReportRoutes />} />
+              <Route path={"/nomina/"} element={<HomePage />} />
+              <Route path={"/nomina/horarios/*"} element={<ScheduleRoutes />} />
             </Routes>
           </Suspense>
         </Router>
