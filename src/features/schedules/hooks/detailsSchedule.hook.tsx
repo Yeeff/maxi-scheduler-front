@@ -31,8 +31,8 @@ const useDetailsScheduleHook = () => {
       setLoading(true);
       const response = await get<IScheduleTemplate>(`/api/schedules/${id}`);
 
-      if (response.operation.code === EResponseCodes.OK) {
-        setSchedule(response.data);
+      if ((response as any).data.operation.code === EResponseCodes.OK) {
+        setSchedule((response as any).data.data);
       } else {
         handleError("Error al cargar los detalles del horario");
       }

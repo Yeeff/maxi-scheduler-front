@@ -10,7 +10,9 @@ export interface IShift {
   name: string;
   startTime: string; // LocalTime as string "HH:mm:ss"
   endTime: string; // LocalTime as string "HH:mm:ss"
-  breakPeriods: IBreakPeriod[];
+  lunchTimeInit?: string; // Lunch start time
+  lunchTimeEnd?: string;   // Lunch end time
+  lunchDescription?: string; // Lunch description
 }
 
 export interface IScheduleDay {
@@ -37,7 +39,7 @@ export interface IShiftForm {
   name: string;
   startTime: string;
   endTime: string;
-  breakDescription: string;
-  breakStartTime: string;
-  breakEndTime: string;
+  lunchDescription: string;
+  lunchTimeInit: string;
+  lunchTimeEnd: string;
 }

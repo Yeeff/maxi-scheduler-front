@@ -125,16 +125,11 @@ const DetailsSchedulePage = (): React.JSX.Element => {
                             </p>
                           </div>
                           <div>
-                            <label className="text-black small bold">Descansos:</label>
+                            <label className="text-black small bold">Descanso:</label>
                             <p className="text-black small">
-                              {shift.breakPeriods && shift.breakPeriods.length > 0
-                                ? shift.breakPeriods.map((breakPeriod, breakIndex) => (
-                                    <span key={breakIndex}>
-                                      {breakPeriod.description}: {formatTime(breakPeriod.startTime)} - {formatTime(breakPeriod.endTime)}
-                                      {breakIndex < shift.breakPeriods!.length - 1 ? ', ' : ''}
-                                    </span>
-                                  ))
-                                : 'Sin descansos'
+                              {shift.lunchDescription && shift.lunchTimeInit && shift.lunchTimeEnd
+                                ? `${shift.lunchDescription}: ${formatTime(shift.lunchTimeInit)} - ${formatTime(shift.lunchTimeEnd)}`
+                                : 'Sin descanso'
                               }
                             </p>
                           </div>

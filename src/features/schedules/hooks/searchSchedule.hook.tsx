@@ -66,15 +66,15 @@ export default function useSearchScheduleHook() {
 
       // Handle both ApiResponse format and direct array format
       let schedules: IScheduleTemplate[] = [];
-      if (response && response.operation && response.operation.code === EResponseCodes.OK) {
-        schedules = response.data as IScheduleTemplate[];
+      if (response && (response as any).data && (response as any).data.operation && (response as any).data.operation.code === EResponseCodes.OK) {
+        schedules = (response as any).data.data as IScheduleTemplate[];
         console.log("Data loaded (ApiResponse format):", schedules);
       } else if (Array.isArray(response)) {
         schedules = response;
         console.log("Data loaded (direct array format):", schedules);
-      } else if ((response as any)?.id || (response as any)?.name) {
+      } else if ((response as any)?.data?.id || (response as any)?.data?.name) {
         // Single object response
-        schedules = [response as unknown as IScheduleTemplate];
+        schedules = [(response as any).data as unknown as IScheduleTemplate];
         console.log("Data loaded (single object):", schedules);
       }
 
@@ -152,11 +152,11 @@ export default function useSearchScheduleHook() {
 
       // Handle DELETE responses - they may return 204 No Content (empty response)
       // or ApiResponse format. If no error operation is present, assume success.
-      if (!response || !response.operation || response.operation.code === EResponseCodes.OK) {
+      if (!response || !(response as any).data || !(response as any).data.operation || (response as any).data.operation.code === EResponseCodes.OK) {
         console.log("Schedule deleted successfully");
       } else {
-        console.log("Delete failed:", response.operation);
-        const errorMsg = response.operation.message || 'Error al eliminar el horario';
+        console.log("Delete failed:", (response as any).data.operation);
+        const errorMsg = (response as any).data.operation.message || 'Error al eliminar el horario';
         setMessage({
           title: "Error",
           description: errorMsg,

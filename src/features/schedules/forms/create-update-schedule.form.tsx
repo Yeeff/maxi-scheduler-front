@@ -52,9 +52,9 @@ export const CreateUpdateScheduleForm = ({
     name: "",
     startTime: "",
     endTime: "",
-    breakDescription: "",
-    breakStartTime: "",
-    breakEndTime: "",
+    lunchDescription: "",
+    lunchTimeInit: "",
+    lunchTimeEnd: "",
   });
 
   const watchedDetails = watch("details");
@@ -66,18 +66,18 @@ export const CreateUpdateScheduleForm = ({
         name: existingShift.name || "",
         startTime: existingShift.startTime || "",
         endTime: existingShift.endTime || "",
-        breakDescription: existingShift.breakPeriods?.[0]?.description || "",
-        breakStartTime: existingShift.breakPeriods?.[0]?.startTime || "",
-        breakEndTime: existingShift.breakPeriods?.[0]?.endTime || "",
+        lunchDescription: existingShift.lunchDescription || "",
+        lunchTimeInit: existingShift.lunchTimeInit || "",
+        lunchTimeEnd: existingShift.lunchTimeEnd || "",
       });
     } else {
       setShiftForm({
         name: "",
         startTime: "",
         endTime: "",
-        breakDescription: "",
-        breakStartTime: "",
-        breakEndTime: "",
+        lunchDescription: "",
+        lunchTimeInit: "",
+        lunchTimeEnd: "",
       });
     }
     setShowShiftModal(true);
@@ -89,11 +89,9 @@ export const CreateUpdateScheduleForm = ({
         name: shiftForm.name,
         startTime: shiftForm.startTime,
         endTime: shiftForm.endTime,
-        breakPeriods: shiftForm.breakDescription ? [{
-          description: shiftForm.breakDescription,
-          startTime: shiftForm.breakStartTime,
-          endTime: shiftForm.breakEndTime,
-        }] : [],
+        lunchDescription: shiftForm.lunchDescription || undefined,
+        lunchTimeInit: shiftForm.lunchTimeInit || undefined,
+        lunchTimeEnd: shiftForm.lunchTimeEnd || undefined,
       };
 
       // Update the form data
@@ -221,8 +219,8 @@ export const CreateUpdateScheduleForm = ({
                   <div className="shift-info m-top-10 p-10 bg-light">
                     <p><strong>Turno:</strong> {shift.name}</p>
                     <p><strong>Horario:</strong> {shift.startTime} - {shift.endTime}</p>
-                    {shift.breakPeriods?.length > 0 && (
-                      <p><strong>Descanso:</strong> {shift.breakPeriods[0].description} ({shift.breakPeriods[0].startTime} - {shift.breakPeriods[0].endTime})</p>
+                    {shift.lunchDescription && shift.lunchTimeInit && shift.lunchTimeEnd && (
+                      <p><strong>Descanso:</strong> {shift.lunchDescription} ({shift.lunchTimeInit} - {shift.lunchTimeEnd})</p>
                     )}
                   </div>
                 )}
@@ -304,32 +302,32 @@ export const CreateUpdateScheduleForm = ({
           <h4 className="text-black medium bold m-top-15">Descanso (Opcional)</h4>
 
           <InputComponent
-            idInput="breakDescription"
+            idInput="lunchDescription"
             label="Descripción del descanso"
             typeInput="text"
-            value={shiftForm.breakDescription}
-            onChange={(e) => setShiftForm({ ...shiftForm, breakDescription: e.target.value })}
+            value={shiftForm.lunchDescription}
+            onChange={(e) => setShiftForm({ ...shiftForm, lunchDescription: e.target.value })}
             className="input-basic medium"
             classNameLabel="text-black big bold"
           />
 
           <div className="grid-form-2-container gap-15">
             <InputComponent
-              idInput="breakStartTime"
+              idInput="lunchTimeInit"
               label="Hora inicio descanso"
               typeInput="time"
-              value={shiftForm.breakStartTime}
-              onChange={(e) => setShiftForm({ ...shiftForm, breakStartTime: e.target.value })}
+              value={shiftForm.lunchTimeInit}
+              onChange={(e) => setShiftForm({ ...shiftForm, lunchTimeInit: e.target.value })}
               className="input-basic medium"
               classNameLabel="text-black big bold"
             />
 
             <InputComponent
-              idInput="breakEndTime"
+              idInput="lunchTimeEnd"
               label="Hora fin descanso"
               typeInput="time"
-              value={shiftForm.breakEndTime}
-              onChange={(e) => setShiftForm({ ...shiftForm, breakEndTime: e.target.value })}
+              value={shiftForm.lunchTimeEnd}
+              onChange={(e) => setShiftForm({ ...shiftForm, lunchTimeEnd: e.target.value })}
               className="input-basic medium"
               classNameLabel="text-black big bold"
             />

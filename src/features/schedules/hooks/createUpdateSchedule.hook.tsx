@@ -72,18 +72,18 @@ const useCreateUpdateScheduleHook = ({
       console.log("API Response:", response);
 
       // Check if response has operation property (ApiResponse format)
-      if (response && response.operation && response.operation.code === EResponseCodes.OK) {
-        console.log("Data loaded successfully (ApiResponse format):", response.data);
-        reset(response.data);
+      if (response && (response as any).data && (response as any).data.operation && (response as any).data.operation.code === EResponseCodes.OK) {
+        console.log("Data loaded successfully (ApiResponse format):", (response as any).data.data);
+        reset((response as any).data.data);
       }
       // Check if response is direct data (no operation wrapper)
-      else if (response && (response as any).id && (response as any).name) {
-        console.log("Data loaded successfully (direct format):", response);
-        reset(response as unknown as IScheduleTemplate);
+      else if (response && (response as any).data && (response as any).data.id && (response as any).data.name) {
+        console.log("Data loaded successfully (direct format):", (response as any).data);
+        reset((response as any).data as unknown as IScheduleTemplate);
       }
       else {
-        console.log("API Error:", response?.operation || response);
-        const errorMsg = response?.operation?.message || 'Unknown error';
+        console.log("API Error:", (response as any)?.data?.operation || response);
+        const errorMsg = (response as any)?.data?.operation?.message || 'Unknown error';
         handleModalError(`No se han cargado los datos: ${errorMsg}`);
       }
     } catch (error) {
@@ -191,18 +191,18 @@ const useCreateUpdateScheduleHook = ({
     console.log("API Response:", response);
 
     // Check if response has operation property (ApiResponse format)
-    if (response && response.operation && response.operation.code === EResponseCodes.OK) {
+    if (response && (response as any).data && (response as any).data.operation && (response as any).data.operation.code === EResponseCodes.OK) {
       console.log("API call successful (ApiResponse format), showing success modal");
       handleModalSuccess();
     }
     // Check if response is direct data (no operation wrapper) - assume success if we have data
-    else if (response && (response as any).id && (response as any).name) {
+    else if (response && (response as any).data && (response as any).data.id && (response as any).data.name) {
       console.log("API call successful (direct format), showing success modal");
       handleModalSuccess();
     }
     else {
-      console.log("API call failed:", response?.operation || response);
-      const errorMsg = response?.operation?.message || 'Unknown error';
+      console.log("API call failed:", (response as any)?.data?.operation || response);
+      const errorMsg = (response as any)?.data?.operation?.message || 'Unknown error';
       handleModalError(errorMsg, false);
     }
   };
