@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Control, Controller, FormState, UseFormSetValue, UseFormWatch } from "react-hook-form";
 import {
   FormComponent,
   InputComponent,
   TextAreaComponent,
   ButtonComponent,
+  SelectComponent,
 } from "../../../common/components/Form";
 import { Dialog } from "primereact/dialog";
+import { RadioButton } from "primereact/radiobutton";
 
 import { IScheduleTemplate, IShiftForm } from "../../../common/interfaces/schedule.interfaces";
+import useCrudService from "../../../common/hooks/crud-service.hook";
 
 interface IPropsCreateUpdateScheduleForm {
   action: string;
@@ -48,6 +51,12 @@ export const CreateUpdateScheduleForm = ({
   const { errors, isValid } = formState;
   const [showShiftModal, setShowShiftModal] = useState(false);
   const [currentDayIndex, setCurrentDayIndex] = useState<number | null>(null);
+  const [shiftMode, setShiftMode] = useState<'create' | 'select'>('create');
+  const [availableShifts, setAvailableShifts] = useState<any[]>([]);
+  const [selectedShiftId, setSelectedShiftId] = useState<string>('');
+
+  const { get } = useCrudService<any>(process.env.urlApiScheduler);
+
   const [shiftForm, setShiftForm] = useState<IShiftForm>({
     name: "",
     startTime: "",
@@ -59,17 +68,44 @@ export const CreateUpdateScheduleForm = ({
 
   const watchedDetails = watch("details");
 
+  // Load available shifts on component mount
+  useEffect(() => {
+    const loadAvailableShifts = async () => {
+      try {
+        const response = await get<any[]>("/api/schedules/0/days/0/shifts/all");
+        if ((response as any).data && (response as any).data.operation && (response as any).data.operation.code === 'OK') {
+          setAvailableShifts((response as any).data.data || []);
+        }
+      } catch (error) {
+        console.error("Error loading available shifts:", error);
+      }
+    };
+
+    loadAvailableShifts();
+  }, [get]);
+
   const openShiftModal = (dayIndex: number, existingShift?: any) => {
     setCurrentDayIndex(dayIndex);
+    setShiftMode('create');
+    setSelectedShiftId('');
+
     if (existingShift) {
-      setShiftForm({
-        name: existingShift.name || "",
-        startTime: existingShift.startTime || "",
-        endTime: existingShift.endTime || "",
-        lunchDescription: existingShift.lunchDescription || "",
-        lunchTimeInit: existingShift.lunchTimeInit || "",
-        lunchTimeEnd: existingShift.lunchTimeEnd || "",
-      });
+      // Check if this is an existing shift from the database
+      const isExistingShift = availableShifts.find(s => s.id === existingShift.id);
+      if (isExistingShift) {
+        setShiftMode('select');
+        setSelectedShiftId(existingShift.id.toString());
+      } else {
+        setShiftMode('create');
+        setShiftForm({
+          name: existingShift.name || "",
+          startTime: existingShift.startTime || "",
+          endTime: existingShift.endTime || "",
+          lunchDescription: existingShift.lunchDescription || "",
+          lunchTimeInit: existingShift.lunchTimeInit || "",
+          lunchTimeEnd: existingShift.lunchTimeEnd || "",
+        });
+      }
     } else {
       setShiftForm({
         name: "",
@@ -85,24 +121,45 @@ export const CreateUpdateScheduleForm = ({
 
   const saveShift = () => {
     if (currentDayIndex !== null) {
-      const shiftData = {
-        name: shiftForm.name,
-        startTime: shiftForm.startTime,
-        endTime: shiftForm.endTime,
-        lunchDescription: shiftForm.lunchDescription || undefined,
-        lunchTimeInit: shiftForm.lunchTimeInit || undefined,
-        lunchTimeEnd: shiftForm.lunchTimeEnd || undefined,
-      };
+      let shiftData;
 
-      // Update the form data
-      const currentDetails = watchedDetails || [];
-      const updatedDetails = [...currentDetails];
-      updatedDetails[currentDayIndex] = {
-        ...updatedDetails[currentDayIndex],
-        shifts: [shiftData],
-      };
+      if (shiftMode === 'select' && selectedShiftId) {
+        // Use existing shift
+        const selectedShift = availableShifts.find(s => s.id.toString() === selectedShiftId);
+        if (selectedShift) {
+          shiftData = {
+            id: selectedShift.id,
+            name: selectedShift.name,
+            startTime: selectedShift.startTime,
+            endTime: selectedShift.endTime,
+            lunchDescription: selectedShift.lunchDescription,
+            lunchTimeInit: selectedShift.lunchTimeInit,
+            lunchTimeEnd: selectedShift.lunchTimeEnd,
+          };
+        }
+      } else {
+        // Create new shift
+        shiftData = {
+          name: shiftForm.name,
+          startTime: shiftForm.startTime,
+          endTime: shiftForm.endTime,
+          lunchDescription: shiftForm.lunchDescription || undefined,
+          lunchTimeInit: shiftForm.lunchTimeInit || undefined,
+          lunchTimeEnd: shiftForm.lunchTimeEnd || undefined,
+        };
+      }
 
-      setValue("details", updatedDetails);
+      if (shiftData) {
+        // Update the form data
+        const currentDetails = watchedDetails || [];
+        const updatedDetails = [...currentDetails];
+        updatedDetails[currentDayIndex] = {
+          ...updatedDetails[currentDayIndex],
+          shifts: [shiftData],
+        };
+
+        setValue("details", updatedDetails);
+      }
     }
     setShowShiftModal(false);
   };
@@ -246,7 +303,7 @@ export const CreateUpdateScheduleForm = ({
 
       <Dialog
         visible={showShiftModal}
-        style={{ width: "500px" }}
+        style={{ width: "600px" }}
         header="Configurar Turno"
         onHide={() => setShowShiftModal(false)}
         footer={
@@ -262,76 +319,145 @@ export const CreateUpdateScheduleForm = ({
               className="button-save"
               type="button"
               action={saveShift}
+              disabled={shiftMode === 'create' && (!shiftForm.name || !shiftForm.startTime || !shiftForm.endTime)}
             />
           </div>
         }
       >
         <div className="grid-form-1-container gap-15">
-          <InputComponent
-            idInput="shiftName"
-            label="Nombre del turno *"
-            typeInput="text"
-            value={shiftForm.name}
-            onChange={(e) => setShiftForm({ ...shiftForm, name: e.target.value })}
-            className="input-basic medium"
-            classNameLabel="text-black big bold"
-          />
-
-          <div className="grid-form-2-container gap-15">
-            <InputComponent
-              idInput="startTime"
-              label="Hora inicio *"
-              typeInput="time"
-              value={shiftForm.startTime}
-              onChange={(e) => setShiftForm({ ...shiftForm, startTime: e.target.value })}
-              className="input-basic medium"
-              classNameLabel="text-black big bold"
-            />
-
-            <InputComponent
-              idInput="endTime"
-              label="Hora fin *"
-              typeInput="time"
-              value={shiftForm.endTime}
-              onChange={(e) => setShiftForm({ ...shiftForm, endTime: e.target.value })}
-              className="input-basic medium"
-              classNameLabel="text-black big bold"
-            />
+          {/* Radio buttons to choose between creating new or selecting existing */}
+          <div className="shift-mode-selection">
+            <h4 className="text-black medium bold">Tipo de turno</h4>
+            <div className="flex-start gap-20 m-top-10">
+              <div className="flex-center gap-5">
+                <RadioButton
+                  inputId="createShift"
+                  name="shiftMode"
+                  value="create"
+                  onChange={(e) => setShiftMode(e.value)}
+                  checked={shiftMode === 'create'}
+                />
+                <label htmlFor="createShift" className="text-black medium">Crear nuevo turno</label>
+              </div>
+              <div className="flex-center gap-5">
+                <RadioButton
+                  inputId="selectShift"
+                  name="shiftMode"
+                  value="select"
+                  onChange={(e) => setShiftMode(e.value)}
+                  checked={shiftMode === 'select'}
+                />
+                <label htmlFor="selectShift" className="text-black medium">Seleccionar turno existente</label>
+              </div>
+            </div>
           </div>
 
-          <h4 className="text-black medium bold m-top-15">Descanso (Opcional)</h4>
+          {shiftMode === 'select' ? (
+            // Select existing shift
+            <div className="existing-shift-selection">
+              <div className="select-container">
+                <label className="text-black big bold">Seleccionar turno existente *</label>
+                <select
+                  value={selectedShiftId}
+                  onChange={(e) => setSelectedShiftId(e.target.value)}
+                  className="input-basic medium"
+                  style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                >
+                  <option value="">Seleccione un turno existente</option>
+                  {availableShifts.map(shift => (
+                    <option key={shift.id} value={shift.id.toString()}>
+                      {shift.name} ({shift.startTime} - {shift.endTime})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {selectedShiftId && (
+                <div className="shift-preview m-top-15 p-10 bg-light">
+                  {(() => {
+                    const selectedShift = availableShifts.find(s => s.id.toString() === selectedShiftId);
+                    return selectedShift ? (
+                      <>
+                        <p><strong>Nombre:</strong> {selectedShift.name}</p>
+                        <p><strong>Horario:</strong> {selectedShift.startTime} - {selectedShift.endTime}</p>
+                        {selectedShift.lunchDescription && selectedShift.lunchTimeInit && selectedShift.lunchTimeEnd && (
+                          <p><strong>Descanso:</strong> {selectedShift.lunchDescription} ({selectedShift.lunchTimeInit} - {selectedShift.lunchTimeEnd})</p>
+                        )}
+                      </>
+                    ) : null;
+                  })()}
+                </div>
+              )}
+            </div>
+          ) : (
+            // Create new shift
+            <>
+              <InputComponent
+                idInput="shiftName"
+                label="Nombre del turno *"
+                typeInput="text"
+                value={shiftForm.name}
+                onChange={(e) => setShiftForm({ ...shiftForm, name: e.target.value })}
+                className="input-basic medium"
+                classNameLabel="text-black big bold"
+              />
 
-          <InputComponent
-            idInput="lunchDescription"
-            label="Descripción del descanso"
-            typeInput="text"
-            value={shiftForm.lunchDescription}
-            onChange={(e) => setShiftForm({ ...shiftForm, lunchDescription: e.target.value })}
-            className="input-basic medium"
-            classNameLabel="text-black big bold"
-          />
+              <div className="grid-form-2-container gap-15">
+                <InputComponent
+                  idInput="startTime"
+                  label="Hora inicio *"
+                  typeInput="time"
+                  value={shiftForm.startTime}
+                  onChange={(e) => setShiftForm({ ...shiftForm, startTime: e.target.value })}
+                  className="input-basic medium"
+                  classNameLabel="text-black big bold"
+                />
 
-          <div className="grid-form-2-container gap-15">
-            <InputComponent
-              idInput="lunchTimeInit"
-              label="Hora inicio descanso"
-              typeInput="time"
-              value={shiftForm.lunchTimeInit}
-              onChange={(e) => setShiftForm({ ...shiftForm, lunchTimeInit: e.target.value })}
-              className="input-basic medium"
-              classNameLabel="text-black big bold"
-            />
+                <InputComponent
+                  idInput="endTime"
+                  label="Hora fin *"
+                  typeInput="time"
+                  value={shiftForm.endTime}
+                  onChange={(e) => setShiftForm({ ...shiftForm, endTime: e.target.value })}
+                  className="input-basic medium"
+                  classNameLabel="text-black big bold"
+                />
+              </div>
 
-            <InputComponent
-              idInput="lunchTimeEnd"
-              label="Hora fin descanso"
-              typeInput="time"
-              value={shiftForm.lunchTimeEnd}
-              onChange={(e) => setShiftForm({ ...shiftForm, lunchTimeEnd: e.target.value })}
-              className="input-basic medium"
-              classNameLabel="text-black big bold"
-            />
-          </div>
+              <h4 className="text-black medium bold m-top-15">Descanso (Opcional)</h4>
+
+              <InputComponent
+                idInput="lunchDescription"
+                label="Descripción del descanso"
+                typeInput="text"
+                value={shiftForm.lunchDescription}
+                onChange={(e) => setShiftForm({ ...shiftForm, lunchDescription: e.target.value })}
+                className="input-basic medium"
+                classNameLabel="text-black big bold"
+              />
+
+              <div className="grid-form-2-container gap-15">
+                <InputComponent
+                  idInput="lunchTimeInit"
+                  label="Hora inicio descanso"
+                  typeInput="time"
+                  value={shiftForm.lunchTimeInit}
+                  onChange={(e) => setShiftForm({ ...shiftForm, lunchTimeInit: e.target.value })}
+                  className="input-basic medium"
+                  classNameLabel="text-black big bold"
+                />
+
+                <InputComponent
+                  idInput="lunchTimeEnd"
+                  label="Hora fin descanso"
+                  typeInput="time"
+                  value={shiftForm.lunchTimeEnd}
+                  onChange={(e) => setShiftForm({ ...shiftForm, lunchTimeEnd: e.target.value })}
+                  className="input-basic medium"
+                  classNameLabel="text-black big bold"
+                />
+              </div>
+            </>
+          )}
         </div>
       </Dialog>
     </div>
