@@ -64,18 +64,22 @@ export default function useSearchScheduleHook() {
 
       const response = await get<IScheduleTemplate[]>("/api/schedules");
 
-      // Handle both ApiResponse format and direct array format
+      // The crud-service hook now properly handles ApiResponse format
+      // and returns data directly in the ApiResponse.data field
       let schedules: IScheduleTemplate[] = [];
-      if (response && (response as any).data && (response as any).data.operation && (response as any).data.operation.code === EResponseCodes.OK) {
-        schedules = (response as any).data.data as IScheduleTemplate[];
-        console.log("Data loaded (ApiResponse format):", schedules);
-      } else if (Array.isArray(response)) {
-        schedules = response;
-        console.log("Data loaded (direct array format):", schedules);
-      } else if ((response as any)?.data?.id || (response as any)?.data?.name) {
-        // Single object response
-        schedules = [(response as any).data as unknown as IScheduleTemplate];
-        console.log("Data loaded (single object):", schedules);
+      if (response.operation.code === EResponseCodes.OK) {
+        schedules = response.data as IScheduleTemplate[];
+        console.log("Data loaded successfully:", schedules);
+      } else {
+        console.error("API returned error:", response.operation.message);
+        setMessage({
+          title: "Error",
+          description: response.operation.message || "Error al cargar los horarios",
+          show: true,
+          OkTitle: "Aceptar",
+          background: true,
+        });
+        return;
       }
 
       // Apply client-side filtering if filter is provided

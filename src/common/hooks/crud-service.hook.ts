@@ -15,7 +15,7 @@ function useCrudService<T>(baseUrl: string) {
   ): Promise<ApiResponse<T>> => {
     try {
       const api = instanceApi(baseUrl, authorization.token);
-      return await api({
+      const rawResponse = await api({
         method: "get",
         headers: {
           "Content-Type": "application/json",
@@ -25,6 +25,15 @@ function useCrudService<T>(baseUrl: string) {
         url: `${endpoint}`,
         params: params,
       });
+
+      // Handle ApiResponse format from backend
+      if (rawResponse && rawResponse.data && rawResponse.data.operation) {
+        const { operation, data } = rawResponse.data;
+        return new ApiResponse(data, operation.code as EResponseCodes, operation.message);
+      }
+
+      // Fallback for direct responses
+      return new ApiResponse(rawResponse as T, EResponseCodes.OK);
     } catch (error: any) {
       return new ApiResponse(
         {} as T,
@@ -45,7 +54,7 @@ function useCrudService<T>(baseUrl: string) {
 
       const isFormData = data instanceof FormData;
 
-      return await api({
+      const rawResponse = await api({
         method: "post",
         headers: {
           ...(isFormData
@@ -58,6 +67,15 @@ function useCrudService<T>(baseUrl: string) {
         params: params,
         data: data,
       });
+
+      // Handle ApiResponse format from backend
+      if (rawResponse && rawResponse.data && rawResponse.data.operation) {
+        const { operation, data: responseData } = rawResponse.data;
+        return new ApiResponse(responseData, operation.code as EResponseCodes, operation.message);
+      }
+
+      // Fallback for direct responses
+      return new ApiResponse(rawResponse as T, EResponseCodes.OK);
     } catch (error: any) {
       return new ApiResponse(
         {} as T,
@@ -75,7 +93,7 @@ function useCrudService<T>(baseUrl: string) {
   ): Promise<ApiResponse<T>> => {
     try {
       const api = instanceApi(baseUrl, authorization.token);
-      return await api({
+      const rawResponse = await api({
         method: "put",
         headers: {
           "Content-Type": "application/json",
@@ -86,6 +104,15 @@ function useCrudService<T>(baseUrl: string) {
         params: params,
         data: data,
       });
+
+      // Handle ApiResponse format from backend
+      if (rawResponse && rawResponse.data && rawResponse.data.operation) {
+        const { operation, data: responseData } = rawResponse.data;
+        return new ApiResponse(responseData, operation.code as EResponseCodes, operation.message);
+      }
+
+      // Fallback for direct responses
+      return new ApiResponse(rawResponse as T, EResponseCodes.OK);
     } catch (error: any) {
       return new ApiResponse(
         {} as T,
@@ -102,7 +129,7 @@ function useCrudService<T>(baseUrl: string) {
   ): Promise<ApiResponse<T>> => {
     try {
       const api = instanceApi(baseUrl, authorization.token);
-      return await api({
+      const rawResponse = await api({
         method: "delete",
         headers: {
           "Content-Type": "application/json",
@@ -112,6 +139,15 @@ function useCrudService<T>(baseUrl: string) {
         url: `${endpoint}`,
         params: params,
       });
+
+      // Handle ApiResponse format from backend
+      if (rawResponse && rawResponse.data && rawResponse.data.operation) {
+        const { operation, data: responseData } = rawResponse.data;
+        return new ApiResponse(responseData, operation.code as EResponseCodes, operation.message);
+      }
+
+      // Fallback for direct responses
+      return new ApiResponse(rawResponse as T, EResponseCodes.OK);
     } catch (error: any) {
       return new ApiResponse(
         {} as T,

@@ -12,6 +12,7 @@ import { RadioButton } from "primereact/radiobutton";
 
 import { IScheduleTemplate, IShiftForm } from "../../../common/interfaces/schedule.interfaces";
 import useCrudService from "../../../common/hooks/crud-service.hook";
+import { EResponseCodes } from "../../../common/constants/api.enum";
 
 interface IPropsCreateUpdateScheduleForm {
   action: string;
@@ -66,28 +67,56 @@ export const CreateUpdateScheduleForm = ({
     lunchTimeEnd: "",
   });
 
-  const watchedDetails = watch("details");
+  const [shiftFormErrors, setShiftFormErrors] = useState<Partial<IShiftForm>>({});
+  const [isLoadingShifts, setIsLoadingShifts] = useState(false);
+  const [shiftsError, setShiftsError] = useState<string | null>(null);
 
-  // Load available shifts on component mount
+  const watchedDetails = watch("details");
+  const watchedName = watch("name");
+
+  // Load available shifts on component mount - only once
   useEffect(() => {
+    let isMounted = true;
+
     const loadAvailableShifts = async () => {
+      if (!isMounted) return;
+
+      setIsLoadingShifts(true);
+      setShiftsError(null);
+
       try {
-        const response = await get<any[]>("/api/schedules/0/days/0/shifts/all");
-        if ((response as any).data && (response as any).data.operation && (response as any).data.operation.code === 'OK') {
-          setAvailableShifts((response as any).data.data || []);
+        const response = await get<any[]>("/api/shifts/all");
+        if (!isMounted) return;
+
+        if (response.operation.code === EResponseCodes.SUCCESS) {
+          setAvailableShifts(response.data || []);
+        } else {
+          setShiftsError("Error al cargar los turnos disponibles");
+          console.error("Error loading available shifts:", response.operation.message);
         }
       } catch (error) {
+        if (!isMounted) return;
+        setShiftsError("No se pudieron cargar los turnos disponibles");
         console.error("Error loading available shifts:", error);
+      } finally {
+        if (isMounted) {
+          setIsLoadingShifts(false);
+        }
       }
     };
 
     loadAvailableShifts();
-  }, [get]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Empty dependency array to run only once
 
   const openShiftModal = (dayIndex: number, existingShift?: any) => {
     setCurrentDayIndex(dayIndex);
     setShiftMode('create');
     setSelectedShiftId('');
+    setShiftFormErrors({}); // Clear previous errors
 
     if (existingShift) {
       // Check if this is an existing shift from the database
@@ -119,7 +148,34 @@ export const CreateUpdateScheduleForm = ({
     setShowShiftModal(true);
   };
 
+  const validateShiftForm = (): boolean => {
+    const errors: Partial<IShiftForm> = {};
+
+    if (shiftMode === 'create') {
+      if (!shiftForm.name.trim()) {
+        errors.name = "El nombre del turno es obligatorio";
+      }
+      if (!shiftForm.startTime) {
+        errors.startTime = "La hora de inicio es obligatoria";
+      }
+      if (!shiftForm.endTime) {
+        errors.endTime = "La hora de fin es obligatoria";
+      }
+    } else if (shiftMode === 'select') {
+      if (!selectedShiftId) {
+        // This would be handled by the select validation
+      }
+    }
+
+    setShiftFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const saveShift = () => {
+    if (!validateShiftForm()) {
+      return;
+    }
+
     if (currentDayIndex !== null) {
       let shiftData;
 
@@ -173,6 +229,32 @@ export const CreateUpdateScheduleForm = ({
     };
 
     setValue("details", updatedDetails);
+  };
+
+  // Validation functions
+  const validateTemplate = (): { isValid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+
+    // Check if name is provided
+    if (!watchedName || !watchedName.trim()) {
+      errors.push("El nombre del horario es obligatorio");
+    }
+
+    // Check if at least one day has a shift
+    const hasAtLeastOneShift = watchedDetails?.some(day => day.shifts && day.shifts.length > 0);
+    if (!hasAtLeastOneShift) {
+      errors.push("Debe configurar al menos un turno para algún día de la semana");
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  };
+
+  const isFormValid = () => {
+    const templateValidation = validateTemplate();
+    return templateValidation.isValid;
   };
 
   if (isLoading) {
@@ -238,7 +320,8 @@ export const CreateUpdateScheduleForm = ({
         </div>
 
         <div className="m-top-20">
-          <h3 className="text-black large bold">Configuración por día</h3>
+          <h3 className="text-black large bold">Configuración por día *</h3>
+          <p className="text-gray small m-bottom-15">Debe configurar al menos un turno para algún día de la semana</p>
           {DAYS_OF_WEEK.map((day, index) => {
             const dayData = watchedDetails?.[index];
             const hasShift = dayData?.shifts?.length > 0;
@@ -296,9 +379,21 @@ export const CreateUpdateScheduleForm = ({
           <ButtonComponent
             value={`${action === "edit" ? "Editar" : "Guardar"}`}
             className="button-save large disabled-black"
-            disabled={!isValid}
+            disabled={!isValid || !isFormValid()}
           />
         </div>
+
+        {/* Validation Messages */}
+        {!isFormValid() && (
+          <div className="validation-messages m-top-15 p-15 bg-error-light border-error">
+            <h4 className="text-error medium bold">Errores de validación:</h4>
+            <ul className="text-error small m-top-10">
+              {validateTemplate().errors.map((error, index) => (
+                <li key={index}>• {error}</li>
+              ))}
+            </ul>
+          </div>
+        )}
       </FormComponent>
 
       <Dialog
@@ -319,7 +414,7 @@ export const CreateUpdateScheduleForm = ({
               className="button-save"
               type="button"
               action={saveShift}
-              disabled={shiftMode === 'create' && (!shiftForm.name || !shiftForm.startTime || !shiftForm.endTime)}
+              disabled={shiftMode === 'create' && (!shiftForm.name.trim() || !shiftForm.startTime || !shiftForm.endTime)}
             />
           </div>
         }
@@ -357,19 +452,57 @@ export const CreateUpdateScheduleForm = ({
             <div className="existing-shift-selection">
               <div className="select-container">
                 <label className="text-black big bold">Seleccionar turno existente *</label>
-                <select
-                  value={selectedShiftId}
-                  onChange={(e) => setSelectedShiftId(e.target.value)}
-                  className="input-basic medium"
-                  style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-                >
-                  <option value="">Seleccione un turno existente</option>
-                  {availableShifts.map(shift => (
-                    <option key={shift.id} value={shift.id.toString()}>
-                      {shift.name} ({shift.startTime} - {shift.endTime})
+                {isLoadingShifts ? (
+                  <div className="text-center p-10">
+                    <p>Cargando turnos disponibles...</p>
+                  </div>
+                ) : shiftsError ? (
+                  <div className="error-message p-10 bg-error-light border-error">
+                    <p className="text-error">{shiftsError}</p>
+                    <button
+                      type="button"
+                      className="button-link text-primary"
+                      onClick={() => {
+                        // Retry loading shifts
+                        const loadAvailableShifts = async () => {
+                          setIsLoadingShifts(true);
+                          setShiftsError(null);
+                          try {
+                            const response = await get<any[]>("/api/shifts/all");
+                            if (response.operation.code === EResponseCodes.SUCCESS) {
+                              setAvailableShifts(response.data || []);
+                            } else {
+                              setShiftsError("Error al cargar los turnos disponibles");
+                            }
+                          } catch (error) {
+                            setShiftsError("No se pudieron cargar los turnos disponibles");
+                          } finally {
+                            setIsLoadingShifts(false);
+                          }
+                        };
+                        loadAvailableShifts();
+                      }}
+                    >
+                      Reintentar
+                    </button>
+                  </div>
+                ) : (
+                  <select
+                    value={selectedShiftId}
+                    onChange={(e) => setSelectedShiftId(e.target.value)}
+                    className="input-basic medium"
+                    style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+                  >
+                    <option value="">
+                      {availableShifts.length === 0 ? "No hay turnos disponibles" : "Seleccione un turno existente"}
                     </option>
-                  ))}
-                </select>
+                    {availableShifts.map(shift => (
+                      <option key={shift.id} value={shift.id.toString()}>
+                        {shift.name} ({shift.startTime} - {shift.endTime})
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
               {selectedShiftId && (
                 <div className="shift-preview m-top-15 p-10 bg-light">
@@ -396,10 +529,19 @@ export const CreateUpdateScheduleForm = ({
                 label="Nombre del turno *"
                 typeInput="text"
                 value={shiftForm.name}
-                onChange={(e) => setShiftForm({ ...shiftForm, name: e.target.value })}
-                className="input-basic medium"
+                onChange={(e) => {
+                  setShiftForm({ ...shiftForm, name: e.target.value });
+                  // Clear error when user starts typing
+                  if (shiftFormErrors.name) {
+                    setShiftFormErrors({ ...shiftFormErrors, name: undefined });
+                  }
+                }}
+                className={`input-basic medium ${shiftFormErrors.name ? 'input-error' : ''}`}
                 classNameLabel="text-black big bold"
               />
+              {shiftFormErrors.name && (
+                <p className="text-error small m-top-5">{shiftFormErrors.name}</p>
+              )}
 
               <div className="grid-form-2-container gap-15">
                 <InputComponent
@@ -407,20 +549,38 @@ export const CreateUpdateScheduleForm = ({
                   label="Hora inicio *"
                   typeInput="time"
                   value={shiftForm.startTime}
-                  onChange={(e) => setShiftForm({ ...shiftForm, startTime: e.target.value })}
-                  className="input-basic medium"
+                  onChange={(e) => {
+                    setShiftForm({ ...shiftForm, startTime: e.target.value });
+                    // Clear error when user starts typing
+                    if (shiftFormErrors.startTime) {
+                      setShiftFormErrors({ ...shiftFormErrors, startTime: undefined });
+                    }
+                  }}
+                  className={`input-basic medium ${shiftFormErrors.startTime ? 'input-error' : ''}`}
                   classNameLabel="text-black big bold"
                 />
+                {shiftFormErrors.startTime && (
+                  <p className="text-error small m-top-5">{shiftFormErrors.startTime}</p>
+                )}
 
                 <InputComponent
                   idInput="endTime"
                   label="Hora fin *"
                   typeInput="time"
                   value={shiftForm.endTime}
-                  onChange={(e) => setShiftForm({ ...shiftForm, endTime: e.target.value })}
-                  className="input-basic medium"
+                  onChange={(e) => {
+                    setShiftForm({ ...shiftForm, endTime: e.target.value });
+                    // Clear error when user starts typing
+                    if (shiftFormErrors.endTime) {
+                      setShiftFormErrors({ ...shiftFormErrors, endTime: undefined });
+                    }
+                  }}
+                  className={`input-basic medium ${shiftFormErrors.endTime ? 'input-error' : ''}`}
                   classNameLabel="text-black big bold"
                 />
+                {shiftFormErrors.endTime && (
+                  <p className="text-error small m-top-5">{shiftFormErrors.endTime}</p>
+                )}
               </div>
 
               <h4 className="text-black medium bold m-top-15">Descanso (Opcional)</h4>
