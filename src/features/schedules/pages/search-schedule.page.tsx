@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import useSearchScheduleHook from "../hooks/searchSchedule.hook";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { IScheduleTemplate } from "../../../common/interfaces/schedule.interfaces";
 
 import { FilterScheduleForm } from "../forms/filter-schedule.form";
+import { ShiftTemplatesModal } from "../forms/shift-templates-modal.component";
+import { ButtonComponent } from "../../../common/components/Form";
 
 const SearchSchedulePage = (): React.JSX.Element => {
   const {
@@ -21,6 +23,8 @@ const SearchSchedulePage = (): React.JSX.Element => {
     clearFields,
     register
   } = useSearchScheduleHook();
+
+  const [showShiftTemplatesModal, setShowShiftTemplatesModal] = useState(false);
 
   const renderActions = (row: IScheduleTemplate) => {
     return (
@@ -44,7 +48,15 @@ const SearchSchedulePage = (): React.JSX.Element => {
     <div className="main-page">
       <div className="card-table">
         <div className="title-area">
-          <label className="text-black extra-large bold">Horarios</label>
+          <div className="flex-between">
+            <label className="text-black extra-large bold">Horarios</label>
+            <ButtonComponent
+              value="Administrar Plantillas de Turnos"
+              className="button-secondary"
+              type="button"
+              action={() => setShowShiftTemplatesModal(true)}
+            />
+          </div>
         </div>
 
         <FilterScheduleForm
@@ -92,6 +104,11 @@ const SearchSchedulePage = (): React.JSX.Element => {
             </DataTable>
           </div>
         )}
+
+        <ShiftTemplatesModal
+          visible={showShiftTemplatesModal}
+          onHide={() => setShowShiftTemplatesModal(false)}
+        />
       </div>
     </div>
   );
