@@ -91,7 +91,9 @@ export const CreateUpdateScheduleForm = ({
         if (response.operation.code === EResponseCodes.SUCCESS || response.operation.code === EResponseCodes.OK) {
           // The API returns the data wrapped in another object, so we need to extract the actual array
           const shiftsArray = (response as any).data?.data || (response as any).data || [];
-          setAvailableShifts(Array.isArray(shiftsArray) ? shiftsArray : []);
+          // Filter only templates (shifts marked as templates)
+          const templates = Array.isArray(shiftsArray) ? shiftsArray.filter((s: any) => s.isTemplate) : [];
+          setAvailableShifts(templates);
         } else {
           setShiftsError("Error al cargar los turnos disponibles");
           console.error("Error loading available shifts:", response.operation.message);
@@ -182,7 +184,7 @@ export const CreateUpdateScheduleForm = ({
       let shiftData;
 
       if (shiftMode === 'select' && selectedShiftId) {
-        // Use existing shift
+        // Use existing shift (template)
         const selectedShift = availableShifts.find(s => s.id.toString() === selectedShiftId);
         if (selectedShift) {
           shiftData = {
@@ -193,6 +195,7 @@ export const CreateUpdateScheduleForm = ({
             lunchDescription: selectedShift.lunchDescription,
             lunchTimeInit: selectedShift.lunchTimeInit,
             lunchTimeEnd: selectedShift.lunchTimeEnd,
+            isTemplate: true, // Mark as template reference
           };
         }
       } else {
