@@ -276,7 +276,7 @@ export const CreateUpdateScheduleForm = ({
     <div className="container-sections-forms">
       <FormComponent
         id="createOrUpdateSchedule"
-        className="form-signIn"
+        className="form-signIn schedule-form"
         action={handleSubmitSchedule}
       >
         <div className="grid-form-2-container gap-25">
