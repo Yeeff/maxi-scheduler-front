@@ -67,8 +67,10 @@ export default function useSearchScheduleHook() {
       // The crud-service hook now properly handles ApiResponse format
       // and returns data directly in the ApiResponse.data field
       let schedules: IScheduleTemplate[] = [];
-      if (response.operation.code === EResponseCodes.OK) {
-        schedules = response.data as IScheduleTemplate[];
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        // Handle different response formats
+        const responseData = (response as any).data?.data || (response as any).data || [];
+        schedules = Array.isArray(responseData) ? responseData : [];
         console.log("Data loaded successfully:", schedules);
       } else {
         console.error("API returned error:", response.operation.message);

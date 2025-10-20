@@ -3,6 +3,7 @@ import useSearchScheduleHook from "../hooks/searchSchedule.hook";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { IScheduleTemplate } from "../../../common/interfaces/schedule.interfaces";
+import { FiEdit, FiEye, FiTrash2 } from "react-icons/fi";
 
 import { FilterScheduleForm } from "../forms/filter-schedule.form";
 import { ShiftTemplatesModal } from "../forms/shift-templates-modal.component";
@@ -35,9 +36,9 @@ const SearchSchedulePage = (): React.JSX.Element => {
             style={{ display: action.hide ? "none" : "block" }}
             onClick={() => action.onClick(row)}
           >
-            {action.icon === "Edit" && <span>✏️</span>}
-            {action.icon === "Detail" && <span>👁️</span>}
-            {action.icon === "Delete" && <span>🗑️</span>}
+            {action.icon === "Edit" && <FiEdit size={20} style={{ cursor: 'pointer', color: '#094a90' }} />}
+            {action.icon === "Detail" && <FiEye size={20} style={{ cursor: 'pointer', color: '#094a90' }} />}
+            {action.icon === "Delete" && <FiTrash2 size={20} style={{ cursor: 'pointer', color: '#dc3545' }} />}
           </div>
         ))}
       </div>
@@ -48,15 +49,13 @@ const SearchSchedulePage = (): React.JSX.Element => {
     <div className="main-page">
       <div className="card-table">
         <div className="title-area">
-          <div className="flex-between">
-            <label className="text-black extra-large bold">Horarios</label>
-            <ButtonComponent
-              value="Administrar Plantillas de Turnos"
-              className="button-secondary"
-              type="button"
-              action={() => setShowShiftTemplatesModal(true)}
-            />
-          </div>
+          <label className="text-black extra-large bold">Horarios</label>
+          <ButtonComponent
+            value="Administrar Plantillas de Turnos"
+            className="button-secondary"
+            type="button"
+            action={() => setShowShiftTemplatesModal(true)}
+          />
         </div>
 
         <FilterScheduleForm
