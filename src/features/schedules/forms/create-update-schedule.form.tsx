@@ -88,8 +88,10 @@ export const CreateUpdateScheduleForm = ({
         const response = await get<any[]>("/api/shifts/all");
         if (!isMounted) return;
 
-        if (response.operation.code === EResponseCodes.SUCCESS) {
-          setAvailableShifts(response.data || []);
+        if (response.operation.code === EResponseCodes.SUCCESS || response.operation.code === EResponseCodes.OK) {
+          // The API returns the data wrapped in another object, so we need to extract the actual array
+          const shiftsArray = (response as any).data?.data || (response as any).data || [];
+          setAvailableShifts(Array.isArray(shiftsArray) ? shiftsArray : []);
         } else {
           setShiftsError("Error al cargar los turnos disponibles");
           console.error("Error loading available shifts:", response.operation.message);
