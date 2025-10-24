@@ -111,7 +111,14 @@ export function SelectComponent({
         <Dropdown
           id={field.name}
           name={field.name}
-          value={data?.find((row) => row.value === field.value)?.value}
+          value={data?.find((row) => {
+            // Handle both string values and object values with id
+            const fieldValue = field.value;
+            if (typeof fieldValue === 'object' && fieldValue?.id) {
+              return row.value === fieldValue.id.toString();
+            }
+            return row.value === fieldValue;
+          })?.value}
           onChange={(e) => {
             if (rules && 'setValueAs' in rules) {
               const transformedValue = (rules as any).setValueAs(e.value);

@@ -66,15 +66,29 @@ const useCreateUpdatePositionHook = ({
       console.log("API Response:", response);
 
       // Check if response has operation property (ApiResponse format)
-      if (response && (response as any).data && (response as any).data.operation && (response as any).data.operation.code === EResponseCodes.OK) {
-        console.log("Data loaded successfully (ApiResponse format):", (response as any).data.data);
-        reset((response as any).data.data);
-      }
-      // Check if response is direct data (no operation wrapper)
-      else if (response && (response as any).data && (response as any).data.id && (response as any).data.name) {
-        console.log("Data loaded successfully (direct format):", (response as any).data);
-        reset((response as any).data as unknown as IPosition);
-      }
+     if (response && (response as any).data && (response as any).data.operation && (response as any).data.operation.code === EResponseCodes.OK) {
+       console.log("Data loaded successfully (ApiResponse format):", (response as any).data.data);
+       const positionData = (response as any).data.data;
+       // Transform company and scheduleTemplate to match form expectations
+       const transformedData = {
+         ...positionData,
+         company: positionData.company ? { id: positionData.company.id, name: positionData.company.name } : undefined,
+         scheduleTemplate: positionData.scheduleTemplate ? { id: positionData.scheduleTemplate.id, name: positionData.scheduleTemplate.name } : undefined,
+       };
+       reset(transformedData);
+     }
+     // Check if response is direct data (no operation wrapper)
+     else if (response && (response as any).data && (response as any).data.id && (response as any).data.name) {
+       console.log("Data loaded successfully (direct format):", (response as any).data);
+       const positionData = (response as any).data;
+       // Transform company and scheduleTemplate to match form expectations
+       const transformedData = {
+         ...positionData,
+         company: positionData.company ? { id: positionData.company.id, name: positionData.company.name } : undefined,
+         scheduleTemplate: positionData.scheduleTemplate ? { id: positionData.scheduleTemplate.id, name: positionData.scheduleTemplate.name } : undefined,
+       };
+       reset(transformedData);
+     }
       else {
         console.log("API Error:", (response as any)?.data?.operation || response);
         const errorMsg = (response as any)?.data?.operation?.message || 'Unknown error';
