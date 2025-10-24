@@ -158,6 +158,13 @@ export const CreateUpdatePositionForm = ({
                   className="select-basic medium"
                   classNameLabel="text-black big bold"
                   placeholder="Seleccione una empresa"
+                  rules={{
+                    setValueAs: (value: string) => {
+                      if (!value || value === '') return undefined;
+                      const selectedCompany = companies.find(c => c.id.toString() === value);
+                      return selectedCompany ? { id: selectedCompany.id } : undefined;
+                    }
+                  }}
                 />
               );
             }}
@@ -184,6 +191,13 @@ export const CreateUpdatePositionForm = ({
                   className="select-basic medium"
                   classNameLabel="text-black big bold"
                   placeholder="Seleccione una plantilla de horario"
+                  rules={{
+                    setValueAs: (value: string) => {
+                      if (!value || value === '') return undefined;
+                      const selectedSchedule = scheduleTemplates.find(s => s.id.toString() === value);
+                      return selectedSchedule ? { id: selectedSchedule.id } : undefined;
+                    }
+                  }}
                 />
               );
             }}

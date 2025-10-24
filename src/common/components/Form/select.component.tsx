@@ -23,6 +23,7 @@ interface ISelectProps<T> {
   emptyMessage?: string;
   shouldUnregister?: boolean;
   optionsRegister?: {};
+  rules?: {};
 }
 
 function LabelElement({ label, idInput, classNameLabel }): React.JSX.Element {
@@ -53,6 +54,7 @@ export function SelectComponent({
   emptyMessage = "Sin resultados.",
   shouldUnregister,
   optionsRegister,
+  rules,
 }: ISelectProps<any>): React.JSX.Element {
   if (data) {
     const seleccione: IDropdownProps = { name: placeholder, value: "" };
@@ -70,7 +72,7 @@ export function SelectComponent({
     name: idInput,
     control,
     shouldUnregister,
-    rules: optionsRegister,
+    rules: rules || optionsRegister,
   });
 
   // const messageError = () => {
@@ -110,7 +112,14 @@ export function SelectComponent({
           id={field.name}
           name={field.name}
           value={data?.find((row) => row.value === field.value)?.value}
-          onChange={(e) => field.onChange(e.value)}
+          onChange={(e) => {
+            if (rules && 'setValueAs' in rules) {
+              const transformedValue = (rules as any).setValueAs(e.value);
+              field.onChange(transformedValue);
+            } else {
+              field.onChange(e.value);
+            }
+          }}
           onBlur={(e) => field.onBlur()}
           options={data}
           optionLabel="name"

@@ -177,6 +177,7 @@ const useCreateUpdatePositionHook = ({
 
   const handleCreateOrUpdatePosition = async (data: IPosition) => {
     console.log("Creating/updating position with data:", data);
+
     const response =
       action === "edit"
         ? await put<IPosition>(`/api/positions/${id}`, data)
