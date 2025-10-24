@@ -10,6 +10,7 @@ import useAppCominicator from "./common/hooks/app-communicator.hook";
 import SpinnerComponent from "./common/components/spinner.component";
 import ScheduleRoutes from "./features/schedules/schedule-routes";
 import CompanyRoutes from "./features/companies/company-routes";
+import PositionRoutes from "./features/positions/position-routes";
 
 function App() {
   const { publish } = useAppCominicator();
@@ -35,6 +36,7 @@ function App() {
               <Route path={"/nomina/"} element={<HomePage />} />
               <Route path={"/nomina/horarios/*"} element={<ScheduleRoutes />} />
               <Route path={"/nomina/empresas/*"} element={<CompanyRoutes />} />
+              <Route path={"/nomina/cargos/*"} element={<PositionRoutes />} />
             </Routes>
           </Suspense>
         </Router>
