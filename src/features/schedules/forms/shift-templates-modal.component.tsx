@@ -43,9 +43,9 @@ export const ShiftTemplatesModal = ({ visible, onHide }: IShiftTemplatesModalPro
       const response = await get<any[]>("/api/shifts/all");
       if (response.operation.code === EResponseCodes.SUCCESS || response.operation.code === EResponseCodes.OK) {
         const shiftsArray = (response as any).data?.data || (response as any).data || [];
-        // Filter only templates
-        const templates = Array.isArray(shiftsArray) ? shiftsArray.filter((s: any) => s.isTemplate) : [];
-        setShifts(templates);
+        // For now, show all shifts (not filtering by isTemplate since the API doesn't return this field)
+        const allShifts = Array.isArray(shiftsArray) ? shiftsArray : [];
+        setShifts(allShifts);
       } else {
         console.error("Error loading shift templates:", response.operation.message);
       }

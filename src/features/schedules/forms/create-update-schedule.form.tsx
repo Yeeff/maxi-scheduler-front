@@ -91,9 +91,9 @@ export const CreateUpdateScheduleForm = ({
         if (response.operation.code === EResponseCodes.SUCCESS || response.operation.code === EResponseCodes.OK) {
           // The API returns the data wrapped in another object, so we need to extract the actual array
           const shiftsArray = (response as any).data?.data || (response as any).data || [];
-          // Filter only templates (shifts marked as templates)
-          const templates = Array.isArray(shiftsArray) ? shiftsArray.filter((s: any) => s.isTemplate) : [];
-          setAvailableShifts(templates);
+          // For now, show all shifts (not filtering by isTemplate since the API doesn't return this field)
+          const allShifts = Array.isArray(shiftsArray) ? shiftsArray : [];
+          setAvailableShifts(allShifts);
         } else {
           setShiftsError("Error al cargar los turnos disponibles");
           console.error("Error loading available shifts:", response.operation.message);
@@ -474,8 +474,10 @@ export const CreateUpdateScheduleForm = ({
                           setShiftsError(null);
                           try {
                             const response = await get<any[]>("/api/shifts/all");
-                            if (response.operation.code === EResponseCodes.SUCCESS) {
-                              setAvailableShifts(response.data || []);
+                            if (response.operation.code === EResponseCodes.SUCCESS || response.operation.code === EResponseCodes.OK) {
+                              const shiftsArray = (response as any).data?.data || (response as any).data || [];
+                              const allShifts = Array.isArray(shiftsArray) ? shiftsArray : [];
+                              setAvailableShifts(allShifts);
                             } else {
                               setShiftsError("Error al cargar los turnos disponibles");
                             }

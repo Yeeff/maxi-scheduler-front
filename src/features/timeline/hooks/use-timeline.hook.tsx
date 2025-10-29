@@ -25,7 +25,6 @@ export default function useTimelineHook() {
   // Load initial data
   useEffect(() => {
     loadCompanies();
-    loadTimelineData();
   }, []);
 
   // Reload data when company filter changes
@@ -48,12 +47,25 @@ export default function useTimelineHook() {
   const loadTimelineData = async () => {
     try {
       setLoading(true);
-      const params = selectedCompanyId ? `?companyId=${selectedCompanyId}` : '';
-      const response = await get<ITimelineData>(`/api/timeline${params}`);
+
+      // Only load timeline data if a company is selected
+      if (!selectedCompanyId) {
+        setTimelineData([]);
+        return;
+      }
+
+      // Get current week start (Monday)
+      const today = new Date();
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - today.getDay() + 1); // Monday of current week
+      const weekStart = monday.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+
+      const params = `?companyId=${selectedCompanyId}&weekStart=${weekStart}`;
+      const response = await get<ITimelineData>(`/api/daily-schedules/timeline${params}`);
 
       if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
-        const data = (response as any).data?.data || (response as any).data || { positions: [] };
-        setTimelineData(data.positions || []);
+        const timelineDataResponse = (response as any).data?.data || (response as any).data || { positions: [] };
+        setTimelineData(timelineDataResponse.positions || []);
       } else {
         setMessage({
           title: "Error",
