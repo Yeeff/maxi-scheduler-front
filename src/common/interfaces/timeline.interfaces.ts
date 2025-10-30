@@ -17,19 +17,14 @@ export interface IWorkSchedule {
 export interface ITimelineRow {
   id: string;
   position: IPosition;
-  employee?: {
-    id: number;
-    name: string;
-    document?: string;
-  };
-  scheduleData: {
-    monday: ITimeBlock[];
-    tuesday: ITimeBlock[];
-    wednesday: ITimeBlock[];
-    thursday: ITimeBlock[];
-    friday: ITimeBlock[];
-    saturday: ITimeBlock[];
-    sunday: ITimeBlock[];
+  actualScheduleData: {
+    MONDAY: ITimeBlock[];
+    TUESDAY: ITimeBlock[];
+    WEDNESDAY: ITimeBlock[];
+    THURSDAY: ITimeBlock[];
+    FRIDAY: ITimeBlock[];
+    SATURDAY: ITimeBlock[];
+    SUNDAY: ITimeBlock[];
   };
 }
 
@@ -48,6 +43,5 @@ export interface ITimelineFilter {
 
 export interface ITimelineData {
   positions: ITimelineRow[];
-  companies: ICompany[];
   weekStart: string; // ISO date for Monday of the displayed week
 }

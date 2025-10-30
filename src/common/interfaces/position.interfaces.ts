@@ -12,6 +12,11 @@ export interface IPosition {
   status?: boolean;
   company: ICompany;
   scheduleTemplate: IScheduleTemplate;
+  employeeCache?: {
+    id: number;
+    name: string;
+    document?: string;
+  };
   idUser?: number;
 }
 

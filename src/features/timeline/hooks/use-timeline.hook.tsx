@@ -150,26 +150,26 @@ export default function useTimelineHook() {
       label: 'Liberar puesto',
       icon: 'pi pi-user-minus',
       command: handleUnassignEmployee,
-      disabled: !selectedRows.some(row => row.employee)
+      disabled: !selectedRows.some(row => row.position.employeeCache)
     },
     {
       label: 'Pasar empleado a otro puesto',
       icon: 'pi pi-arrow-right',
       command: handleMoveEmployee,
-      disabled: !selectedRows.some(row => row.employee)
+      disabled: !selectedRows.some(row => row.position.employeeCache)
     },
     { separator: true },
     {
       label: 'Vincular plantilla de horario',
       icon: 'pi pi-calendar-plus',
       command: handleLinkScheduleTemplate,
-      disabled: !selectedRows.some(row => row.employee)
+      disabled: !selectedRows.some(row => row.position.employeeCache)
     },
     {
       label: 'Cambiar plantilla de horario',
       icon: 'pi pi-refresh',
       command: handleChangeScheduleTemplate,
-      disabled: !selectedRows.some(row => row.employee)
+      disabled: !selectedRows.some(row => row.position.employeeCache)
     },
     {
       label: 'Generar horarios',

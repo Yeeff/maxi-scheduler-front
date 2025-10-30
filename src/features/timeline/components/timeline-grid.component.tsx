@@ -16,13 +16,13 @@ interface ITimelineGridProps {
 }
 
 const DAYS_OF_WEEK = [
-  { key: 'monday', label: 'Lunes', short: 'Lun' },
-  { key: 'tuesday', label: 'Martes', short: 'Mar' },
-  { key: 'wednesday', label: 'Miércoles', short: 'Mié' },
-  { key: 'thursday', label: 'Jueves', short: 'Jue' },
-  { key: 'friday', label: 'Viernes', short: 'Vie' },
-  { key: 'saturday', label: 'Sábado', short: 'Sáb' },
-  { key: 'sunday', label: 'Domingo', short: 'Dom' },
+  { key: 'MONDAY', label: 'Lunes', short: 'Lun' },
+  { key: 'TUESDAY', label: 'Martes', short: 'Mar' },
+  { key: 'WEDNESDAY', label: 'Miércoles', short: 'Mié' },
+  { key: 'THURSDAY', label: 'Jueves', short: 'Jue' },
+  { key: 'FRIDAY', label: 'Viernes', short: 'Vie' },
+  { key: 'SATURDAY', label: 'Sábado', short: 'Sáb' },
+  { key: 'SUNDAY', label: 'Domingo', short: 'Dom' },
 ];
 
 export const TimelineGrid = ({
@@ -55,8 +55,8 @@ export const TimelineGrid = ({
     return (
       <div className="position-employee-cell">
         <div className="position-name text-black bold">{row.position.name}</div>
-        {row.employee ? (
-          <div className="employee-name text-gray small">{row.employee.name}</div>
+        {row.position.employeeCache ? (
+          <div className="employee-name text-gray small">{row.position.employeeCache.name}</div>
         ) : (
           <div className="no-employee text-gray small italic">Sin asignar</div>
         )}
@@ -65,7 +65,7 @@ export const TimelineGrid = ({
   };
 
   const renderTimeBlocks = (row: ITimelineRow, day: string) => {
-    const timeBlocks = row.scheduleData[day as keyof typeof row.scheduleData] || [];
+    const timeBlocks = row.actualScheduleData[day as keyof typeof row.actualScheduleData] || [];
 
     return (
       <div
