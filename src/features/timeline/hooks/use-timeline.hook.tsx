@@ -20,7 +20,7 @@ export default function useTimelineHook() {
   const [loading, setLoading] = useState(false);
 
   // Services
-  const { get } = useCrudService(process.env.urlApiScheduler);
+  const { get, put } = useCrudService(process.env.urlApiScheduler);
 
   // Load initial data
   useEffect(() => {
@@ -112,9 +112,39 @@ export default function useTimelineHook() {
     console.log("Assign employee to positions:", selectedRows);
   };
 
-  const handleUnassignEmployee = () => {
-    // TODO: Unassign employees from positions
-    console.log("Unassign employees from positions:", selectedRows);
+  const handleUnassignEmployee = async () => {
+    try {
+      // Unassign employees from all selected positions
+      for (const row of selectedRows) {
+        if (row.position.employeeCache) {
+          console.log("Unassigning employee from position:", row.position.id);
+          await put(`/api/positions/${row.position.id}/unassign-employee`, {});
+        }
+      }
+
+      // Show success message
+      setMessage({
+        title: "Puestos Liberados",
+        description: `Se han liberado ${selectedRows.filter(row => row.position.employeeCache).length} puesto(s) exitosamente.`,
+        show: true,
+        OkTitle: "Aceptar",
+        onOk: () => {
+          // Reload timeline data
+          loadTimelineData();
+          setMessage((prev) => ({ ...prev, show: false }));
+        },
+        background: true,
+      });
+    } catch (error) {
+      console.error("Error unassigning employees:", error);
+      setMessage({
+        title: "Error",
+        description: "Error al liberar los puestos",
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+    }
   };
 
   const handleMoveEmployee = () => {
