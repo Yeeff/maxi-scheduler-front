@@ -25,6 +25,12 @@ const DAYS_OF_WEEK = [
   { key: 'SUNDAY', label: 'Domingo', short: 'Dom' },
 ];
 
+// Helper function to convert time string (HH:mm) to minutes since midnight
+const timeToMinutes = (timeString: string): number => {
+  const [hours, minutes] = timeString.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
 export const TimelineGrid = ({
   data,
   selectedRows,
@@ -71,26 +77,90 @@ export const TimelineGrid = ({
       <div
         className="time-blocks-cell"
         onClick={() => onCellClick(row, day)}
-        style={{ cursor: 'pointer', minHeight: '60px' }}
+        style={{
+          cursor: 'pointer',
+          minHeight: '60px',
+          position: 'relative',
+          width: '100%'
+        }}
       >
         {timeBlocks.length > 0 ? (
-          timeBlocks.map((block, index) => (
-            <div
-              key={index}
-              className={`time-block ${block.type}`}
-              style={{
-                backgroundColor: getBlockColor(block.type),
-                padding: '2px 4px',
-                margin: '1px 0',
-                borderRadius: '3px',
-                fontSize: '11px',
-                color: 'white',
-                textAlign: 'center'
-              }}
-            >
-              {formatTimeRange(block.startTime, block.endTime)}
-            </div>
-          ))
+          <div className="time-visualization" style={{ position: 'relative', height: '50px', width: '100%' }}>
+            {(() => {
+              // Sort blocks by start time to maintain chronological order
+              const sortedBlocks = [...timeBlocks].sort((a, b) =>
+                timeToMinutes(a.startTime) - timeToMinutes(b.startTime)
+              );
+
+              // Calculate total duration of all blocks for the day
+              const totalDuration = sortedBlocks.reduce((total, block) => {
+                const startMinutes = timeToMinutes(block.startTime);
+                const endMinutes = timeToMinutes(block.endTime);
+                return total + (endMinutes - startMinutes);
+              }, 0);
+
+              const CELL_WIDTH = 140; // pixels
+              let currentLeft = 0;
+
+              return sortedBlocks.map((block, index) => {
+                const startMinutes = timeToMinutes(block.startTime);
+                const endMinutes = timeToMinutes(block.endTime);
+                const duration = endMinutes - startMinutes;
+
+                // Calculate proportional width based on total duration of blocks
+                const proportion = duration / totalDuration;
+                const width = proportion * CELL_WIDTH;
+
+                const blockElement = (
+                  <div
+                    key={index}
+                    className={`time-block-sequential ${block.type}`}
+                    style={{
+                      backgroundColor: getBlockColor(block.type),
+                      position: 'absolute',
+                      left: `${currentLeft}px`,
+                      top: '15px', // Move blocks down to make room for labels
+                      width: `${width}px`,
+                      height: '20px', // Shorter blocks
+                      borderRadius: '3px',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                      border: '1px solid rgba(255,255,255,0.3)',
+                      zIndex: block.type === 'break' ? 10 : 5
+                    }}
+                    title={`${block.type === 'work' ? 'Trabajo' : 'Break'}: ${formatTimeRange(block.startTime, block.endTime)} (${duration} min)`}
+                  />
+                );
+
+                // Add time label above the block
+                const labelElement = (
+                  <div
+                    key={`label-${index}`}
+                    style={{
+                      position: 'absolute',
+                      left: `${currentLeft}px`,
+                      top: '0px',
+                      width: `${width}px`,
+                      textAlign: 'center',
+                      fontSize: '8px',
+                      fontWeight: 'bold',
+                      color: '#333',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      zIndex: 15
+                    }}
+                    title={formatTimeRange(block.startTime, block.endTime)}
+                  >
+                    {width > 50 ? formatTimeRange(block.startTime, block.endTime) :
+                     width > 30 ? block.startTime : '...'}
+                  </div>
+                );
+
+                currentLeft += width;
+                return [labelElement, blockElement];
+              }).flat();
+            })()}
+          </div>
         ) : (
           <div className="no-schedule text-gray small">-</div>
         )}
@@ -100,9 +170,9 @@ export const TimelineGrid = ({
 
   const getBlockColor = (type: string) => {
     switch (type) {
-      case 'work': return '#094a90';
-      case 'break': return '#6c757d';
-      case 'off': return '#dc3545';
+      case 'work': return '#094a90'; // Blue for work
+      case 'break': return '#ffc107'; // Yellow/Orange for break
+      case 'off': return '#dc3545'; // Red for off time
       default: return '#6c757d';
     }
   };
@@ -154,13 +224,18 @@ export const TimelineGrid = ({
           frozen
         />
 
-        {DAYS_OF_WEEK.map((day) => (
+        {DAYS_OF_WEEK.map((day, index) => (
           <Column
             key={day.key}
             field={day.key}
             header={day.short}
             body={(row: ITimelineRow) => renderTimeBlocks(row, day.key)}
-            style={{ width: '120px', minWidth: '120px' }}
+            style={{
+              width: '140px',
+              minWidth: '140px',
+              paddingLeft: index === 0 ? '0px' : '2px', // Add small gap between columns
+              paddingRight: index === DAYS_OF_WEEK.length - 1 ? '0px' : '2px'
+            }}
           />
         ))}
       </DataTable>

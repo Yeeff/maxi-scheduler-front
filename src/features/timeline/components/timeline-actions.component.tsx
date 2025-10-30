@@ -32,7 +32,7 @@ export const TimelineActions = ({
   onBulkGenerateSchedules,
 }: ITimelineActionsProps) => {
   const hasSelectedRows = selectedRows.length > 0;
-  const hasAssignedEmployees = selectedRows.some(row => row.employee);
+  const hasAssignedEmployees = selectedRows.some(row => row.position.employeeCache);
 
   const companyOptions = [
     { label: 'Todas las empresas', value: undefined },

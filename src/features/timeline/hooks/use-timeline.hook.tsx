@@ -60,8 +60,11 @@ export default function useTimelineHook() {
       monday.setDate(today.getDate() - today.getDay() + 1); // Monday of current week
       const weekStart = monday.toISOString().split('T')[0]; // Format as YYYY-MM-DD
 
-      const params = `?companyId=${selectedCompanyId}&weekStart=${weekStart}`;
-      const response = await get<ITimelineData>(`/api/daily-schedules/timeline${params}`);
+      const params = new URLSearchParams({
+        companyId: selectedCompanyId.toString(),
+        weekStart: weekStart
+      });
+      const response = await get<ITimelineData>(`/api/daily-schedules/timeline?${params.toString()}`);
 
       if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
         const timelineDataResponse = (response as any).data?.data || (response as any).data || { positions: [] };
@@ -139,49 +142,27 @@ export default function useTimelineHook() {
     console.log("Bulk generate schedules for positions:", selectedRows);
   };
 
-  // Context menu model for right-click actions
+  // Context menu model for right-click actions - minimalistic style
   const contextMenuModel = [
     {
       label: 'Vincular empleado',
       icon: 'pi pi-user-plus',
-      command: handleAssignEmployee
+      command: handleAssignEmployee,
+      style: { background: 'transparent', border: 'none', color: '#000' }
     },
     {
       label: 'Liberar puesto',
       icon: 'pi pi-user-minus',
       command: handleUnassignEmployee,
-      disabled: !selectedRows.some(row => row.position.employeeCache)
+      disabled: !selectedRows.some(row => row.position.employeeCache),
+      style: { background: 'transparent', border: 'none', color: '#000' }
     },
     {
       label: 'Pasar empleado a otro puesto',
       icon: 'pi pi-arrow-right',
       command: handleMoveEmployee,
-      disabled: !selectedRows.some(row => row.position.employeeCache)
-    },
-    { separator: true },
-    {
-      label: 'Vincular plantilla de horario',
-      icon: 'pi pi-calendar-plus',
-      command: handleLinkScheduleTemplate,
-      disabled: !selectedRows.some(row => row.position.employeeCache)
-    },
-    {
-      label: 'Cambiar plantilla de horario',
-      icon: 'pi pi-refresh',
-      command: handleChangeScheduleTemplate,
-      disabled: !selectedRows.some(row => row.position.employeeCache)
-    },
-    {
-      label: 'Generar horarios',
-      icon: 'pi pi-play',
-      command: handleGenerateSchedules,
-      disabled: !selectedRows.some(row => row.employee)
-    },
-    {
-      label: 'Generar horarios a partir de plantillas',
-      icon: 'pi pi-bolt',
-      command: handleBulkGenerateSchedules,
-      disabled: !selectedRows.some(row => row.employee)
+      disabled: !selectedRows.some(row => row.position.employeeCache),
+      style: { background: 'transparent', border: 'none', color: '#000' }
     },
   ];
 
