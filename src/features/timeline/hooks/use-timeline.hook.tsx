@@ -114,18 +114,57 @@ export default function useTimelineHook() {
 
   const handleUnassignEmployee = async () => {
     try {
-      // Unassign employees from all selected positions
-      for (const row of selectedRows) {
-        if (row.position.employeeCache) {
-          console.log("Unassigning employee from position:", row.position.id);
-          await put(`/api/positions/${row.position.id}/unassign-employee`, {});
-        }
-      }
+      // For now, handle single position (can be extended for multiple)
+      const position = selectedRows.find(row => row.position.employeeCache);
+      if (!position) return;
 
-      // Show success message
+      // STEP 1: Get preview of what will be deleted
+      const previewResponse = await get(`/api/positions/${position.position.id}/unassign-preview`);
+      const impact = (previewResponse as any).data?.data || (previewResponse as any).data || {};
+
+      // STEP 2: Show confirmation dialog
       setMessage({
-        title: "Puestos Liberados",
-        description: `Se han liberado ${selectedRows.filter(row => row.position.employeeCache).length} puesto(s) exitosamente.`,
+        title: "Confirmar Liberación de Puesto",
+        description: `Se liberará el puesto del empleado ${
+          position.position.employeeCache?.name || 'desconocido'
+        }.${
+          impact.futureSchedulesDeleted > 0
+            ? ` Además se eliminarán ${impact.futureSchedulesDeleted} registro(s) de horarios futuros.`
+            : ' No hay horarios futuros que eliminar.'
+        } ¿Desea continuar?`,
+        show: true,
+        OkTitle: "Liberar Puesto",
+        onOk: () => executeUnassign(position.position.id),
+        cancelTitle: "Cancelar",
+        background: true,
+      });
+
+    } catch (error) {
+      console.error("Error getting unassign preview:", error);
+      setMessage({
+        title: "Error",
+        description: "Error al calcular el impacto de la liberación",
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+    }
+  };
+
+  const executeUnassign = async (positionId: number) => {
+    try {
+      // STEP 3: Execute the unassignment
+      const resultResponse = await put(`/api/positions/${positionId}/unassign-employee`, {});
+      const result = (resultResponse as any).data?.data || (resultResponse as any).data || {};
+
+      // STEP 4: Show success message
+      setMessage({
+        title: "Puesto Liberado",
+        description: `El puesto ha sido liberado exitosamente.${
+          result.futureSchedulesDeleted > 0
+            ? ` Se eliminaron ${result.futureSchedulesDeleted} registro(s) de horarios.`
+            : ''
+        }`,
         show: true,
         OkTitle: "Aceptar",
         onOk: () => {
@@ -135,11 +174,12 @@ export default function useTimelineHook() {
         },
         background: true,
       });
+
     } catch (error) {
-      console.error("Error unassigning employees:", error);
+      console.error("Error executing unassign:", error);
       setMessage({
         title: "Error",
-        description: "Error al liberar los puestos",
+        description: "Error al liberar el puesto",
         show: true,
         OkTitle: "Aceptar",
         background: true,
