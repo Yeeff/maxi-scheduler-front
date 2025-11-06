@@ -81,84 +81,47 @@ export const TimelineGrid = ({
           cursor: 'pointer',
           minHeight: '60px',
           position: 'relative',
-          width: '100%'
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}
       >
         {timeBlocks.length > 0 ? (
-          <div className="time-visualization" style={{ position: 'relative', height: '50px', width: '100%' }}>
+          <div className="time-visualization" style={{
+            position: 'relative',
+            height: '35px',
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
             {(() => {
-              // Sort blocks by start time to maintain chronological order
-              const sortedBlocks = [...timeBlocks].sort((a, b) =>
-                timeToMinutes(a.startTime) - timeToMinutes(b.startTime)
+              // Take the first (and only) block for the day
+              const block = timeBlocks[0];
+
+              return (
+                <div
+                  className={`time-block-single ${block.type} ${block.isCurrentEmployee ? 'current-employee' : 'historical-employee'}`}
+                  style={{
+                    backgroundColor: getBlockColor(block.type, block.isCurrentEmployee),
+                    width: '90%',
+                    height: '30px',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    color: 'white',
+                    border: block.isCurrentEmployee ? '2px solid #000' : '1px solid rgba(0,0,0,0.3)',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}
+                  title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ' (Histórico)'}`}
+                >
+                  {formatTimeRange(block.startTime, block.endTime)}
+                </div>
               );
-
-              // Calculate total duration of all blocks for the day
-              const totalDuration = sortedBlocks.reduce((total, block) => {
-                const startMinutes = timeToMinutes(block.startTime);
-                const endMinutes = timeToMinutes(block.endTime);
-                return total + (endMinutes - startMinutes);
-              }, 0);
-
-              const CELL_WIDTH = 140; // pixels
-              let currentLeft = 0;
-
-              return sortedBlocks.map((block, index) => {
-                const startMinutes = timeToMinutes(block.startTime);
-                const endMinutes = timeToMinutes(block.endTime);
-                const duration = endMinutes - startMinutes;
-
-                // Calculate proportional width based on total duration of blocks
-                const proportion = duration / totalDuration;
-                const width = proportion * CELL_WIDTH;
-
-                const blockElement = (
-                  <div
-                    key={index}
-                    className={`time-block-sequential ${block.type}`}
-                    style={{
-                      backgroundColor: getBlockColor(block.type, block.isCurrentEmployee),
-                      position: 'absolute',
-                      left: `${currentLeft}px`,
-                      top: '15px', // Move blocks down to make room for labels
-                      width: `${width}px`,
-                      height: '20px', // Shorter blocks
-                      borderRadius: '3px',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                      border: block.isCurrentEmployee ? '2px solid #000' : '1px solid rgba(255,255,255,0.3)',
-                      zIndex: block.type === 'break' ? 10 : 5
-                    }}
-                    title={`${block.employeeName || 'Sin asignar'} - ${block.type === 'work' ? 'Trabajo' : 'Break'}: ${formatTimeRange(block.startTime, block.endTime)} (${duration} min)${block.isCurrentEmployee ? ' (Actual)' : ''}`}
-                  />
-                );
-
-                // Add time label above the block
-                const labelElement = (
-                  <div
-                    key={`label-${index}`}
-                    style={{
-                      position: 'absolute',
-                      left: `${currentLeft}px`,
-                      top: '0px',
-                      width: `${width}px`,
-                      textAlign: 'center',
-                      fontSize: '8px',
-                      fontWeight: 'bold',
-                      color: '#333',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      zIndex: 15
-                    }}
-                    title={`${block.employeeName || 'Sin asignar'}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ''}`}
-                  >
-                    {width > 50 ? `${block.employeeName || 'N/A'}: ${formatTimeRange(block.startTime, block.endTime)}` :
-                     width > 30 ? block.employeeName || 'N/A' : '...'}
-                  </div>
-                );
-
-                currentLeft += width;
-                return [labelElement, blockElement];
-              }).flat();
             })()}
           </div>
         ) : (
