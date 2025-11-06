@@ -35,6 +35,9 @@ export interface ITimeBlock {
   type: 'work' | 'break' | 'off';
   scheduleTemplateId?: number;
   workScheduleId?: number;
+  employeeId?: number;
+  employeeName?: string;
+  isCurrentEmployee?: boolean;
 }
 
 export interface ITimelineFilter {

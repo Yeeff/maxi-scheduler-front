@@ -116,7 +116,7 @@ export const TimelineGrid = ({
                     key={index}
                     className={`time-block-sequential ${block.type}`}
                     style={{
-                      backgroundColor: getBlockColor(block.type),
+                      backgroundColor: getBlockColor(block.type, block.isCurrentEmployee),
                       position: 'absolute',
                       left: `${currentLeft}px`,
                       top: '15px', // Move blocks down to make room for labels
@@ -124,10 +124,10 @@ export const TimelineGrid = ({
                       height: '20px', // Shorter blocks
                       borderRadius: '3px',
                       boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                      border: '1px solid rgba(255,255,255,0.3)',
+                      border: block.isCurrentEmployee ? '2px solid #000' : '1px solid rgba(255,255,255,0.3)',
                       zIndex: block.type === 'break' ? 10 : 5
                     }}
-                    title={`${block.type === 'work' ? 'Trabajo' : 'Break'}: ${formatTimeRange(block.startTime, block.endTime)} (${duration} min)`}
+                    title={`${block.employeeName || 'Sin asignar'} - ${block.type === 'work' ? 'Trabajo' : 'Break'}: ${formatTimeRange(block.startTime, block.endTime)} (${duration} min)${block.isCurrentEmployee ? ' (Actual)' : ''}`}
                   />
                 );
 
@@ -149,10 +149,10 @@ export const TimelineGrid = ({
                       whiteSpace: 'nowrap',
                       zIndex: 15
                     }}
-                    title={formatTimeRange(block.startTime, block.endTime)}
+                    title={`${block.employeeName || 'Sin asignar'}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ''}`}
                   >
-                    {width > 50 ? formatTimeRange(block.startTime, block.endTime) :
-                     width > 30 ? block.startTime : '...'}
+                    {width > 50 ? `${block.employeeName || 'N/A'}: ${formatTimeRange(block.startTime, block.endTime)}` :
+                     width > 30 ? block.employeeName || 'N/A' : '...'}
                   </div>
                 );
 
@@ -168,13 +168,15 @@ export const TimelineGrid = ({
     );
   };
 
-  const getBlockColor = (type: string) => {
-    switch (type) {
-      case 'work': return '#094a90'; // Blue for work
-      case 'break': return '#ffc107'; // Yellow/Orange for break
-      case 'off': return '#dc3545'; // Red for off time
-      default: return '#6c757d';
-    }
+  const getBlockColor = (type: string, isCurrentEmployee?: boolean) => {
+    // Different shades for current vs historical employees
+    const baseColors = {
+      work: isCurrentEmployee ? '#094a90' : '#6c757d', // Blue for current, gray for historical
+      break: isCurrentEmployee ? '#ffc107' : '#ffecb3', // Yellow for current, light yellow for historical
+      off: '#dc3545' // Red for off time (same for all)
+    };
+
+    return baseColors[type as keyof typeof baseColors] || '#6c757d';
   };
 
   const formatTimeRange = (start: string, end: string) => {
