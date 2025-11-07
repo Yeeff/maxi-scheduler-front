@@ -100,10 +100,52 @@ export default function useTimelineHook() {
     console.log("Cell clicked:", { row, day });
   };
 
+  // Modal state
+  const [showAssignEmployeeModal, setShowAssignEmployeeModal] = useState(false);
+
   // Action handlers
   const handleAssignEmployee = () => {
-    // TODO: Open employee assignment modal
-    console.log("Assign employee to positions:", selectedRows);
+    if (selectedRows.length === 1 && !selectedRows[0].position.employeeCache) {
+      setShowAssignEmployeeModal(true);
+    }
+  };
+
+  const handleAssignEmployeeConfirm = async (employeeId: number) => {
+    try {
+      const positionId = selectedRows[0].position.id;
+
+      // Call assign employee endpoint
+      const response = await put(`/api/positions/${positionId}/assign-employee`, { employeeId });
+
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        // Show success message
+        setMessage({
+          title: "Empleado Asignado",
+          description: "El empleado ha sido asignado exitosamente a la posición.",
+          show: true,
+          OkTitle: "Aceptar",
+          onOk: () => {
+            // Reload timeline data
+            loadTimelineData();
+            setMessage((prev) => ({ ...prev, show: false }));
+          },
+          background: true,
+        });
+
+        setShowAssignEmployeeModal(false);
+      } else {
+        throw new Error(response.operation.message || "Error al asignar empleado");
+      }
+    } catch (error) {
+      console.error("Error assigning employee:", error);
+      setMessage({
+        title: "Error",
+        description: "Error al asignar el empleado a la posición",
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+    }
   };
 
   const handleUnassignEmployee = async () => {
@@ -253,6 +295,10 @@ export default function useTimelineHook() {
     handleGenerateSchedules,
     handleBulkGenerateSchedules,
     contextMenuModel,
+    // Modal state
+    showAssignEmployeeModal,
+    setShowAssignEmployeeModal,
+    handleAssignEmployeeConfirm,
     // Button states
     canAssignEmployee,
     canUnassignEmployee,

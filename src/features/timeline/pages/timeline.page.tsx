@@ -1,6 +1,7 @@
 import React from "react";
 import { TimelineGrid } from "../components/timeline-grid.component";
 import { TimelineActions } from "../components/timeline-actions.component";
+import AssignEmployeeModal from "../components/assign-employee-modal.component";
 import useTimelineHook from "../hooks/use-timeline.hook";
 
 const TimelinePage = (): React.JSX.Element => {
@@ -21,6 +22,9 @@ const TimelinePage = (): React.JSX.Element => {
     handleGenerateSchedules,
     handleBulkGenerateSchedules,
     contextMenuModel,
+    showAssignEmployeeModal,
+    setShowAssignEmployeeModal,
+    handleAssignEmployeeConfirm,
     canAssignEmployee,
     canUnassignEmployee,
     canAssociateTemplate,
@@ -62,6 +66,13 @@ const TimelinePage = (): React.JSX.Element => {
             loading={loading}
           />
         </div>
+
+        <AssignEmployeeModal
+          visible={showAssignEmployeeModal}
+          onHide={() => setShowAssignEmployeeModal(false)}
+          onAssign={handleAssignEmployeeConfirm}
+          positionId={selectedRows.length > 0 ? selectedRows[0].position.id : 0}
+        />
       </div>
     </div>
   );
