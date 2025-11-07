@@ -233,9 +233,54 @@ export default function useTimelineHook() {
     console.log("Link schedule template to positions:", selectedRows);
   };
 
+  // Modal state for change schedule template
+  const [showChangeTemplateModal, setShowChangeTemplateModal] = useState(false);
+
   const handleChangeScheduleTemplate = () => {
-    // TODO: Open schedule template change modal
-    console.log("Change schedule template for positions:", selectedRows);
+    if (selectedRows.length === 1 && selectedRows[0].position.employeeCache) {
+      setShowChangeTemplateModal(true);
+    }
+  };
+
+  const handleChangeTemplateConfirm = async (scheduleTemplateId: number | null) => {
+    try {
+      const employeeId = selectedRows[0].position.employeeCache!.id;
+
+      // Call update employee schedule template endpoint
+      const response = await put(`/api/employees-cache/${employeeId}/schedule-template`, {
+        scheduleTemplateId
+      });
+
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        // Show success message
+        const action = scheduleTemplateId ? "actualizada" : "removida";
+        setMessage({
+          title: "Plantilla Actualizada",
+          description: `La plantilla de horario ha sido ${action} exitosamente.`,
+          show: true,
+          OkTitle: "Aceptar",
+          onOk: () => {
+            // Reload timeline data
+            loadTimelineData();
+            setMessage((prev) => ({ ...prev, show: false }));
+          },
+          background: true,
+        });
+
+        setShowChangeTemplateModal(false);
+      } else {
+        throw new Error(response.operation.message || "Error al cambiar plantilla");
+      }
+    } catch (error) {
+      console.error("Error changing schedule template:", error);
+      setMessage({
+        title: "Error",
+        description: "Error al cambiar la plantilla de horario",
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+    }
   };
 
   const handleGenerateSchedules = () => {
@@ -299,6 +344,10 @@ export default function useTimelineHook() {
     showAssignEmployeeModal,
     setShowAssignEmployeeModal,
     handleAssignEmployeeConfirm,
+    // Change template modal state
+    showChangeTemplateModal,
+    setShowChangeTemplateModal,
+    handleChangeTemplateConfirm,
     // Button states
     canAssignEmployee,
     canUnassignEmployee,

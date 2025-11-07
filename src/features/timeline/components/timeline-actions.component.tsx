@@ -149,7 +149,7 @@ export const TimelineActions = ({
             label="Asociar plantilla"
             icon="pi pi-calendar-plus"
             className="timeline-action-button"
-            onClick={onLinkScheduleTemplate}
+            onClick={onChangeScheduleTemplate}
             disabled={!canAssociateTemplate}
             style={{
               background: 'transparent',

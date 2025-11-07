@@ -16,6 +16,7 @@ export interface IPosition {
     id: number;
     name: string;
     document?: string;
+    scheduleTemplate?: IScheduleTemplate;
   };
   idUser?: number;
 }

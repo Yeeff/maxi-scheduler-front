@@ -2,6 +2,7 @@ import React from "react";
 import { TimelineGrid } from "../components/timeline-grid.component";
 import { TimelineActions } from "../components/timeline-actions.component";
 import AssignEmployeeModal from "../components/assign-employee-modal.component";
+import ChangeScheduleTemplateModal from "../components/change-schedule-template-modal.component";
 import useTimelineHook from "../hooks/use-timeline.hook";
 
 const TimelinePage = (): React.JSX.Element => {
@@ -25,6 +26,9 @@ const TimelinePage = (): React.JSX.Element => {
     showAssignEmployeeModal,
     setShowAssignEmployeeModal,
     handleAssignEmployeeConfirm,
+    showChangeTemplateModal,
+    setShowChangeTemplateModal,
+    handleChangeTemplateConfirm,
     canAssignEmployee,
     canUnassignEmployee,
     canAssociateTemplate,
@@ -72,6 +76,15 @@ const TimelinePage = (): React.JSX.Element => {
           onHide={() => setShowAssignEmployeeModal(false)}
           onAssign={handleAssignEmployeeConfirm}
           positionId={selectedRows.length > 0 ? selectedRows[0].position.id : 0}
+        />
+
+        <ChangeScheduleTemplateModal
+          visible={showChangeTemplateModal}
+          onHide={() => setShowChangeTemplateModal(false)}
+          onChange={handleChangeTemplateConfirm}
+          employeeId={selectedRows.length > 0 && selectedRows[0].position.employeeCache ? selectedRows[0].position.employeeCache.id : 0}
+          currentScheduleTemplateId={selectedRows.length > 0 && selectedRows[0].position.employeeCache?.scheduleTemplate ? selectedRows[0].position.employeeCache.scheduleTemplate.id : undefined}
+          key={selectedRows.length > 0 && selectedRows[0].position.employeeCache ? selectedRows[0].position.employeeCache.id : 0}
         />
       </div>
     </div>
