@@ -4,16 +4,18 @@ import { Column } from "primereact/column";
 import { ContextMenu } from "primereact/contextmenu";
 import { Checkbox } from "primereact/checkbox";
 
-import { ITimelineRow, ITimeBlock } from "../../../common/interfaces/timeline.interfaces";
+import { ITimelineRow, ITimelineEmployee, ITimeBlock } from "../../../common/interfaces/timeline.interfaces";
 
 interface ITimelineGridProps {
-  data: ITimelineRow[];
-  selectedRows: ITimelineRow[];
-  onSelectionChange: (rows: ITimelineRow[]) => void;
-  onCellClick: (row: ITimelineRow, day: string) => void;
-  contextMenuModel: any[];
-  loading?: boolean;
-}
+   data: ITimelineRow[];
+   selectedRows: ITimelineRow[];
+   onSelectionChange: (rows: ITimelineRow[]) => void;
+   onCellClick: (row: ITimelineRow, day: string) => void;
+   contextMenuModel: any[];
+   loading?: boolean;
+   onAssignEmployee?: (position: ITimelineRow) => void;
+   onUnassignEmployee?: (position: ITimelineRow) => void;
+ }
 
 const DAYS_OF_WEEK = [
   { key: 'MONDAY', label: 'Lunes', short: 'Lun' },
@@ -32,13 +34,15 @@ const timeToMinutes = (timeString: string): number => {
 };
 
 export const TimelineGrid = ({
-  data,
-  selectedRows,
-  onSelectionChange,
-  onCellClick,
-  contextMenuModel,
-  loading = false,
-}: ITimelineGridProps) => {
+   data,
+   selectedRows,
+   onSelectionChange,
+   onCellClick,
+   contextMenuModel,
+   loading = false,
+   onAssignEmployee,
+   onUnassignEmployee,
+ }: ITimelineGridProps) => {
   const contextMenuRef = useRef<ContextMenu>(null);
   const [contextMenuTarget, setContextMenuTarget] = useState<any>(null);
 
@@ -49,11 +53,23 @@ export const TimelineGrid = ({
   };
 
   const handleRowSelection = (row: ITimelineRow) => {
-    const isSelected = selectedRows.some(selected => selected.id === row.id);
-    if (isSelected) {
-      onSelectionChange(selectedRows.filter(selected => selected.id !== row.id));
-    } else {
-      onSelectionChange([...selectedRows, row]);
+     const isSelected = selectedRows.some(selected => selected.id === row.id);
+     if (isSelected) {
+       onSelectionChange(selectedRows.filter(selected => selected.id !== row.id));
+     } else {
+       onSelectionChange([...selectedRows, row]);
+     }
+   };
+
+  const handleAssignEmployee = (position: ITimelineRow) => {
+    if (onAssignEmployee) {
+      onAssignEmployee(position);
+    }
+  };
+
+  const handleUnassignEmployee = (position: ITimelineRow) => {
+    if (onUnassignEmployee) {
+      onUnassignEmployee(position);
     }
   };
 
@@ -70,62 +86,166 @@ export const TimelineGrid = ({
     );
   };
 
-  const renderTimeBlocks = (row: ITimelineRow, day: string) => {
-    const timeBlocks = row.actualScheduleData[day as keyof typeof row.actualScheduleData] || [];
-
+  const renderPositionRow = (row: ITimelineRow) => {
     return (
-      <div
-        className="time-blocks-cell"
-        onClick={() => onCellClick(row, day)}
-        style={{
-          cursor: 'pointer',
-          minHeight: '60px',
-          position: 'relative',
-          width: '100%',
+      <div key={row.id} className="position-timeline-section">
+        {/* Position Header */}
+        <div className="position-header" style={{
+          backgroundColor: selectedRows.some(selected => selected.id === row.id) ? '#e3f2fd' : '#f8f9fa',
+          border: '1px solid #e0e0e0',
+          borderBottom: '2px solid #094a90',
+          padding: '12px 15px',
+          marginBottom: '0',
+          fontSize: '16px',
+          fontWeight: 'bold',
+          color: '#094a90',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        {timeBlocks.length > 0 ? (
-          <div className="time-visualization" style={{
-            position: 'relative',
-            height: '35px',
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            {(() => {
-              // Take the first (and only) block for the day
-              const block = timeBlocks[0];
+          gap: '10px'
+        }}>
+          <Checkbox
+            checked={selectedRows.some(selected => selected.id === row.id)}
+            onChange={() => handleRowSelection(row)}
+          />
+          {row.position.name} - {row.position.location}
+        </div>
 
-              return (
-                <div
-                  className={`time-block-single ${block.type} ${block.isCurrentEmployee ? 'current-employee' : 'historical-employee'}`}
-                  style={{
-                    backgroundColor: getBlockColor(block.type, block.isCurrentEmployee),
-                    width: '90%',
-                    height: '30px',
-                    borderRadius: '4px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '11px',
-                    fontWeight: 'bold',
-                    color: 'white',
-                    border: block.isCurrentEmployee ? '2px solid #000' : '1px solid rgba(0,0,0,0.3)',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                  }}
-                  title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ' (Histórico)'}`}
-                >
-                  {formatTimeRange(block.startTime, block.endTime)}
-                </div>
-              );
-            })()}
+        {/* Employee Name Header */}
+        <div className="employee-header-row" style={{
+          display: 'flex',
+          alignItems: 'center',
+          backgroundColor: '#e9ecef',
+          borderBottom: '1px solid #dee2e6',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          color: '#495057'
+        }}>
+          <div style={{
+            width: '200px',
+            padding: '8px 15px',
+            borderRight: '1px solid #dee2e6'
+          }}>
+            Empleado
           </div>
+          {DAYS_OF_WEEK.map(day => (
+            <div key={day.key} style={{
+              flex: 1,
+              padding: '8px 10px',
+              textAlign: 'center',
+              borderRight: '1px solid #dee2e6'
+            }}>
+              {day.short}
+            </div>
+          ))}
+        </div>
+
+        {/* Employee Rows */}
+        {row.employees && row.employees.length > 0 ? (
+          row.employees.map(employee => (
+            <div key={employee.id} className="employee-timeline-row" style={{
+              display: 'flex',
+              alignItems: 'center',
+              borderBottom: '1px solid #e0e0e0',
+              backgroundColor: 'white'
+            }}>
+              {/* Employee Name Column */}
+              <div className="employee-name-column" style={{
+                width: '200px',
+                padding: '10px 15px',
+                fontSize: '14px',
+                fontWeight: employee.isCurrentEmployee ? 'bold' : 'normal',
+                color: employee.isCurrentEmployee ? '#094a90' : '#6c757d',
+                borderRight: '1px solid #dee2e6'
+              }}>
+                {employee.name}
+                {employee.isCurrentEmployee && (
+                  <span style={{
+                    marginLeft: '8px',
+                    backgroundColor: '#094a90',
+                    color: 'white',
+                    padding: '2px 6px',
+                    borderRadius: '3px',
+                    fontSize: '10px'
+                  }}>
+                    ACTUAL
+                  </span>
+                )}
+              </div>
+
+              {/* Days Columns */}
+              {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => {
+                const timeBlocks = employee.scheduleData[day as keyof typeof employee.scheduleData] || [];
+
+                return (
+                  <div
+                    key={day}
+                    className="time-blocks-cell"
+                    onClick={() => onCellClick(row, day)}
+                    style={{
+                      cursor: 'pointer',
+                      minHeight: '45px',
+                      position: 'relative',
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRight: '1px solid #dee2e6'
+                    }}
+                  >
+                    {timeBlocks.length > 0 && timeBlocks[0].type !== 'off' ? (
+                      <div className="time-visualization" style={{
+                        position: 'relative',
+                        height: '35px',
+                        width: '95%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        {(() => {
+                          // Take the first (and only) block for the day
+                          const block = timeBlocks[0];
+
+                          return (
+                            <div
+                              className={`time-block-single ${block.type} ${block.isCurrentEmployee ? 'current-employee' : 'historical-employee'}`}
+                              style={{
+                                backgroundColor: getBlockColor(block.type, block.isCurrentEmployee),
+                                width: '100%',
+                                height: '32px',
+                                borderRadius: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '10px',
+                                fontWeight: 'bold',
+                                color: 'white',
+                                border: block.isCurrentEmployee ? '2px solid #000' : '1px solid rgba(0,0,0,0.3)',
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                              }}
+                              title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ' (Histórico)'}`}
+                            >
+                              {formatTimeRange(block.startTime, block.endTime)}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      <div className="no-schedule text-gray small">-</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))
         ) : (
-          <div className="no-schedule text-gray small">-</div>
+          <div className="no-employees" style={{
+            padding: '20px',
+            textAlign: 'center',
+            color: '#6c757d',
+            fontStyle: 'italic'
+          }}>
+            No hay empleados asignados a esta posición
+          </div>
         )}
       </div>
     );
@@ -157,59 +277,70 @@ export const TimelineGrid = ({
   };
 
   return (
-    <>
-      <DataTable
-        value={data}
-        loading={loading}
-        scrollable
-        scrollHeight="600px"
-        className="timeline-datatable"
-        onContextMenu={(e) => {
-          const target = e.originalEvent.target as HTMLElement;
-          const rowElement = target.closest('tr');
-          if (rowElement) {
-            const rowIndex = Array.from(rowElement.parentElement?.children || []).indexOf(rowElement);
-            if (data[rowIndex]) {
-              handleContextMenu(e.originalEvent, data[rowIndex]);
-            }
-          }
-        }}
-      >
-        <Column
-          header=""
-          body={renderSelectionCell}
-          style={{ width: '40px' }}
-          frozen
-        />
-        <Column
-          field="position"
-          header="Cargo/Empleado"
-          body={renderPositionEmployeeCell}
-          style={{ width: '200px', minWidth: '200px' }}
-          frozen
-        />
+    <div className="timeline-custom-grid" style={{
+      border: '1px solid #dee2e6',
+      borderRadius: '4px',
+      overflow: 'hidden'
+    }}>
+      {data.map(row => renderPositionRow(row))}
 
-        {DAYS_OF_WEEK.map((day, index) => (
-          <Column
-            key={day.key}
-            field={day.key}
-            header={day.short}
-            body={(row: ITimelineRow) => renderTimeBlocks(row, day.key)}
-            style={{
-              width: '140px',
-              minWidth: '140px',
-              paddingLeft: index === 0 ? '0px' : '2px', // Add small gap between columns
-              paddingRight: index === DAYS_OF_WEEK.length - 1 ? '0px' : '2px'
-            }}
-          />
-        ))}
-      </DataTable>
+      {/* Action buttons for selected positions */}
+      {selectedRows.length > 0 && (
+        <div className="timeline-actions" style={{
+          padding: '15px',
+          backgroundColor: '#f8f9fa',
+          borderTop: '1px solid #dee2e6',
+          display: 'flex',
+          gap: '10px',
+          alignItems: 'center'
+        }}>
+          <span style={{ fontWeight: 'bold', color: '#094a90' }}>
+            {selectedRows.length} posición(es) seleccionada(s)
+          </span>
+
+          {/* Show assign button if any selected position doesn't have an employee */}
+          {selectedRows.some(row => !row.position.employeeCache) && (
+            <button
+              onClick={() => handleAssignEmployee(selectedRows[0])} // For now, handle first selected
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              Asignar Empleado
+            </button>
+          )}
+
+          {/* Show unassign button if any selected position has an employee */}
+          {selectedRows.some(row => row.position.employeeCache) && (
+            <button
+              onClick={() => handleUnassignEmployee(selectedRows[0])} // For now, handle first selected
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '14px'
+              }}
+            >
+              Desasignar Empleado
+            </button>
+          )}
+        </div>
+      )}
 
       <ContextMenu
         model={contextMenuModel}
         ref={contextMenuRef}
         onHide={() => setContextMenuTarget(null)}
       />
-    </>
+    </div>
   );
 };

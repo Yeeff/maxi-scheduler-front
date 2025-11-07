@@ -14,10 +14,12 @@ export interface IWorkSchedule {
   status: 'active' | 'inactive';
 }
 
-export interface ITimelineRow {
-  id: string;
-  position: IPosition;
-  actualScheduleData: {
+export interface ITimelineEmployee {
+  id: number;
+  name: string;
+  document: string;
+  isCurrentEmployee: boolean;
+  scheduleData: {
     MONDAY: ITimeBlock[];
     TUESDAY: ITimeBlock[];
     WEDNESDAY: ITimeBlock[];
@@ -26,6 +28,12 @@ export interface ITimelineRow {
     SATURDAY: ITimeBlock[];
     SUNDAY: ITimeBlock[];
   };
+}
+
+export interface ITimelineRow {
+  id: string;
+  position: IPosition;
+  employees: ITimelineEmployee[];
 }
 
 export interface ITimeBlock {
