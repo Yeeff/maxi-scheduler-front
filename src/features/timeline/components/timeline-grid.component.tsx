@@ -146,28 +146,32 @@ export const TimelineGrid = ({
               display: 'flex',
               alignItems: 'center',
               borderBottom: '1px solid #e0e0e0',
-              backgroundColor: 'white'
+              backgroundColor: employee.currentEmployee ? '#fff3cd' : 'white',
+              borderLeft: employee.currentEmployee ? '4px solid #ffc107' : 'none',
+              position: 'relative'
             }}>
               {/* Employee Name Column */}
               <div className="employee-name-column" style={{
                 width: '200px',
                 padding: '10px 15px',
                 fontSize: '14px',
-                fontWeight: employee.isCurrentEmployee ? 'bold' : 'normal',
-                color: employee.isCurrentEmployee ? '#094a90' : '#6c757d',
+                fontWeight: employee.currentEmployee ? 'bold' : 'normal',
+                color: employee.currentEmployee ? '#094a90' : '#6c757d',
                 borderRight: '1px solid #dee2e6'
               }}>
                 {employee.name}
-                {employee.isCurrentEmployee && (
+                {employee.currentEmployee && (
                   <span style={{
                     marginLeft: '8px',
-                    backgroundColor: '#094a90',
-                    color: 'white',
-                    padding: '2px 6px',
-                    borderRadius: '3px',
-                    fontSize: '10px'
+                    backgroundColor: '#ffc107',
+                    color: '#000',
+                    padding: '3px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    border: '2px solid #ff8c00'
                   }}>
-                    ACTUAL
+                    ⭐ ACTUAL
                   </span>
                 )}
               </div>
@@ -209,7 +213,7 @@ export const TimelineGrid = ({
                             <div
                               className={`time-block-single ${block.type} ${block.isCurrentEmployee ? 'current-employee' : 'historical-employee'}`}
                               style={{
-                                backgroundColor: getBlockColor(block.type, block.isCurrentEmployee),
+                                backgroundColor: getBlockColor(block.type, block.isCurrentEmployee ? true : false),
                                 width: '100%',
                                 height: '32px',
                                 borderRadius: '4px',
@@ -217,10 +221,12 @@ export const TimelineGrid = ({
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 fontSize: '10px',
-                                fontWeight: 'bold',
+                                fontWeight: block.isCurrentEmployee ? 'bold' : 'normal',
                                 color: 'white',
-                                border: block.isCurrentEmployee ? '2px solid #000' : '1px solid rgba(0,0,0,0.3)',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                                border: block.isCurrentEmployee ? '3px solid #000' : '1px solid rgba(0,0,0,0.3)',
+                                boxShadow: block.isCurrentEmployee ? '0 2px 8px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.1)',
+                                transform: block.isCurrentEmployee ? 'scale(1.05)' : 'scale(1)',
+                                transition: 'all 0.2s ease'
                               }}
                               title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ' (Histórico)'}`}
                             >
@@ -251,11 +257,11 @@ export const TimelineGrid = ({
     );
   };
 
-  const getBlockColor = (type: string, isCurrentEmployee?: boolean) => {
+  const getBlockColor = (type: string, currentEmployee?: boolean) => {
     // Different shades for current vs historical employees
     const baseColors = {
-      work: isCurrentEmployee ? '#094a90' : '#6c757d', // Blue for current, gray for historical
-      break: isCurrentEmployee ? '#ffc107' : '#ffecb3', // Yellow for current, light yellow for historical
+      work: currentEmployee ? '#094a90' : '#adb5bd', // Blue for current, light gray for historical
+      break: currentEmployee ? '#ffc107' : '#fff3cd', // Yellow for current, very light yellow for historical
       off: '#dc3545' // Red for off time (same for all)
     };
 

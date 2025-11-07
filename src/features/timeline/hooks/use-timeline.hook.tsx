@@ -54,15 +54,9 @@ export default function useTimelineHook() {
         return;
       }
 
-      // Get current week start (Monday)
-      const today = new Date();
-      const monday = new Date(today);
-      monday.setDate(today.getDate() - today.getDay() + 1); // Monday of current week
-      const weekStart = monday.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-
+      // Backend now calculates default week start, so we only send companyId
       const params = new URLSearchParams({
-        companyId: selectedCompanyId.toString(),
-        weekStart: weekStart
+        companyId: selectedCompanyId.toString()
       });
       const response = await get<ITimelineData>(`/api/daily-schedules/timeline?${params.toString()}`);
 

@@ -18,7 +18,7 @@ export interface ITimelineEmployee {
   id: number;
   name: string;
   document: string;
-  isCurrentEmployee: boolean;
+  currentEmployee: boolean;
   scheduleData: {
     MONDAY: ITimeBlock[];
     TUESDAY: ITimeBlock[];
