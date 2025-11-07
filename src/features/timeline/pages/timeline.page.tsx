@@ -21,6 +21,10 @@ const TimelinePage = (): React.JSX.Element => {
     handleGenerateSchedules,
     handleBulkGenerateSchedules,
     contextMenuModel,
+    canAssignEmployee,
+    canUnassignEmployee,
+    canAssociateTemplate,
+    canGenerateSchedules,
   } = useTimelineHook();
 
   return (
@@ -42,6 +46,10 @@ const TimelinePage = (): React.JSX.Element => {
           onChangeScheduleTemplate={handleChangeScheduleTemplate}
           onGenerateSchedules={handleGenerateSchedules}
           onBulkGenerateSchedules={handleBulkGenerateSchedules}
+          canAssignEmployee={canAssignEmployee}
+          canUnassignEmployee={canUnassignEmployee}
+          canAssociateTemplate={canAssociateTemplate}
+          canGenerateSchedules={canGenerateSchedules}
         />
 
         <div className="timeline-container">

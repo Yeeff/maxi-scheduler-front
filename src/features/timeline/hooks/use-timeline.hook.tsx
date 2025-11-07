@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { AppContext } from "../../../common/contexts/app.context";
 import { ITimelineRow, ITimelineData } from "../../../common/interfaces/timeline.interfaces";
-import { ICompany } from "../../../common/interfaces/position.interfaces";
+import { ICompany } from "../../../common/interfaces/company.interfaces";
 import { EResponseCodes } from "../../../common/constants/api.enum";
 
 import useCrudService from "../../../common/hooks/crud-service.hook";
@@ -230,6 +230,12 @@ export default function useTimelineHook() {
     },
   ];
 
+  // Computed properties for button states
+  const canAssignEmployee = selectedRows.length === 1 && !selectedRows[0]?.position.employeeCache;
+  const canUnassignEmployee = selectedRows.length === 1 && !!selectedRows[0]?.position.employeeCache;
+  const canAssociateTemplate = selectedRows.length === 1 && !!selectedRows[0]?.position.employeeCache;
+  const canGenerateSchedules = selectedRows.length > 0;
+
   return {
     timelineData,
     companies,
@@ -247,5 +253,10 @@ export default function useTimelineHook() {
     handleGenerateSchedules,
     handleBulkGenerateSchedules,
     contextMenuModel,
+    // Button states
+    canAssignEmployee,
+    canUnassignEmployee,
+    canAssociateTemplate,
+    canGenerateSchedules,
   };
 }

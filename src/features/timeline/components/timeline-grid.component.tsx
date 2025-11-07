@@ -290,57 +290,6 @@ export const TimelineGrid = ({
     }}>
       {data.map(row => renderPositionRow(row))}
 
-      {/* Action buttons for selected positions */}
-      {selectedRows.length > 0 && (
-        <div className="timeline-actions" style={{
-          padding: '15px',
-          backgroundColor: '#f8f9fa',
-          borderTop: '1px solid #dee2e6',
-          display: 'flex',
-          gap: '10px',
-          alignItems: 'center'
-        }}>
-          <span style={{ fontWeight: 'bold', color: '#094a90' }}>
-            {selectedRows.length} posición(es) seleccionada(s)
-          </span>
-
-          {/* Show assign button if any selected position doesn't have an employee */}
-          {selectedRows.some(row => !row.position.employeeCache) && (
-            <button
-              onClick={() => handleAssignEmployee(selectedRows[0])} // For now, handle first selected
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#28a745',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              Asignar Empleado
-            </button>
-          )}
-
-          {/* Show unassign button if any selected position has an employee */}
-          {selectedRows.some(row => row.position.employeeCache) && (
-            <button
-              onClick={() => handleUnassignEmployee(selectedRows[0])} // For now, handle first selected
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#dc3545',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px'
-              }}
-            >
-              Desasignar Empleado
-            </button>
-          )}
-        </div>
-      )}
 
       <ContextMenu
         model={contextMenuModel}
