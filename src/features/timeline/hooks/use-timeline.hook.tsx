@@ -20,7 +20,7 @@ export default function useTimelineHook() {
   const [loading, setLoading] = useState(false);
 
   // Services
-  const { get, put } = useCrudService(process.env.urlApiScheduler);
+  const { get, put, post } = useCrudService(process.env.urlApiScheduler);
 
   // Load initial data
   useEffect(() => {
@@ -283,9 +283,112 @@ export default function useTimelineHook() {
     }
   };
 
-  const handleGenerateSchedules = () => {
-    // TODO: Generate schedules from templates
-    console.log("Generate schedules for positions:", selectedRows);
+  const handleGenerateSchedules = async () => {
+    try {
+      // Validate selected positions
+      const validationErrors: string[] = [];
+
+      selectedRows.forEach((row, index) => {
+        if (!row.position.employeeCache) {
+          validationErrors.push(`Posición ${index + 1}: No tiene empleado asignado`);
+        } else if (!row.position.employeeCache.scheduleTemplate) {
+          validationErrors.push(`Empleado ${row.position.employeeCache.name}: No tiene plantilla de horario asignada`);
+        }
+      });
+
+      if (validationErrors.length > 0) {
+        setMessage({
+          title: "Validación Fallida",
+          description: `No se pueden generar horarios:\n${validationErrors.join('\n')}`,
+          show: true,
+          OkTitle: "Aceptar",
+          background: true,
+        });
+        return;
+      }
+
+      // Show confirmation dialog
+      setMessage({
+        title: "Confirmar Generación de Horarios",
+        description: `Se generarán los horarios para ${selectedRows.length} posición(es) desde hoy hasta el final de la semana. ¿Desea continuar?`,
+        show: true,
+        OkTitle: "Generar Horarios",
+        onOk: () => executeGenerateSchedules(),
+        cancelTitle: "Cancelar",
+        background: true,
+      });
+
+    } catch (error) {
+      console.error("Error validating positions:", error);
+      setMessage({
+        title: "Error",
+        description: "Error al validar las posiciones seleccionadas",
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+    }
+  };
+
+  const executeGenerateSchedules = async () => {
+    try {
+      const positionIds = selectedRows.map(row => row.position.id);
+
+      // Call generate schedules endpoint
+      const response = await post<Record<number, string>>("/api/daily-schedules/generate-schedules", {
+        positionIds
+      });
+
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        const results = (response as any).data?.data || (response as any).data || {};
+
+        // Check if all were successful
+        const errors = Object.entries(results)
+          .filter(([_, message]) => (message as string).startsWith("ERROR"))
+          .map(([positionId, message]) => `Posición ${positionId}: ${message}`);
+
+        if (errors.length === 0) {
+          // All successful
+          setMessage({
+            title: "Horarios Generados",
+            description: `Se generaron los horarios exitosamente para ${positionIds.length} posición(es).`,
+            show: true,
+            OkTitle: "Aceptar",
+            onOk: () => {
+              // Reload timeline data
+              loadTimelineData();
+              setMessage((prev) => ({ ...prev, show: false }));
+            },
+            background: true,
+          });
+        } else {
+          // Some errors
+          setMessage({
+            title: "Generación Parcial",
+            description: `Algunos horarios no pudieron generarse:\n${errors.join('\n')}`,
+            show: true,
+            OkTitle: "Aceptar",
+            onOk: () => {
+              // Reload timeline data even with partial success
+              loadTimelineData();
+              setMessage((prev) => ({ ...prev, show: false }));
+            },
+            background: true,
+          });
+        }
+      } else {
+        throw new Error(response.operation.message || "Error al generar horarios");
+      }
+    } catch (error) {
+      console.error("Error generating schedules:", error);
+      setMessage({
+        title: "Error",
+        description: "Error al generar los horarios",
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+    }
   };
 
   const handleBulkGenerateSchedules = () => {
