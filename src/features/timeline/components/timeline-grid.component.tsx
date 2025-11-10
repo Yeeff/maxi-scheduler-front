@@ -86,173 +86,117 @@ export const TimelineGrid = ({
     );
   };
 
-  const renderPositionRow = (row: ITimelineRow) => {
+  const renderEmployeeRow = (employee: ITimelineEmployee, position: ITimelineRow) => {
     return (
-      <div key={row.id} className="position-timeline-section">
-        {/* Position Header */}
-        <div className="position-header" style={{
-          backgroundColor: selectedRows.some(selected => selected.id === row.id) ? '#e3f2fd' : '#f8f9fa',
-          border: '1px solid #e0e0e0',
-          borderBottom: '2px solid #094a90',
-          padding: '12px 15px',
-          marginBottom: '0',
-          fontSize: '16px',
-          fontWeight: 'bold',
-          color: '#094a90',
+      <div key={`${position.id}-${employee.id}`} className="employee-timeline-row" style={{
+        display: 'flex',
+        alignItems: 'center',
+        borderBottom: '1px solid #e0e0e0',
+        backgroundColor: 'white',
+        position: 'relative',
+        minHeight: '32px'
+      }}>
+        {/* Position-Employee Column */}
+        <div className="position-employee-column" style={{
+          width: '220px',
+          padding: '6px 12px',
+          fontSize: '12px',
+          fontWeight: employee.currentEmployee ? 'bold' : 'normal',
+          color: employee.currentEmployee ? '#094a90' : '#6c757d',
+          borderRight: '1px solid #dee2e6',
           display: 'flex',
           alignItems: 'center',
-          gap: '10px'
+          gap: '8px'
         }}>
           <Checkbox
-            checked={selectedRows.some(selected => selected.id === row.id)}
-            onChange={() => handleRowSelection(row)}
+            checked={selectedRows.some(selected => selected.id === position.id)}
+            onChange={() => handleRowSelection(position)}
           />
-          {row.position.name} - {row.position.location}
-        </div>
-
-        {/* Employee Name Header */}
-        <div className="employee-header-row" style={{
-          display: 'flex',
-          alignItems: 'center',
-          backgroundColor: '#e9ecef',
-          borderBottom: '1px solid #dee2e6',
-          fontSize: '12px',
-          fontWeight: 'bold',
-          color: '#495057'
-        }}>
-          <div style={{
-            width: '200px',
-            padding: '8px 15px',
-            borderRight: '1px solid #dee2e6'
-          }}>
-            Empleado
-          </div>
-          {DAYS_OF_WEEK.map(day => (
-            <div key={day.key} style={{
-              flex: 1,
-              padding: '8px 10px',
-              textAlign: 'center',
-              borderRight: '1px solid #dee2e6'
-            }}>
-              {day.short}
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '11px', color: '#6c757d', marginBottom: '2px' }}>
+              {position.position.name} - {position.position.location}
             </div>
-          ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              {employee.name}
+              {employee.currentEmployee && (
+                <span style={{
+                  color: '#ffc107',
+                  fontSize: '12px',
+                  lineHeight: '1'
+                }}>
+                  ⭐
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Employee Rows */}
-        {row.employees && row.employees.length > 0 ? (
-          row.employees.map(employee => (
-            <div key={employee.id} className="employee-timeline-row" style={{
-              display: 'flex',
-              alignItems: 'center',
-              borderBottom: '1px solid #e0e0e0',
-              backgroundColor: employee.currentEmployee ? '#fff3cd' : 'white',
-              borderLeft: employee.currentEmployee ? '4px solid #ffc107' : 'none',
-              position: 'relative'
-            }}>
-              {/* Employee Name Column */}
-              <div className="employee-name-column" style={{
-                width: '200px',
-                padding: '10px 15px',
-                fontSize: '14px',
-                fontWeight: employee.currentEmployee ? 'bold' : 'normal',
-                color: employee.currentEmployee ? '#094a90' : '#6c757d',
-                borderRight: '1px solid #dee2e6'
-              }}>
-                {employee.name}
-                {employee.currentEmployee && (
-                  <span style={{
-                    marginLeft: '8px',
-                    backgroundColor: '#ffc107',
-                    color: '#000',
-                    padding: '3px 8px',
-                    borderRadius: '12px',
-                    fontSize: '10px',
-                    fontWeight: 'bold',
-                    border: '2px solid #ff8c00'
-                  }}>
-                    ⭐ ACTUAL
-                  </span>
-                )}
-              </div>
+        {/* Days Columns */}
+        {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => {
+          const timeBlocks = employee.scheduleData[day as keyof typeof employee.scheduleData] || [];
 
-              {/* Days Columns */}
-              {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => {
-                const timeBlocks = employee.scheduleData[day as keyof typeof employee.scheduleData] || [];
+          return (
+            <div
+              key={day}
+              className="time-blocks-cell"
+              onClick={() => onCellClick(position, day)}
+              style={{
+                cursor: 'pointer',
+                minHeight: '32px',
+                position: 'relative',
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRight: '1px solid #dee2e6',
+                padding: '4px'
+              }}
+            >
+              {timeBlocks.length > 0 && timeBlocks[0].type !== 'off' ? (
+                <div className="time-visualization" style={{
+                  position: 'relative',
+                  height: '24px',
+                  width: '95%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {(() => {
+                    // Take the first (and only) block for the day
+                    const block = timeBlocks[0];
 
-                return (
-                  <div
-                    key={day}
-                    className="time-blocks-cell"
-                    onClick={() => onCellClick(row, day)}
-                    style={{
-                      cursor: 'pointer',
-                      minHeight: '45px',
-                      position: 'relative',
-                      flex: 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRight: '1px solid #dee2e6'
-                    }}
-                  >
-                    {timeBlocks.length > 0 && timeBlocks[0].type !== 'off' ? (
-                      <div className="time-visualization" style={{
-                        position: 'relative',
-                        height: '35px',
-                        width: '95%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                        {(() => {
-                          // Take the first (and only) block for the day
-                          const block = timeBlocks[0];
-
-                          return (
-                            <div
-                              className={`time-block-single ${block.type} ${block.isCurrentEmployee ? 'current-employee' : 'historical-employee'}`}
-                              style={{
-                                backgroundColor: getBlockColor(block.type, block.isCurrentEmployee ? true : false),
-                                width: '100%',
-                                height: '32px',
-                                borderRadius: '4px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '10px',
-                                fontWeight: block.isCurrentEmployee ? 'bold' : 'normal',
-                                color: 'white',
-                                border: block.isCurrentEmployee ? '3px solid #000' : '1px solid rgba(0,0,0,0.3)',
-                                boxShadow: block.isCurrentEmployee ? '0 2px 8px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.1)',
-                                transform: block.isCurrentEmployee ? 'scale(1.05)' : 'scale(1)',
-                                transition: 'all 0.2s ease'
-                              }}
-                              title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ' (Histórico)'}`}
-                            >
-                              {formatTimeRange(block.startTime, block.endTime)}
-                            </div>
-                          );
-                        })()}
+                    return (
+                      <div
+                        className={`time-block-single ${block.type} ${block.isCurrentEmployee ? 'current-employee' : 'historical-employee'}`}
+                        style={{
+                          backgroundColor: getBlockColor(block.type, block.isCurrentEmployee ? true : false),
+                          width: '100%',
+                          height: '20px',
+                          borderRadius: '3px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '9px',
+                          fontWeight: block.isCurrentEmployee ? 'bold' : 'normal',
+                          color: 'white',
+                          border: block.isCurrentEmployee ? '2px solid #000' : '1px solid rgba(0,0,0,0.3)',
+                          boxShadow: block.isCurrentEmployee ? '0 1px 4px rgba(0,0,0,0.2)' : '0 1px 2px rgba(0,0,0,0.1)',
+                          transform: block.isCurrentEmployee ? 'scale(1.02)' : 'scale(1)',
+                          transition: 'all 0.2s ease'
+                        }}
+                        title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ' (Histórico)'}`}
+                      >
+                        {formatTimeRange(block.startTime, block.endTime)}
                       </div>
-                    ) : (
-                      <div className="no-schedule text-gray small">-</div>
-                    )}
-                  </div>
-                );
-              })}
+                    );
+                  })()}
+                </div>
+              ) : (
+                <div className="no-schedule text-gray small" style={{ fontSize: '10px' }}>-</div>
+              )}
             </div>
-          ))
-        ) : (
-          <div className="no-employees" style={{
-            padding: '20px',
-            textAlign: 'center',
-            color: '#6c757d',
-            fontStyle: 'italic'
-          }}>
-            No hay empleados asignados a esta posición
-          </div>
-        )}
+          );
+        })}
       </div>
     );
   };
@@ -288,8 +232,86 @@ export const TimelineGrid = ({
       borderRadius: '4px',
       overflow: 'hidden'
     }}>
-      {data.map(row => renderPositionRow(row))}
+      {/* Global Header */}
+      <div className="timeline-global-header" style={{
+        display: 'flex',
+        alignItems: 'center',
+        backgroundColor: '#f8f9fa',
+        borderBottom: '2px solid #094a90',
+        fontSize: '11px',
+        fontWeight: 'bold',
+        color: '#495057'
+      }}>
+        <div style={{
+          width: '220px',
+          padding: '8px 12px',
+          borderRight: '1px solid #dee2e6'
+        }}>
+          Posición - Empleado
+        </div>
+        {DAYS_OF_WEEK.map(day => (
+          <div key={day.key} style={{
+            flex: 1,
+            padding: '8px 10px',
+            textAlign: 'center',
+            borderRight: '1px solid #dee2e6'
+          }}>
+            {day.short}
+          </div>
+        ))}
+      </div>
 
+      {/* Employee Rows */}
+      {data.length > 0 ? (
+        data.flatMap(row =>
+          row.employees && row.employees.length > 0
+            ? row.employees.map(employee => renderEmployeeRow(employee, row))
+            : [
+                <div key={row.id} className="no-employees-row" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderBottom: '1px solid #e0e0e0',
+                  backgroundColor: '#f8f9fa'
+                }}>
+                  <div style={{
+                    width: '220px',
+                    padding: '12px',
+                    fontSize: '12px',
+                    color: '#6c757d',
+                    borderRight: '1px solid #dee2e6',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <Checkbox
+                      checked={selectedRows.some(selected => selected.id === row.id)}
+                      onChange={() => handleRowSelection(row)}
+                    />
+                    {row.position.name} - {row.position.location}
+                  </div>
+                  <div style={{
+                    flex: 1,
+                    padding: '12px',
+                    textAlign: 'center',
+                    color: '#6c757d',
+                    fontStyle: 'italic',
+                    fontSize: '11px'
+                  }}>
+                    No hay empleados asignados
+                  </div>
+                </div>
+              ]
+        )
+      ) : (
+        <div style={{
+          padding: '40px',
+          textAlign: 'center',
+          color: '#6c757d',
+          fontStyle: 'italic'
+        }}>
+          No hay posiciones para mostrar
+        </div>
+      )}
 
       <ContextMenu
         model={contextMenuModel}

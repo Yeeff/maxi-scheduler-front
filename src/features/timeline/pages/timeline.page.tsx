@@ -60,6 +60,24 @@ const TimelinePage = (): React.JSX.Element => {
           canGenerateSchedules={canGenerateSchedules}
         />
 
+        {/* Selected items info - positioned above the table */}
+        {selectedRows.length > 0 && (
+          <div style={{
+            margin: '12px 0',
+            padding: '8px 16px',
+            backgroundColor: '#e3f2fd',
+            border: '1px solid #2196f3',
+            borderRadius: '4px',
+            color: '#1565c0',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}>
+            <span className="text-black">
+              {selectedRows.length} cargo{selectedRows.length > 1 ? 's' : ''} seleccionado{selectedRows.length > 1 ? 's' : ''}
+            </span>
+          </div>
+        )}
+
         <div className="timeline-container">
           <TimelineGrid
             data={timelineData}

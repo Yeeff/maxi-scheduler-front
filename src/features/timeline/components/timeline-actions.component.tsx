@@ -49,38 +49,49 @@ export const TimelineActions = ({
       value: company.id
     }))
   ];
-
-  return (
-    <div className="timeline-actions" style={{ margin: '20px 0' }}>
-      <div className="actions-toolbar">
-        <div className="toolbar-left">
-          <div className="company-filter">
-            <label className="text-black bold">Empresa:</label>
-            <Dropdown
-              value={selectedCompanyId}
-              options={companyOptions}
-              onChange={(e) => onCompanyChange(e.value)}
-              placeholder="Seleccionar empresa"
-              className="company-dropdown"
-              style={{ width: '250px' }}
-            />
-          </div>
-
-          {hasSelectedRows && (
-            <div className="selected-info">
-              <span className="text-black">
-                {selectedRows.length} cargo{selectedRows.length > 1 ? 's' : ''} seleccionado{selectedRows.length > 1 ? 's' : ''}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="toolbar-actions" style={{
-          display: 'flex',
-          gap: '16px',
-          alignItems: 'center',
-          flexWrap: 'wrap'
+return (
+  <div className="timeline-actions" style={{ margin: '20px 0' }}>
+    {/* Company Filter Section */}
+    <div className="company-filter-section" style={{
+      border: '1px solid #dee2e6',
+      borderRadius: '4px',
+      padding: '16px',
+      backgroundColor: '#f8f9fa',
+      marginBottom: '16px'
+    }}>
+      <div className="company-filter">
+        <label className="text-black bold" style={{
+          display: 'block',
+          marginBottom: '6px',
+          fontSize: '14px',
+          fontWeight: '600'
         }}>
+          Empresa/Cliente:
+        </label>
+        <Dropdown
+          value={selectedCompanyId}
+          options={companyOptions}
+          onChange={(e) => onCompanyChange(e.value)}
+          placeholder="Seleccionar empresa"
+          className="company-dropdown"
+          style={{ width: '250px' }}
+        />
+      </div>
+    </div>
+
+    {/* Actions Buttons Section */}
+    <div className="actions-buttons-section" style={{
+      border: '1px solid #dee2e6',
+      borderRadius: '4px',
+      padding: '12px',
+      backgroundColor: 'white'
+    }}>
+      <div className="toolbar-actions" style={{
+        display: 'flex',
+        gap: '16px',
+        alignItems: 'center',
+        flexWrap: 'wrap'
+      }}>
           <Button
             label="Asignar empleado"
             icon="pi pi-user-plus"
