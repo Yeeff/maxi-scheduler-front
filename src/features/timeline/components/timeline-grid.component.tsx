@@ -127,6 +127,17 @@ export const TimelineGrid = ({
                   ⭐
                 </span>
               )}
+              {employee.currentEmployee && position.position.employeeCache?.scheduleTemplate && (
+                <span style={{
+                  color: '#28a745',
+                  fontSize: '12px',
+                  lineHeight: '1',
+                  cursor: 'help'
+                }}
+                title={`Horario: ${position.position.employeeCache.scheduleTemplate.name}`}>
+                  🕒
+                </span>
+              )}
             </div>
           </div>
         </div>
