@@ -63,6 +63,14 @@ export default function useTimelineHook() {
       if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
         const timelineDataResponse = (response as any).data?.data || (response as any).data || { positions: [] };
         setTimelineData(timelineDataResponse.positions || []);
+
+        // Update selectedRows to synchronize with new data
+        const updatedSelectedRows = selectedRows
+          .map(selectedRow =>
+            timelineDataResponse.positions.find((row: ITimelineRow) => row.position.id === selectedRow.position.id)
+          )
+          .filter(Boolean) as ITimelineRow[];
+        setSelectedRows(updatedSelectedRows);
       } else {
         setMessage({
           title: "Error",
