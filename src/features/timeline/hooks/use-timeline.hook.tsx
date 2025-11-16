@@ -19,6 +19,7 @@ export default function useTimelineHook() {
   const [selectedRows, setSelectedRows] = useState<ITimelineRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [isGeneratingSchedules, setIsGeneratingSchedules] = useState(false);
+  const [weekStart, setWeekStart] = useState<string | null>(null);
 
   // Services
   const { get, put, post } = useCrudService(process.env.urlApiScheduler);
@@ -64,6 +65,7 @@ export default function useTimelineHook() {
       if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
         const timelineDataResponse = (response as any).data?.data || (response as any).data || { positions: [] };
         setTimelineData(timelineDataResponse.positions || []);
+        setWeekStart(timelineDataResponse.weekStart || null); // Guardar weekStart
 
         // Update selectedRows to synchronize with new data
         const updatedSelectedRows = selectedRows
@@ -104,7 +106,54 @@ export default function useTimelineHook() {
     setSelectedRows(rows);
   };
 
+  // Función para convertir nombre del día a fecha real
+  const getDayDate = (dayName: string): string | null => {
+    if (!weekStart) return null;
+    
+    const daysMap: { [key: string]: number } = {
+      'MONDAY': 0,
+      'TUESDAY': 1,
+      'WEDNESDAY': 2,
+      'THURSDAY': 3,
+      'FRIDAY': 4,
+      'SATURDAY': 5,
+      'SUNDAY': 6
+    };
+    
+    const dayIndex = daysMap[dayName];
+    if (dayIndex === undefined) return null;
+    
+    // Parsear la fecha sin considerar zona horaria
+    const [year, month, day] = weekStart.split('-').map(Number);
+    const weekStartDate = new Date(year, month - 1, day);
+    
+    // Calcular la fecha del día
+    const targetDate = new Date(weekStartDate);
+    targetDate.setDate(targetDate.getDate() + dayIndex);
+    
+    // Formato YYYY-MM-DD
+    const resultYear = targetDate.getFullYear();
+    const resultMonth = String(targetDate.getMonth() + 1).padStart(2, '0');
+    const resultDay = String(targetDate.getDate()).padStart(2, '0');
+    
+    console.log("getDayDate - weekStart:", weekStart, "dayName:", dayName, "dayIndex:", dayIndex, "result:", `${resultYear}-${resultMonth}-${resultDay}`);
+    
+    return `${resultYear}-${resultMonth}-${resultDay}`;
+  };
+
   const handleCellClick = (row: ITimelineRow, day: string) => {
+    // VALIDACIÓN: Verificar si hay empleado asignado a la posición
+    if (!row.position.employeeCache) {
+      setMessage({
+        title: "Empleado No Asignado",
+        description: `No hay un empleado asignado a la posición "${row.position.name}". Asigna un empleado primero para crear o editar horarios.`,
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+      return;
+    }
+
     // Find any employee with a work block for this day (prioritize current employee)
     let selectedEmployee = row.employees.find(emp => emp.currentEmployee);
     
@@ -122,17 +171,32 @@ export default function useTimelineHook() {
       const timeBlock = timeBlocks.find(block => block.type === 'work'); // Only allow editing work blocks
 
       if (timeBlock) {
-        console.log("TimeBlock clicked:", timeBlock);
+        // MODO EDITAR: Bloque existente
+        console.log("TimeBlock clicked (EDIT mode):", timeBlock);
         setSelectedTimeBlock({
           ...timeBlock,
-          employeeName: selectedEmployee.name
+          employeeName: selectedEmployee.name,
+          positionId: row.position.id,
+          date: day
         });
         setShowTimeBlockEditorModal(true);
       } else {
-        console.log("No work block found for day:", day, "TimeBlocks:", timeBlocks);
+        // MODO CREAR: Celda vacía
+        const realDate = getDayDate(day);
+        console.log("Empty cell clicked (CREATE mode) - day:", day, "realDate:", realDate);
+        setSelectedTimeBlock(null); // Indica que es nuevo
+        setSelectedRowForTimeBlock(row); // Guardar la fila
+        setSelectedDateForTimeBlock(realDate); // Guardar la fecha real (YYYY-MM-DD)
+        setShowTimeBlockEditorModal(true);
       }
     } else {
-      console.log("No employee with work block found for position:", row.position.name, "on day:", day);
+      // MODO CREAR: Celda vacía (sin empleado histórico)
+      const realDate = getDayDate(day);
+      console.log("Empty cell clicked (CREATE mode) - day:", day, "realDate:", realDate);
+      setSelectedTimeBlock(null); // Indica que es nuevo
+      setSelectedRowForTimeBlock(row); // Guardar la fila
+      setSelectedDateForTimeBlock(realDate); // Guardar la fecha real (YYYY-MM-DD)
+      setShowTimeBlockEditorModal(true);
     }
   };
 
@@ -140,6 +204,8 @@ export default function useTimelineHook() {
   const [showAssignEmployeeModal, setShowAssignEmployeeModal] = useState(false);
   const [showTimeBlockEditorModal, setShowTimeBlockEditorModal] = useState(false);
   const [selectedTimeBlock, setSelectedTimeBlock] = useState<any>(null);
+  const [selectedRowForTimeBlock, setSelectedRowForTimeBlock] = useState<ITimelineRow | null>(null);
+  const [selectedDateForTimeBlock, setSelectedDateForTimeBlock] = useState<string | null>(null);
 
   // Action handlers
   const handleAssignEmployee = () => {
@@ -467,6 +533,53 @@ export default function useTimelineHook() {
     }
   };
 
+  const handleTimeBlockCreate = async (positionId: number, employeeId: number, date: string, startTime: string, endTime: string) => {
+    try {
+      setIsGeneratingSchedules(true);
+      console.log("Creating time block:", { positionId, employeeId, date, startTime, endTime });
+      
+      const response = await post(`/api/daily-schedules/time-block`, {
+        positionId,
+        employeeId,
+        date,
+        startTime,
+        endTime
+      });
+
+      // Validar que la respuesta sea exitosa
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        setMessage({
+          title: "Horario Creado",
+          description: "El horario ha sido creado exitosamente.",
+          show: true,
+          OkTitle: "Aceptar",
+          onOk: () => {
+            loadTimelineData();
+            setMessage((prev) => ({ ...prev, show: false }));
+          },
+          background: true,
+        });
+
+        setShowTimeBlockEditorModal(false);
+      } else {
+        // Si la respuesta tiene código FAIL, mostrar error
+        throw new Error(response.operation.message || "Error al crear el horario");
+      }
+    } catch (error) {
+      console.error("Error creating time block:", error);
+      const errorMessage = (error as any)?.response?.data?.operation?.message || (error as any)?.message || "Error al crear el horario";
+      setMessage({
+        title: "Error",
+        description: errorMessage,
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+    } finally {
+      setIsGeneratingSchedules(false);
+    }
+  };
+
   // Context menu model for right-click actions - minimalistic style
   const contextMenuModel = [
     {
@@ -527,7 +640,10 @@ export default function useTimelineHook() {
     setShowTimeBlockEditorModal,
     selectedTimeBlock,
     setSelectedTimeBlock,
+    selectedRowForTimeBlock,
+    selectedDateForTimeBlock,
     handleTimeBlockSave,
+    handleTimeBlockCreate,
     // Button states
     canAssignEmployee,
     canUnassignEmployee,

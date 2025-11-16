@@ -9,29 +9,77 @@ interface ITimeBlockEditorModalProps {
   visible: boolean;
   onHide: () => void;
   onSave: (timeBlockId: number, startTime: string, endTime: string) => void;
-  timeBlock?: ITimeBlock;
+  onCreate?: (positionId: number, employeeId: number, date: string, startTime: string, endTime: string) => void;
+  timeBlock?: ITimeBlock | null;
+  selectedRow?: any; // ITimelineRow
+  selectedDate?: string;
 }
 
 const TimeBlockEditorModal = ({
   visible,
   onHide,
   onSave,
+  onCreate,
   timeBlock,
+  selectedRow,
+  selectedDate,
 }: ITimeBlockEditorModalProps): React.JSX.Element => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Determine if we're in CREATE or EDIT mode
+  const isCreateMode = !timeBlock || !timeBlock.id;
+
   useEffect(() => {
-    if (visible && timeBlock) {
-      setStartTime(timeBlock.startTime || "");
-      setEndTime(timeBlock.endTime || "");
+    if (visible) {
+      if (isCreateMode) {
+        // CREATE mode: clear fields
+        setStartTime("");
+        setEndTime("");
+      } else {
+        // EDIT mode: populate with existing data
+        setStartTime(timeBlock?.startTime || "");
+        setEndTime(timeBlock?.endTime || "");
+      }
     }
-  }, [visible, timeBlock]);
+  }, [visible, timeBlock, isCreateMode]);
 
   const handleSave = async () => {
-    console.log("handleSave called - timeBlock:", timeBlock, "startTime:", startTime, "endTime:", endTime);
-    if (timeBlock && timeBlock.id) {
+    if (isCreateMode) {
+      // CREATE mode
+      if (!onCreate || !selectedRow || !selectedDate) {
+        console.error("Missing required props for CREATE mode:", { onCreate, selectedRow, selectedDate });
+        return;
+      }
+      setLoading(true);
+      try {
+        console.log("Creating time block:", {
+          positionId: selectedRow.position.id,
+          employeeId: selectedRow.position.employeeCache.id,
+          date: selectedDate,
+          startTime,
+          endTime
+        });
+        await onCreate(
+          selectedRow.position.id,
+          selectedRow.position.employeeCache.id,
+          selectedDate,
+          startTime,
+          endTime
+        );
+        onHide();
+      } catch (error) {
+        console.error("Error creating time block:", error);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // EDIT mode
+      if (!timeBlock || !timeBlock.id) {
+        console.error("TimeBlock or ID missing:", { timeBlock, id: timeBlock?.id });
+        return;
+      }
       setLoading(true);
       try {
         console.log("Calling onSave with:", timeBlock.id, startTime, endTime);
@@ -42,8 +90,6 @@ const TimeBlockEditorModal = ({
       } finally {
         setLoading(false);
       }
-    } else {
-      console.error("TimeBlock or ID missing:", { timeBlock, id: timeBlock?.id });
     }
   };
 
@@ -81,8 +127,8 @@ const TimeBlockEditorModal = ({
         }}
       />
       <Button
-        label="Guardar Cambios"
-        icon="pi pi-check"
+        label={isCreateMode ? "Crear Bloque" : "Guardar Cambios"}
+        icon={isCreateMode ? "pi pi-plus" : "pi pi-check"}
         onClick={handleSave}
         loading={loading}
         style={{
@@ -114,7 +160,7 @@ const TimeBlockEditorModal = ({
         borderRadius: '8px',
         boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
       }}
-      header="Editar Horario"
+      header={isCreateMode ? "Crear Nuevo Horario" : "Editar Horario"}
       modal
       className="p-fluid"
       footer={footer}

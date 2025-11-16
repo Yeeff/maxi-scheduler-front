@@ -33,7 +33,10 @@ const TimelinePage = (): React.JSX.Element => {
     showTimeBlockEditorModal,
     setShowTimeBlockEditorModal,
     selectedTimeBlock,
+    selectedRowForTimeBlock,
+    selectedDateForTimeBlock,
     handleTimeBlockSave,
+    handleTimeBlockCreate,
     canAssignEmployee,
     canUnassignEmployee,
     canAssociateTemplate,
@@ -114,7 +117,10 @@ const TimelinePage = (): React.JSX.Element => {
           visible={showTimeBlockEditorModal}
           onHide={() => setShowTimeBlockEditorModal(false)}
           onSave={handleTimeBlockSave}
+          onCreate={handleTimeBlockCreate}
           timeBlock={selectedTimeBlock}
+          selectedRow={selectedRowForTimeBlock || (selectedRows.length > 0 ? selectedRows[0] : undefined)}
+          selectedDate={selectedDateForTimeBlock || selectedTimeBlock?.date}
         />
       </div>
     </div>
