@@ -150,7 +150,10 @@ export const TimelineGrid = ({
             <div
               key={day}
               className="time-blocks-cell"
-              onClick={() => onCellClick(position, day)}
+              onClick={() => {
+                console.log("Cell clicked - position:", position.position.name, "day:", day);
+                onCellClick(position, day);
+              }}
               style={{
                 cursor: 'pointer',
                 minHeight: '32px',
@@ -182,18 +185,20 @@ export const TimelineGrid = ({
                         style={{
                           backgroundColor: getBlockColor(block.type, block.isCurrentEmployee ? true : false),
                           width: '100%',
-                          height: '20px',
+                          height: '24px',
                           borderRadius: '3px',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '9px',
-                          fontWeight: block.isCurrentEmployee ? 'bold' : 'normal',
-                          color: 'white',
+                          fontSize: '11px',
+                          fontWeight: 'bold',
+                          color: '#ffffff',
+                          textShadow: '0 1px 2px rgba(0,0,0,0.5)',
                           border: block.isCurrentEmployee ? '2px solid #000' : '1px solid rgba(0,0,0,0.3)',
                           boxShadow: block.isCurrentEmployee ? '0 1px 4px rgba(0,0,0,0.2)' : '0 1px 2px rgba(0,0,0,0.1)',
                           transform: block.isCurrentEmployee ? 'scale(1.02)' : 'scale(1)',
-                          transition: 'all 0.2s ease'
+                          transition: 'all 0.2s ease',
+                          letterSpacing: '0.5px'
                         }}
                         title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ' (Histórico)'}`}
                       >

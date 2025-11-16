@@ -3,6 +3,7 @@ import { TimelineGrid } from "../components/timeline-grid.component";
 import { TimelineActions } from "../components/timeline-actions.component";
 import AssignEmployeeModal from "../components/assign-employee-modal.component";
 import ChangeScheduleTemplateModal from "../components/change-schedule-template-modal.component";
+import TimeBlockEditorModal from "../components/time-block-editor-modal.component";
 import useTimelineHook from "../hooks/use-timeline.hook";
 
 const TimelinePage = (): React.JSX.Element => {
@@ -29,6 +30,10 @@ const TimelinePage = (): React.JSX.Element => {
     showChangeTemplateModal,
     setShowChangeTemplateModal,
     handleChangeTemplateConfirm,
+    showTimeBlockEditorModal,
+    setShowTimeBlockEditorModal,
+    selectedTimeBlock,
+    handleTimeBlockSave,
     canAssignEmployee,
     canUnassignEmployee,
     canAssociateTemplate,
@@ -103,6 +108,13 @@ const TimelinePage = (): React.JSX.Element => {
           employeeId={selectedRows.length > 0 && selectedRows[0].position.employeeCache ? selectedRows[0].position.employeeCache.id : 0}
           currentScheduleTemplateId={selectedRows.length > 0 && selectedRows[0].position.employeeCache?.scheduleTemplate ? selectedRows[0].position.employeeCache.scheduleTemplate.id : undefined}
           key={selectedRows.length > 0 && selectedRows[0].position.employeeCache ? selectedRows[0].position.employeeCache.id : 0}
+        />
+
+        <TimeBlockEditorModal
+          visible={showTimeBlockEditorModal}
+          onHide={() => setShowTimeBlockEditorModal(false)}
+          onSave={handleTimeBlockSave}
+          timeBlock={selectedTimeBlock}
         />
       </div>
     </div>

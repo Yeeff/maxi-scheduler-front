@@ -18,6 +18,7 @@ export default function useTimelineHook() {
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | undefined>(undefined);
   const [selectedRows, setSelectedRows] = useState<ITimelineRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isGeneratingSchedules, setIsGeneratingSchedules] = useState(false);
 
   // Services
   const { get, put, post } = useCrudService(process.env.urlApiScheduler);
@@ -104,12 +105,41 @@ export default function useTimelineHook() {
   };
 
   const handleCellClick = (row: ITimelineRow, day: string) => {
-    // TODO: Open time block editor modal
-    console.log("Cell clicked:", { row, day });
+    // Find any employee with a work block for this day (prioritize current employee)
+    let selectedEmployee = row.employees.find(emp => emp.currentEmployee);
+    
+    if (!selectedEmployee) {
+      // If no current employee, find any employee with a work block
+      selectedEmployee = row.employees.find(emp => {
+        const timeBlocks = emp.scheduleData[day as keyof typeof emp.scheduleData] || [];
+        return timeBlocks.some(block => block.type === 'work');
+      });
+    }
+
+    if (selectedEmployee) {
+      // Find the time block for this day
+      const timeBlocks = selectedEmployee.scheduleData[day as keyof typeof selectedEmployee.scheduleData] || [];
+      const timeBlock = timeBlocks.find(block => block.type === 'work'); // Only allow editing work blocks
+
+      if (timeBlock) {
+        console.log("TimeBlock clicked:", timeBlock);
+        setSelectedTimeBlock({
+          ...timeBlock,
+          employeeName: selectedEmployee.name
+        });
+        setShowTimeBlockEditorModal(true);
+      } else {
+        console.log("No work block found for day:", day, "TimeBlocks:", timeBlocks);
+      }
+    } else {
+      console.log("No employee with work block found for position:", row.position.name, "on day:", day);
+    }
   };
 
   // Modal state
   const [showAssignEmployeeModal, setShowAssignEmployeeModal] = useState(false);
+  const [showTimeBlockEditorModal, setShowTimeBlockEditorModal] = useState(false);
+  const [selectedTimeBlock, setSelectedTimeBlock] = useState<any>(null);
 
   // Action handlers
   const handleAssignEmployee = () => {
@@ -404,6 +434,39 @@ export default function useTimelineHook() {
     console.log("Bulk generate schedules for positions:", selectedRows);
   };
 
+  // Time block editor handlers
+  const handleTimeBlockSave = async (timeBlockId: number, startTime: string, endTime: string) => {
+    try {
+      setIsGeneratingSchedules(true); // Reuse loading state for simplicity
+      await put(`/api/daily-schedules/time-block`, { timeBlockId, startTime, endTime });
+
+      setMessage({
+        title: "Horario Actualizado",
+        description: "El horario ha sido actualizado exitosamente.",
+        show: true,
+        OkTitle: "Aceptar",
+        onOk: () => {
+          loadTimelineData();
+          setMessage((prev) => ({ ...prev, show: false }));
+        },
+        background: true,
+      });
+
+      setShowTimeBlockEditorModal(false);
+    } catch (error) {
+      console.error("Error updating time block:", error);
+      setMessage({
+        title: "Error",
+        description: "Error al actualizar el horario",
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+    } finally {
+      setIsGeneratingSchedules(false);
+    }
+  };
+
   // Context menu model for right-click actions - minimalistic style
   const contextMenuModel = [
     {
@@ -459,6 +522,12 @@ export default function useTimelineHook() {
     showChangeTemplateModal,
     setShowChangeTemplateModal,
     handleChangeTemplateConfirm,
+    // Time block editor modal state
+    showTimeBlockEditorModal,
+    setShowTimeBlockEditorModal,
+    selectedTimeBlock,
+    setSelectedTimeBlock,
+    handleTimeBlockSave,
     // Button states
     canAssignEmployee,
     canUnassignEmployee,
