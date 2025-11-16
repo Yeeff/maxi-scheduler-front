@@ -133,7 +133,7 @@ return (
             style={{
               background: 'transparent',
               border: 'none',
-              color: canUnassignEmployee ? '#dc3545' : '#6c757d',
+              color: canUnassignEmployee ? '#094a90' : '#6c757d',
               padding: '8px 16px',
               borderRadius: '4px',
               cursor: canUnassignEmployee ? 'pointer' : 'not-allowed',
@@ -147,7 +147,7 @@ return (
             }}
             onMouseEnter={(e) => {
               if (canUnassignEmployee) {
-                e.currentTarget.style.border = '1px solid #dc3545';
+                e.currentTarget.style.border = '1px solid #094a90';
                 e.currentTarget.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
               }
             }}
@@ -165,7 +165,7 @@ return (
             style={{
               background: 'transparent',
               border: 'none',
-              color: canAssociateTemplate ? '#17a2b8' : '#6c757d',
+              color: canAssociateTemplate ? '#094a90' : '#6c757d',
               padding: '8px 16px',
               borderRadius: '4px',
               cursor: canAssociateTemplate ? 'pointer' : 'not-allowed',
@@ -179,7 +179,7 @@ return (
             }}
             onMouseEnter={(e) => {
               if (canAssociateTemplate) {
-                e.currentTarget.style.border = '1px solid #17a2b8';
+                e.currentTarget.style.border = '1px solid #094a90';
                 e.currentTarget.style.backgroundColor = 'rgba(23, 162, 184, 0.1)';
               }
             }}
@@ -197,7 +197,7 @@ return (
             style={{
               background: 'transparent',
               border: 'none',
-              color: canGenerateSchedules ? '#28a745' : '#6c757d',
+              color: canGenerateSchedules ? '#094a90' : '#6c757d',
               padding: '8px 16px',
               borderRadius: '4px',
               cursor: canGenerateSchedules ? 'pointer' : 'not-allowed',
@@ -211,7 +211,7 @@ return (
             }}
             onMouseEnter={(e) => {
               if (canGenerateSchedules) {
-                e.currentTarget.style.border = '1px solid #28a745';
+                e.currentTarget.style.border = '1px solid #094a90';
                 e.currentTarget.style.backgroundColor = 'rgba(40, 167, 69, 0.1)';
               }
             }}

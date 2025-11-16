@@ -93,18 +93,53 @@ const ChangeScheduleTemplateModal = ({
   };
 
   const footer = (
-    <div className="flex justify-content-end gap-2">
+    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
       <Button
         label="Cancelar"
         icon="pi pi-times"
         className="p-button-text"
         onClick={handleHide}
+        style={{
+          background: 'transparent',
+          border: '1px solid #6c757d',
+          color: '#6c757d',
+          padding: '8px 16px',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          fontWeight: '500',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = '#5a6268';
+          e.currentTarget.style.color = '#5a6268';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = '#6c757d';
+          e.currentTarget.style.color = '#6c757d';
+        }}
       />
       <Button
         label="Cambiar Plantilla"
         icon="pi pi-check"
-        className="p-button-primary"
         onClick={handleChange}
+        style={{
+          background: '#094a90',
+          border: 'none',
+          color: 'white',
+          padding: '8px 16px',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          fontWeight: '500',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#138496';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = '#094a90';
+        }}
       />
     </div>
   );
@@ -112,15 +147,38 @@ const ChangeScheduleTemplateModal = ({
   return (
     <Dialog
       visible={visible}
-      style={{ width: "700px" }}
+      style={{
+        width: "700px",
+        borderRadius: '8px',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+      }}
       header="Cambiar Plantilla de Horario"
       modal
       className="p-fluid"
       footer={footer}
       onHide={handleHide}
+      headerStyle={{
+        backgroundColor: '#094a90',
+        color: 'white',
+        borderTopLeftRadius: '8px',
+        borderTopRightRadius: '8px',
+        padding: '16px 24px',
+        fontSize: '18px',
+        fontWeight: '600'
+      }}
+      contentStyle={{
+        padding: '24px',
+        backgroundColor: '#ffffff'
+      }}
     >
-      <div className="p-field mb-4">
-        <label htmlFor="search" className="block text-900 font-medium mb-2">
+      <div style={{ marginBottom: '20px' }}>
+        <label htmlFor="search" style={{
+          display: 'block',
+          color: '#094a90',
+          fontWeight: '600',
+          marginBottom: '8px',
+          fontSize: '14px'
+        }}>
           Buscar plantilla:
         </label>
         <InputText
@@ -128,7 +186,16 @@ const ChangeScheduleTemplateModal = ({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder="Buscar por nombre o descripción..."
-          className="w-full"
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            border: '1px solid #dee2e6',
+            borderRadius: '4px',
+            fontSize: '14px',
+            transition: 'border-color 0.2s ease'
+          }}
+          onFocus={(e) => e.target.style.borderColor = '#094a90'}
+          onBlur={(e) => e.target.style.borderColor = '#dee2e6'}
         />
       </div>
 
@@ -143,16 +210,29 @@ const ChangeScheduleTemplateModal = ({
         scrollHeight="300px"
         emptyMessage="No hay plantillas de horario disponibles"
         className="p-datatable-sm"
+        style={{
+          border: '1px solid #dee2e6',
+          borderRadius: '4px',
+          overflow: 'hidden'
+        }}
       >
-        <Column field="name" header="Nombre" sortable />
-        <Column field="description" header="Descripción" sortable />
+        <Column field="name" header="Nombre" sortable style={{ fontSize: '14px' }} />
+        <Column field="description" header="Descripción" sortable style={{ fontSize: '14px' }} />
       </DataTable>
 
       {selectedTemplate && (
-        <div className="mt-3 p-3 bg-blue-50 border-round">
+        <div style={{
+          marginTop: '16px',
+          padding: '12px 16px',
+          backgroundColor: '#e1f5fe',
+          border: '1px solid #29b6f6',
+          borderRadius: '4px',
+          color: '#0277bd',
+          fontSize: '14px'
+        }}>
           <strong>Plantilla seleccionada:</strong> {selectedTemplate.name}
           {selectedTemplate.description && (
-            <div className="mt-1 text-sm text-gray-600">
+            <div style={{ marginTop: '4px', color: '#546e7a', fontSize: '13px' }}>
               {selectedTemplate.description}
             </div>
           )}
@@ -160,18 +240,19 @@ const ChangeScheduleTemplateModal = ({
       )}
 
       {!selectedTemplate && currentScheduleTemplateId && (
-        <div className="mt-3 p-3 bg-orange-50 border-round">
+        <div style={{
+          marginTop: '16px',
+          padding: '12px 16px',
+          backgroundColor: '#fff3e0',
+          border: '1px solid #ff9800',
+          borderRadius: '4px',
+          color: '#e65100',
+          fontSize: '14px'
+        }}>
           <strong>Nota:</strong> Si no selecciona ninguna plantilla, se removerá la plantilla actual del empleado.
         </div>
       )}
 
-      {currentScheduleTemplateId && (
-        <div className="mt-3 p-3 bg-green-50 border-round">
-          <strong>Plantilla actual asignada:</strong> {
-            scheduleTemplates.find(t => t.id === currentScheduleTemplateId)?.name || 'Desconocida'
-          }
-        </div>
-      )}
     </Dialog>
   );
 };

@@ -203,7 +203,7 @@ export const MassiveFileUploaderPage: FC<MassiveFileUploaderProps> = ({
                           <span onClick={() => {
                             const fileURL = URL.createObjectURL(file);
                             window.open(fileURL);
-                          }} className="name-file-date" style={{ color: "#052c56", cursor: "pointer" }}>
+                          }} className="name-file-date" style={{ color: "#094a90", cursor: "pointer" }}>
                             {file.name}
                             <small>
                               {unixToDateString(file.lastModified, "L")}
