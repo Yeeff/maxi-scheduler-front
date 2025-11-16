@@ -86,7 +86,24 @@ export const TimelineGrid = ({
     );
   };
 
-  const renderEmployeeRow = (employee: ITimelineEmployee, position: ITimelineRow) => {
+  const renderEmployeeRow = (employee: ITimelineEmployee, position: ITimelineRow, index: number, allEmployees: ITimelineEmployee[]) => {
+    // Determinar si es la primera fila de esta posición
+    const isFirstEmployeeOfPosition = index === 0;
+    // Determinar si es la última fila de esta posición
+    const isLastEmployeeOfPosition = index === allEmployees.length - 1;
+    
+    // Generar color único para cada posición basado en su ID (intercalado entre azul oscuro y claro)
+    const getPositionColor = (positionId: string) => {
+      const colors = [
+        '#094a90', // Azul oscuro
+        '#5B8FD4', // Azul claro
+      ];
+      const hash = positionId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      return colors[hash % colors.length];
+    };
+    
+    const positionColor = getPositionColor(position.id);
+    
     return (
       <div key={`${position.id}-${employee.id}`} className="employee-timeline-row" style={{
         display: 'flex',
@@ -94,7 +111,10 @@ export const TimelineGrid = ({
         borderBottom: '1px solid #e0e0e0',
         backgroundColor: 'white',
         position: 'relative',
-        minHeight: '32px'
+        minHeight: '32px',
+        borderLeft: `6px solid ${positionColor}`,
+        borderTopLeftRadius: isFirstEmployeeOfPosition ? '4px' : '0px',
+        borderBottomLeftRadius: isLastEmployeeOfPosition ? '4px' : '0px'
       }}>
         {/* Position-Employee Column */}
         <div className="position-employee-column" style={{
@@ -106,7 +126,8 @@ export const TimelineGrid = ({
           borderRight: '1px solid #dee2e6',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px'
+          gap: '8px',
+          marginLeft: '-6px'
         }}>
           <Checkbox
             checked={selectedRows.some(selected => selected.id === position.id)}
@@ -281,7 +302,7 @@ export const TimelineGrid = ({
       {data.length > 0 ? (
         data.flatMap(row =>
           row.employees && row.employees.length > 0
-            ? row.employees.map(employee => renderEmployeeRow(employee, row))
+            ? row.employees.map((employee, index) => renderEmployeeRow(employee, row, index, row.employees))
             : [
                 <div key={row.id} className="no-employees-row" style={{
                   display: 'flex',
