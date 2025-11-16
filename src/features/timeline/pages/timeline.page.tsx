@@ -121,6 +121,8 @@ const TimelinePage = (): React.JSX.Element => {
           timeBlock={selectedTimeBlock}
           selectedRow={selectedRowForTimeBlock || (selectedRows.length > 0 ? selectedRows[0] : undefined)}
           selectedDate={selectedDateForTimeBlock || selectedTimeBlock?.date}
+          positionName={selectedRowForTimeBlock?.position.name || selectedRows[0]?.position.name}
+          employeeName={selectedTimeBlock?.employeeName || selectedRowForTimeBlock?.position.employeeCache?.name || selectedRows[0]?.position.employeeCache?.name}
         />
       </div>
     </div>

@@ -13,6 +13,8 @@ interface ITimeBlockEditorModalProps {
   timeBlock?: ITimeBlock | null;
   selectedRow?: any; // ITimelineRow
   selectedDate?: string;
+  positionName?: string;
+  employeeName?: string;
 }
 
 const TimeBlockEditorModal = ({
@@ -23,6 +25,8 @@ const TimeBlockEditorModal = ({
   timeBlock,
   selectedRow,
   selectedDate,
+  positionName,
+  employeeName,
 }: ITimeBlockEditorModalProps): React.JSX.Element => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -235,21 +239,33 @@ const TimeBlockEditorModal = ({
         />
       </div>
 
-      {timeBlock && (
-        <div style={{
-          marginTop: '16px',
-          padding: '12px 16px',
-          backgroundColor: '#e3f2fd',
-          border: '1px solid #2196f3',
-          borderRadius: '4px',
-          color: '#1565c0',
-          fontSize: '14px'
-        }}>
-          <strong>Información del bloque:</strong><br />
-          Empleado: {timeBlock.employeeName}<br />
-          Tipo: {timeBlock.type === 'work' ? 'Trabajo' : timeBlock.type}
-        </div>
-      )}
+      {/* Información del Empleado y Posición */}
+      <div style={{
+        marginTop: '16px',
+        padding: '12px 16px',
+        backgroundColor: '#f0f4f8',
+        border: '1px solid #094a90',
+        borderRadius: '4px',
+        color: '#094a90',
+        fontSize: '13px'
+      }}>
+        <strong style={{ fontSize: '14px', display: 'block', marginBottom: '8px' }}>📋 Información del Bloque:</strong>
+        {positionName && (
+          <div style={{ marginBottom: '6px' }}>
+            <strong>Posición:</strong> {positionName}
+          </div>
+        )}
+        {employeeName && (
+          <div style={{ marginBottom: '6px' }}>
+            <strong>Empleado:</strong> {employeeName}
+          </div>
+        )}
+        {timeBlock && timeBlock.type && (
+          <div>
+            <strong>Tipo:</strong> {timeBlock.type === 'work' ? 'Trabajo' : timeBlock.type}
+          </div>
+        )}
+      </div>
     </Dialog>
   );
 };

@@ -172,12 +172,13 @@ export default function useTimelineHook() {
 
       if (timeBlock) {
         // MODO EDITAR: Bloque existente
-        console.log("TimeBlock clicked (EDIT mode):", timeBlock);
+        const realDate = getDayDate(day); // Convertir a fecha real (YYYY-MM-DD)
+        console.log("TimeBlock clicked (EDIT mode):", timeBlock, "realDate:", realDate);
         setSelectedTimeBlock({
           ...timeBlock,
           employeeName: selectedEmployee.name,
           positionId: row.position.id,
-          date: day
+          date: realDate // ← Guardar fecha YYYY-MM-DD en lugar del nombre del día
         });
         setShowTimeBlockEditorModal(true);
       } else {
