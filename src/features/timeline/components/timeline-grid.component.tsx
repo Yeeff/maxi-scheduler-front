@@ -134,7 +134,15 @@ export const TimelineGrid = ({
             onChange={() => handleRowSelection(position)}
           />
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '11px', color: '#6c757d', marginBottom: '2px' }}>
+            <div style={{
+              fontSize: index === 0 ? '13px' : '11px',
+              color: index === 0 ? '#094a90' : '#6c757d',
+              fontWeight: index === 0 ? 'bold' : 'normal',
+              marginBottom: '2px',
+              backgroundColor: index === 0 ? 'rgba(9, 74, 144, 0.08)' : 'transparent',
+              padding: index === 0 ? '2px 4px' : '0px',
+              borderRadius: index === 0 ? '2px' : '0px'
+            }}>
               {position.position.name} - {position.position.location}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -241,8 +249,8 @@ export const TimelineGrid = ({
   const getBlockColor = (type: string, currentEmployee?: boolean) => {
     // Different shades for current vs historical employees
     const baseColors = {
-      work: currentEmployee ? '#094a90' : '#adb5bd', // Blue for current, light gray for historical
-      break: currentEmployee ? '#ffc107' : '#fff3cd', // Yellow for current, very light yellow for historical
+      work: currentEmployee ? '#094a90' : 'rgba(9, 74, 144, 0.6)', // Azul fuerte vs azul tenue (misma tonalidad, más opaco)
+      break: currentEmployee ? '#ffc107' : 'rgba(255, 193, 7, 0.6)', // Amarillo fuerte vs amarillo tenue (misma tonalidad, más opaco)
       off: '#dc3545' // Red for off time (same for all)
     };
 
