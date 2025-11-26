@@ -4,6 +4,7 @@ import { TimelineActions } from "../components/timeline-actions.component";
 import AssignEmployeeModal from "../components/assign-employee-modal.component";
 import ChangeScheduleTemplateModal from "../components/change-schedule-template-modal.component";
 import TimeBlockEditorModal from "../components/time-block-editor-modal.component";
+import TimeBlockManagerModal from "../components/time-block-manager-modal.component";
 import useTimelineHook from "../hooks/use-timeline.hook";
 
 const TimelinePage = (): React.JSX.Element => {
@@ -37,6 +38,12 @@ const TimelinePage = (): React.JSX.Element => {
     selectedDateForTimeBlock,
     handleTimeBlockSave,
     handleTimeBlockCreate,
+    showTimeBlockManagerModal,
+    setShowTimeBlockManagerModal,
+    selectedPositionForManager,
+    selectedDayForManager,
+    handleTimeBlockEdit,
+    handleTimeBlockCreateFromManager,
     canAssignEmployee,
     canUnassignEmployee,
     canAssociateTemplate,
@@ -119,10 +126,34 @@ const TimelinePage = (): React.JSX.Element => {
           onSave={handleTimeBlockSave}
           onCreate={handleTimeBlockCreate}
           timeBlock={selectedTimeBlock}
-          selectedRow={selectedRowForTimeBlock || (selectedRows.length > 0 ? selectedRows[0] : undefined)}
           selectedDate={selectedDateForTimeBlock || selectedTimeBlock?.date}
           positionName={selectedRowForTimeBlock?.position.name || selectedRows[0]?.position.name}
-          employeeName={selectedTimeBlock?.employeeName || selectedRowForTimeBlock?.position.employeeCache?.name || selectedRows[0]?.position.employeeCache?.name}
+          positionId={selectedRowForTimeBlock?.position.id || selectedRows[0]?.position.id}
+          companyId={selectedCompanyId}
+        />
+
+        <TimeBlockManagerModal
+          visible={showTimeBlockManagerModal}
+          onHide={() => setShowTimeBlockManagerModal(false)}
+          positionId={selectedPositionForManager || 0}
+          positionName={timelineData.find(row => row.position.id === selectedPositionForManager)?.position.name || ''}
+          date={(() => {
+            if (!selectedDayForManager) return '';
+            const daysMap: { [key: string]: number } = {
+              'MONDAY': 0, 'TUESDAY': 1, 'WEDNESDAY': 2, 'THURSDAY': 3,
+              'FRIDAY': 4, 'SATURDAY': 5, 'SUNDAY': 6
+            };
+            const dayIndex = daysMap[selectedDayForManager];
+            if (dayIndex === undefined) return '';
+            const selectedDate = new Date();
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            selectedDate.setDate(today.getDate() + mondayOffset + dayIndex);
+            return selectedDate.toISOString().split('T')[0];
+          })()}
+          dayKey={selectedDayForManager || ''}
+          companyId={selectedCompanyId || 0}
         />
       </div>
     </div>

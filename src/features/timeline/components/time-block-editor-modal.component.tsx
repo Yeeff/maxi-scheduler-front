@@ -2,19 +2,31 @@ import React, { useState, useEffect } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 
 import { ITimeBlock } from "../../../common/interfaces/timeline.interfaces";
+import useCrudService from "../../../common/hooks/crud-service.hook";
+import { EResponseCodes } from "../../../common/constants/api.enum";
+
+interface IEmployeeCache {
+  id: number;
+  name: string;
+  document: string;
+  status: boolean;
+}
 
 interface ITimeBlockEditorModalProps {
   visible: boolean;
   onHide: () => void;
-  onSave: (timeBlockId: number, startTime: string, endTime: string) => void;
-  onCreate?: (positionId: number, employeeId: number, date: string, startTime: string, endTime: string) => void;
+  onSave: (timeBlockId: number, employeeId: number, startTime: string, endTime: string, type: string) => void;
+  onCreate?: (positionId: number, employeeId: number, date: string, startTime: string, endTime: string, type: string) => void;
   timeBlock?: ITimeBlock | null;
-  selectedRow?: any; // ITimelineRow
   selectedDate?: string;
   positionName?: string;
-  employeeName?: string;
+  positionId?: number;
+  companyId?: number;
 }
 
 const TimeBlockEditorModal = ({
@@ -23,56 +35,135 @@ const TimeBlockEditorModal = ({
   onSave,
   onCreate,
   timeBlock,
-  selectedRow,
   selectedDate,
   positionName,
-  employeeName,
+  positionId,
+  companyId,
 }: ITimeBlockEditorModalProps): React.JSX.Element => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [selectedEmployee, setSelectedEmployee] = useState<IEmployeeCache | null>(null);
+  const [selectedType, setSelectedType] = useState("work");
   const [loading, setLoading] = useState(false);
+  const [employees, setEmployees] = useState<IEmployeeCache[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredEmployees, setFilteredEmployees] = useState<IEmployeeCache[]>([]);
 
   // Determine if we're in CREATE or EDIT mode
   const isCreateMode = !timeBlock || !timeBlock.id;
 
+  const { get } = useCrudService(process.env.urlApiScheduler);
+
+  useEffect(() => {
+    // Filter employees based on search term
+    if (searchTerm.trim() === "") {
+      setFilteredEmployees(employees);
+    } else {
+      const filtered = employees.filter(employee =>
+        employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        employee.document.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredEmployees(filtered);
+    }
+  }, [employees, searchTerm]);
+
+  const fetchTimeBlockData = async (timeBlockId: number) => {
+    try {
+      const response = await get(`/api/daily-schedules/${timeBlockId}`);
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        const scheduleData = (response as any).data?.data || (response as any).data;
+        if (scheduleData) {
+          setStartTime(scheduleData.actualStartTime || scheduleData.plannedStartTime || "");
+          setEndTime(scheduleData.actualEndTime || scheduleData.plannedEndTime || "");
+          setSelectedType(scheduleData.type || "work");
+          
+          // Find and set the employee
+          if (scheduleData.employeeCache?.id) {
+            const emp = employees.find(e => e.id === scheduleData.employeeCache.id);
+            setSelectedEmployee(emp || null);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching time block data:", error);
+      // Fallback to prop data
+      setStartTime(timeBlock?.startTime || "");
+      setEndTime(timeBlock?.endTime || "");
+      setSelectedType(timeBlock?.type || "work");
+    }
+  };
+
+  const loadAvailableEmployees = async () => {
+    try {
+      setLoading(true);
+      const response = await get<IEmployeeCache[]>("/api/employees-cache/available");
+
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        const employeesData = (response as any).data?.data || (response as any).data || [];
+        setEmployees(Array.isArray(employeesData) ? employeesData : []);
+      } else {
+        console.error("Error loading available employees:", response.operation.message);
+      }
+    } catch (error) {
+      console.error("Error loading available employees:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (visible) {
+      loadAvailableEmployees();
+      
       if (isCreateMode) {
         // CREATE mode: clear fields
         setStartTime("");
         setEndTime("");
+        setSelectedType("work");
+        setSelectedEmployee(null);
+        setSearchTerm("");
       } else {
-        // EDIT mode: populate with existing data
-        setStartTime(timeBlock?.startTime || "");
-        setEndTime(timeBlock?.endTime || "");
+        // EDIT mode: fetch fresh data from API to ensure we have latest data
+        if (timeBlock?.id) {
+          fetchTimeBlockData(timeBlock.id);
+        } else {
+          // Fallback to prop data if no ID
+          setStartTime(timeBlock?.startTime || "");
+          setEndTime(timeBlock?.endTime || "");
+          setSelectedType(timeBlock?.type || "work");
+        }
       }
     }
   }, [visible, timeBlock, isCreateMode]);
 
   const handleSave = async () => {
+    if (!selectedEmployee) {
+      alert("Por favor seleccione un empleado");
+      return;
+    }
+
+    if (!startTime || !endTime) {
+      alert("Por favor ingrese hora de inicio y fin");
+      return;
+    }
+
     if (isCreateMode) {
       // CREATE mode
-      if (!onCreate || !selectedRow || !selectedDate) {
-        console.error("Missing required props for CREATE mode:", { onCreate, selectedRow, selectedDate });
+      if (!onCreate || !positionId || !selectedDate) {
+        console.error("Missing required props for CREATE mode:", { onCreate, positionId, selectedDate });
         return;
       }
       setLoading(true);
       try {
-        console.log("Creating time block:", {
-          positionId: selectedRow.position.id,
-          employeeId: selectedRow.position.employeeCache.id,
-          date: selectedDate,
-          startTime,
-          endTime
-        });
         await onCreate(
-          selectedRow.position.id,
-          selectedRow.position.employeeCache.id,
+          positionId,
+          selectedEmployee.id,
           selectedDate,
           startTime,
-          endTime
+          endTime,
+          selectedType
         );
-        onHide();
+        handleHide();
       } catch (error) {
         console.error("Error creating time block:", error);
       } finally {
@@ -86,9 +177,8 @@ const TimeBlockEditorModal = ({
       }
       setLoading(true);
       try {
-        console.log("Calling onSave with:", timeBlock.id, startTime, endTime);
-        await onSave(timeBlock.id, startTime, endTime);
-        onHide();
+        await onSave(timeBlock.id, selectedEmployee.id, startTime, endTime, selectedType);
+        handleHide();
       } catch (error) {
         console.error("Error saving time block:", error);
       } finally {
@@ -100,6 +190,9 @@ const TimeBlockEditorModal = ({
   const handleHide = () => {
     setStartTime("");
     setEndTime("");
+    setSelectedEmployee(null);
+    setSelectedType("work");
+    setSearchTerm("");
     onHide();
   };
 
@@ -147,7 +240,7 @@ const TimeBlockEditorModal = ({
           transition: 'all 0.2s ease'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#138496';
+          e.currentTarget.style.backgroundColor = '#073a70';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = '#094a90';
@@ -160,11 +253,11 @@ const TimeBlockEditorModal = ({
     <Dialog
       visible={visible}
       style={{
-        width: "400px",
+        width: "500px",
         borderRadius: '8px',
         boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
       }}
-      header={isCreateMode ? "Crear Nuevo Horario" : "Editar Horario"}
+      header={isCreateMode ? "Crear Nuevo Bloque" : "Editar Bloque"}
       modal
       className="p-fluid"
       footer={footer}
@@ -183,6 +276,101 @@ const TimeBlockEditorModal = ({
         backgroundColor: '#ffffff'
       }}
     >
+      {/* Employee Selection */}
+      <div style={{ marginBottom: '20px' }}>
+        <label htmlFor="search" style={{
+          display: 'block',
+          color: '#094a90',
+          fontWeight: '600',
+          marginBottom: '8px',
+          fontSize: '14px'
+        }}>
+          Buscar empleado:
+        </label>
+        <InputText
+          id="search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Buscar por nombre o documento..."
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            border: '1px solid #dee2e6',
+            borderRadius: '4px',
+            fontSize: '14px',
+            marginBottom: '12px',
+            transition: 'border-color 0.2s ease'
+          }}
+          onFocus={(e) => e.target.style.borderColor = '#094a90'}
+          onBlur={(e) => e.target.style.borderColor = '#dee2e6'}
+        />
+
+        <DataTable
+          value={filteredEmployees}
+          selectionMode="single"
+          selection={selectedEmployee}
+          onSelectionChange={(e) => setSelectedEmployee(e.value)}
+          dataKey="id"
+          loading={loading}
+          scrollable
+          scrollHeight="200px"
+          emptyMessage="No hay empleados disponibles"
+          className="p-datatable-sm"
+          style={{
+            border: '1px solid #dee2e6',
+            borderRadius: '4px',
+            overflow: 'hidden',
+            marginBottom: '12px'
+          }}
+        >
+          <Column field="name" header="Nombre" sortable style={{ fontSize: '14px' }} />
+          <Column field="document" header="Documento" sortable style={{ fontSize: '14px' }} />
+        </DataTable>
+
+        {selectedEmployee && (
+          <div style={{
+            padding: '12px 16px',
+            backgroundColor: '#e3f2fd',
+            border: '1px solid #2196f3',
+            borderRadius: '4px',
+            color: '#1565c0',
+            fontSize: '14px'
+          }}>
+            <strong>Empleado seleccionado:</strong> {selectedEmployee.name} ({selectedEmployee.document})
+          </div>
+        )}
+      </div>
+
+      {/* Type Selection */}
+      <div style={{ marginBottom: '20px' }}>
+        <label htmlFor="typeSelect" style={{
+          display: 'block',
+          color: '#094a90',
+          fontWeight: '600',
+          marginBottom: '8px',
+          fontSize: '14px'
+        }}>
+          Tipo de Bloque:
+        </label>
+        <Dropdown
+          id="typeSelect"
+          value={selectedType}
+          options={[
+            { label: 'Trabajo', value: 'work' },
+            { label: 'Descanso', value: 'break' }
+          ]}
+          onChange={(e) => setSelectedType(e.value)}
+          placeholder="Seleccionar tipo"
+          style={{
+            width: '100%',
+            border: '1px solid #dee2e6',
+            borderRadius: '4px',
+            fontSize: '14px'
+          }}
+        />
+      </div>
+
+      {/* Time Selection */}
       <div style={{ marginBottom: '20px' }}>
         <label htmlFor="startTime" style={{
           display: 'block',
@@ -237,34 +425,6 @@ const TimeBlockEditorModal = ({
           onFocus={(e) => e.target.style.borderColor = '#094a90'}
           onBlur={(e) => e.target.style.borderColor = '#dee2e6'}
         />
-      </div>
-
-      {/* Información del Empleado y Posición */}
-      <div style={{
-        marginTop: '16px',
-        padding: '12px 16px',
-        backgroundColor: '#f0f4f8',
-        border: '1px solid #094a90',
-        borderRadius: '4px',
-        color: '#094a90',
-        fontSize: '13px'
-      }}>
-        <strong style={{ fontSize: '14px', display: 'block', marginBottom: '8px' }}>📋 Información del Bloque:</strong>
-        {positionName && (
-          <div style={{ marginBottom: '6px' }}>
-            <strong>Posición:</strong> {positionName}
-          </div>
-        )}
-        {employeeName && (
-          <div style={{ marginBottom: '6px' }}>
-            <strong>Empleado:</strong> {employeeName}
-          </div>
-        )}
-        {timeBlock && timeBlock.type && (
-          <div>
-            <strong>Tipo:</strong> {timeBlock.type === 'work' ? 'Trabajo' : timeBlock.type}
-          </div>
-        )}
       </div>
     </Dialog>
   );

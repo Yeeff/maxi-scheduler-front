@@ -142,71 +142,23 @@ export default function useTimelineHook() {
   };
 
   const handleCellClick = (row: ITimelineRow, day: string) => {
-    // VALIDACIÓN: Verificar si hay empleado asignado a la posición
-    if (!row.position.employeeCache) {
-      setMessage({
-        title: "Empleado No Asignado",
-        description: `No hay un empleado asignado a la posición "${row.position.name}". Asigna un empleado primero para crear o editar horarios.`,
-        show: true,
-        OkTitle: "Aceptar",
-        background: true,
-      });
-      return;
-    }
-
-    // Find any employee with a work block for this day (prioritize current employee)
-    let selectedEmployee = row.employees.find(emp => emp.currentEmployee);
-    
-    if (!selectedEmployee) {
-      // If no current employee, find any employee with a work block
-      selectedEmployee = row.employees.find(emp => {
-        const timeBlocks = emp.scheduleData[day as keyof typeof emp.scheduleData] || [];
-        return timeBlocks.some(block => block.type === 'work');
-      });
-    }
-
-    if (selectedEmployee) {
-      // Find the time block for this day
-      const timeBlocks = selectedEmployee.scheduleData[day as keyof typeof selectedEmployee.scheduleData] || [];
-      const timeBlock = timeBlocks.find(block => block.type === 'work'); // Only allow editing work blocks
-
-      if (timeBlock) {
-        // MODO EDITAR: Bloque existente
-        const realDate = getDayDate(day); // Convertir a fecha real (YYYY-MM-DD)
-        console.log("TimeBlock clicked (EDIT mode):", timeBlock, "realDate:", realDate);
-        setSelectedTimeBlock({
-          ...timeBlock,
-          employeeName: selectedEmployee.name,
-          positionId: row.position.id,
-          date: realDate // ← Guardar fecha YYYY-MM-DD en lugar del nombre del día
-        });
-        setShowTimeBlockEditorModal(true);
-      } else {
-        // MODO CREAR: Celda vacía
-        const realDate = getDayDate(day);
-        console.log("Empty cell clicked (CREATE mode) - day:", day, "realDate:", realDate);
-        setSelectedTimeBlock(null); // Indica que es nuevo
-        setSelectedRowForTimeBlock(row); // Guardar la fila
-        setSelectedDateForTimeBlock(realDate); // Guardar la fecha real (YYYY-MM-DD)
-        setShowTimeBlockEditorModal(true);
-      }
-    } else {
-      // MODO CREAR: Celda vacía (sin empleado histórico)
-      const realDate = getDayDate(day);
-      console.log("Empty cell clicked (CREATE mode) - day:", day, "realDate:", realDate);
-      setSelectedTimeBlock(null); // Indica que es nuevo
-      setSelectedRowForTimeBlock(row); // Guardar la fila
-      setSelectedDateForTimeBlock(realDate); // Guardar la fecha real (YYYY-MM-DD)
-      setShowTimeBlockEditorModal(true);
-    }
+    // Open the time block manager modal for the position and day
+    const realDate = getDayDate(day);
+    console.log("Cell clicked - opening manager modal for position:", row.position.name, "day:", day, "date:", realDate);
+    setSelectedPositionForManager(row.position.id);
+    setSelectedDayForManager(day);
+    setShowTimeBlockManagerModal(true);
   };
 
   // Modal state
   const [showAssignEmployeeModal, setShowAssignEmployeeModal] = useState(false);
   const [showTimeBlockEditorModal, setShowTimeBlockEditorModal] = useState(false);
+  const [showTimeBlockManagerModal, setShowTimeBlockManagerModal] = useState(false);
   const [selectedTimeBlock, setSelectedTimeBlock] = useState<any>(null);
   const [selectedRowForTimeBlock, setSelectedRowForTimeBlock] = useState<ITimelineRow | null>(null);
   const [selectedDateForTimeBlock, setSelectedDateForTimeBlock] = useState<string | null>(null);
+  const [selectedPositionForManager, setSelectedPositionForManager] = useState<number | null>(null);
+  const [selectedDayForManager, setSelectedDayForManager] = useState<string | null>(null);
 
   // Action handlers
   const handleAssignEmployee = () => {
@@ -502,10 +454,10 @@ export default function useTimelineHook() {
   };
 
   // Time block editor handlers
-  const handleTimeBlockSave = async (timeBlockId: number, startTime: string, endTime: string) => {
+  const handleTimeBlockSave = async (timeBlockId: number, employeeId: number, startTime: string, endTime: string, type: string) => {
     try {
       setIsGeneratingSchedules(true); // Reuse loading state for simplicity
-      await put(`/api/daily-schedules/time-block`, { timeBlockId, startTime, endTime });
+      await put(`/api/daily-schedules/time-block`, { timeBlockId, employeeId, startTime, endTime, type });
 
       setMessage({
         title: "Horario Actualizado",
@@ -534,17 +486,18 @@ export default function useTimelineHook() {
     }
   };
 
-  const handleTimeBlockCreate = async (positionId: number, employeeId: number, date: string, startTime: string, endTime: string) => {
+  const handleTimeBlockCreate = async (positionId: number, employeeId: number, date: string, startTime: string, endTime: string, type: string = "work") => {
     try {
       setIsGeneratingSchedules(true);
       console.log("Creating time block:", { positionId, employeeId, date, startTime, endTime });
-      
+
       const response = await post(`/api/daily-schedules/time-block`, {
         positionId,
         employeeId,
         date,
         startTime,
-        endTime
+        endTime,
+        type
       });
 
       // Validar que la respuesta sea exitosa
@@ -579,6 +532,25 @@ export default function useTimelineHook() {
     } finally {
       setIsGeneratingSchedules(false);
     }
+  };
+
+  // Time block manager handlers
+  const handleTimeBlockEdit = (timeBlock: any, row: ITimelineRow) => {
+    const realDate = getDayDate(selectedDayForManager!);
+    setSelectedTimeBlock({
+      ...timeBlock,
+      employeeName: timeBlock.employeeName,
+      positionId: row.position.id,
+      date: realDate
+    });
+    setShowTimeBlockEditorModal(true);
+  };
+
+  const handleTimeBlockCreateFromManager = (row: ITimelineRow, date: string) => {
+    setSelectedTimeBlock(null);
+    setSelectedRowForTimeBlock(row);
+    setSelectedDateForTimeBlock(date);
+    setShowTimeBlockEditorModal(true);
   };
 
   // Context menu model for right-click actions - minimalistic style
@@ -645,6 +617,13 @@ export default function useTimelineHook() {
     selectedDateForTimeBlock,
     handleTimeBlockSave,
     handleTimeBlockCreate,
+    // Time block manager modal state
+    showTimeBlockManagerModal,
+    setShowTimeBlockManagerModal,
+    selectedPositionForManager,
+    selectedDayForManager,
+    handleTimeBlockEdit,
+    handleTimeBlockCreateFromManager,
     // Button states
     canAssignEmployee,
     canUnassignEmployee,
