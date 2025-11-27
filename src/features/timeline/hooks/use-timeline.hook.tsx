@@ -19,6 +19,7 @@ export default function useTimelineHook() {
   const [selectedRows, setSelectedRows] = useState<ITimelineRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [isGeneratingSchedules, setIsGeneratingSchedules] = useState(false);
+  const [isGeneratingWeek, setIsGeneratingWeek] = useState(false);
   const [weekStart, setWeekStart] = useState<string | null>(null);
 
   // Services
@@ -453,6 +454,63 @@ export default function useTimelineHook() {
     console.log("Bulk generate schedules for positions:", selectedRows);
   };
 
+  const handleGenerateWeekFromPrevious = async () => {
+    if (!selectedCompanyId) {
+      setMessage({
+        title: "Error",
+        description: "Debe seleccionar una empresa primero",
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+      return;
+    }
+
+    try {
+      setIsGeneratingWeek(true);
+
+      // Calculate reference date (today)
+      const referenceDate = new Date().toISOString().split('T')[0];
+
+      const request = {
+        companyId: selectedCompanyId,
+        referenceDate: referenceDate
+      };
+
+      const response = await post("/api/daily-schedules/generate-week", request);
+
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        const result = (response as any).data?.data || (response as any).data || {};
+
+        setMessage({
+          title: "Semana Generada",
+          description: result.message || `Se generaron ${result.generatedCount || 0} horarios desde la semana anterior.`,
+          show: true,
+          OkTitle: "Aceptar",
+          onOk: () => {
+            loadTimelineData();
+            setMessage((prev) => ({ ...prev, show: false }));
+          },
+          background: true,
+        });
+      } else {
+        throw new Error(response.operation.message || "Error al generar la semana");
+      }
+    } catch (error) {
+      console.error("Error generating week:", error);
+      const errorMessage = (error as any)?.response?.data?.operation?.message || (error as any)?.message || "Error al generar la semana desde la anterior";
+      setMessage({
+        title: "Error",
+        description: errorMessage,
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+    } finally {
+      setIsGeneratingWeek(false);
+    }
+  };
+
   // Time block editor handlers
   const handleTimeBlockSave = async (timeBlockId: number, employeeId: number, startTime: string, endTime: string, type: string) => {
     try {
@@ -589,6 +647,7 @@ export default function useTimelineHook() {
     selectedCompanyId,
     selectedRows,
     loading,
+    isGeneratingWeek,
     handleCompanyChange,
     handleRowSelectionChange,
     handleCellClick,
@@ -599,6 +658,7 @@ export default function useTimelineHook() {
     handleChangeScheduleTemplate,
     handleGenerateSchedules,
     handleBulkGenerateSchedules,
+    handleGenerateWeekFromPrevious,
     contextMenuModel,
     // Modal state
     showAssignEmployeeModal,

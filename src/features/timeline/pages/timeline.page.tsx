@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "primereact/button";
 import { TimelineGrid } from "../components/timeline-grid.component";
 import { TimelineActions } from "../components/timeline-actions.component";
 import AssignEmployeeModal from "../components/assign-employee-modal.component";
@@ -14,6 +15,7 @@ const TimelinePage = (): React.JSX.Element => {
     selectedCompanyId,
     selectedRows,
     loading,
+    isGeneratingWeek,
     handleCompanyChange,
     handleRowSelectionChange,
     handleCellClick,
@@ -24,6 +26,7 @@ const TimelinePage = (): React.JSX.Element => {
     handleChangeScheduleTemplate,
     handleGenerateSchedules,
     handleBulkGenerateSchedules,
+    handleGenerateWeekFromPrevious,
     contextMenuModel,
     showAssignEmployeeModal,
     setShowAssignEmployeeModal,
@@ -53,8 +56,16 @@ const TimelinePage = (): React.JSX.Element => {
   return (
     <div className="main-page">
       <div className="card-table">
-        <div className="title-area">
+        <div className="title-area" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <label className="text-black extra-large bold">Timeline de Horarios</label>
+          <Button
+            label="Generar semana actual"
+            icon="pi pi-copy"
+            onClick={handleGenerateWeekFromPrevious}
+            loading={isGeneratingWeek}
+            className="p-button-primary"
+            style={{ marginLeft: 'auto' }}
+          />
         </div>
 
         <TimelineActions
