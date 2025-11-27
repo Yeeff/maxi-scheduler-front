@@ -195,50 +195,55 @@ export const TimelineGrid = ({
                 padding: '4px'
               }}
             >
-              {timeBlocks.length > 0 && timeBlocks[0].type !== 'off' ? (
-                <div className="time-visualization" style={{
-                  position: 'relative',
-                  height: '24px',
-                  width: '95%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  {(() => {
-                    // Take the first (and only) block for the day
-                    const block = timeBlocks[0];
+              {(() => {
+                const activeBlocks = timeBlocks.filter(block => block.type !== 'off');
+                return activeBlocks.length > 0 ? (
+                  <div className="time-visualization" style={{
+                    position: 'relative',
+                    height: '24px',
+                    width: '100%'
+                  }}>
+                    {activeBlocks.map((block, index) => {
+                      const startMinutes = timeToMinutes(block.startTime);
+                      const endMinutes = timeToMinutes(block.endTime);
+                      const leftPercent = (startMinutes / 1440) * 100;
+                      const widthPercent = ((endMinutes - startMinutes) / 1440) * 100;
 
-                    return (
-                      <div
-                        className={`time-block-single ${block.type} ${block.isCurrentEmployee ? 'current-employee' : 'historical-employee'}`}
-                        style={{
-                          backgroundColor: getBlockColor(block.type, block.isCurrentEmployee ? true : false),
-                          width: '100%',
-                          height: '24px',
-                          borderRadius: '3px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '11px',
-                          fontWeight: 'bold',
-                          color: '#ffffff',
-                          textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-                          border: block.isCurrentEmployee ? '2px solid #000' : '1px solid rgba(0,0,0,0.3)',
-                          boxShadow: block.isCurrentEmployee ? '0 1px 4px rgba(0,0,0,0.2)' : '0 1px 2px rgba(0,0,0,0.1)',
-                          transform: block.isCurrentEmployee ? 'scale(1.02)' : 'scale(1)',
-                          transition: 'all 0.2s ease',
-                          letterSpacing: '0.5px'
-                        }}
-                        title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ' (Histórico)'}`}
-                      >
-                        {formatTimeRange(block.startTime, block.endTime)}
-                      </div>
-                    );
-                  })()}
-                </div>
-              ) : (
-                <div className="no-schedule text-gray small" style={{ fontSize: '10px' }}>-</div>
-              )}
+                      return (
+                        <div
+                          key={index}
+                          className={`time-block-single ${block.type} ${block.isCurrentEmployee ? 'current-employee' : 'historical-employee'}`}
+                          style={{
+                            position: 'absolute',
+                            left: `calc(${leftPercent}% + ${index * 4}px)`,
+                            width: `${widthPercent}%`,
+                            height: '24px',
+                            backgroundColor: getBlockColor(block.type, block.isCurrentEmployee ? true : false),
+                            borderRadius: '3px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '11px',
+                            fontWeight: 'bold',
+                            color: '#ffffff',
+                            textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+                            border: block.isCurrentEmployee ? '2px solid #000' : '1px solid rgba(0,0,0,0.3)',
+                            boxShadow: block.isCurrentEmployee ? '0 1px 4px rgba(0,0,0,0.2)' : '0 1px 2px rgba(0,0,0,0.1)',
+                            transform: block.isCurrentEmployee ? 'scale(1.02)' : 'scale(1)',
+                            transition: 'all 0.2s ease',
+                            letterSpacing: '0.5px'
+                          }}
+                          title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ' (Histórico)'}`}
+                        >
+                          {formatTimeRange(block.startTime, block.endTime)}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="no-schedule text-gray small" style={{ fontSize: '10px' }}>-</div>
+                );
+              })()}
             </div>
           );
         })}
