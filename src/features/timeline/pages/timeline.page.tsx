@@ -4,6 +4,7 @@ import { TimelineGrid } from "../components/timeline-grid.component";
 import { TimelineActions } from "../components/timeline-actions.component";
 import AssignEmployeeModal from "../components/assign-employee-modal.component";
 import ChangeScheduleTemplateModal from "../components/change-schedule-template-modal.component";
+import { CreateCompanyModal } from "../components/create-company-modal.component";
 import TimeBlockEditorModal from "../components/time-block-editor-modal.component";
 import TimeBlockManagerModal from "../components/time-block-manager-modal.component";
 import useTimelineHook from "../hooks/use-timeline.hook";
@@ -19,6 +20,7 @@ const TimelinePage = (): React.JSX.Element => {
     handleCompanyChange,
     handleRowSelectionChange,
     handleCellClick,
+    handleCreateCompany,
     handleAssignEmployee,
     handleUnassignEmployee,
     handleMoveEmployee,
@@ -31,6 +33,9 @@ const TimelinePage = (): React.JSX.Element => {
     showAssignEmployeeModal,
     setShowAssignEmployeeModal,
     handleAssignEmployeeConfirm,
+    showCreateCompanyModal,
+    setShowCreateCompanyModal,
+    handleCreateCompanyConfirm,
     showChangeTemplateModal,
     setShowChangeTemplateModal,
     handleChangeTemplateConfirm,
@@ -58,14 +63,21 @@ const TimelinePage = (): React.JSX.Element => {
       <div className="card-table">
         <div className="title-area" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <label className="text-black extra-large bold">Timeline de Horarios</label>
-          <Button
-            label="Generar semana actual"
-            icon="pi pi-copy"
-            onClick={handleGenerateWeekFromPrevious}
-            loading={isGeneratingWeek}
-            className="p-button-primary"
-            style={{ marginLeft: 'auto' }}
-          />
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <Button
+              label="Crear empresa"
+              icon="pi pi-plus"
+              onClick={handleCreateCompany}
+              className="p-button-secondary"
+            />
+            <Button
+              label="Generar semana actual"
+              icon="pi pi-copy"
+              onClick={handleGenerateWeekFromPrevious}
+              loading={isGeneratingWeek}
+              className="p-button-primary"
+            />
+          </div>
         </div>
 
         <TimelineActions
@@ -120,6 +132,12 @@ const TimelinePage = (): React.JSX.Element => {
           onHide={() => setShowAssignEmployeeModal(false)}
           onAssign={handleAssignEmployeeConfirm}
           positionId={selectedRows.length > 0 ? selectedRows[0].position.id : 0}
+        />
+
+        <CreateCompanyModal
+          visible={showCreateCompanyModal}
+          onHide={() => setShowCreateCompanyModal(false)}
+          onCreate={handleCreateCompanyConfirm}
         />
 
         <ChangeScheduleTemplateModal

@@ -153,6 +153,7 @@ export default function useTimelineHook() {
 
   // Modal state
   const [showAssignEmployeeModal, setShowAssignEmployeeModal] = useState(false);
+  const [showCreateCompanyModal, setShowCreateCompanyModal] = useState(false);
   const [showTimeBlockEditorModal, setShowTimeBlockEditorModal] = useState(false);
   const [showTimeBlockManagerModal, setShowTimeBlockManagerModal] = useState(false);
   const [selectedTimeBlock, setSelectedTimeBlock] = useState<any>(null);
@@ -162,6 +163,72 @@ export default function useTimelineHook() {
   const [selectedDayForManager, setSelectedDayForManager] = useState<string | null>(null);
 
   // Action handlers
+  const handleCreateCompany = () => {
+    setShowCreateCompanyModal(true);
+  };
+
+  const handleCreateCompanyConfirm = async (companyData: { name: string; nit: string }) => {
+    try {
+      const response = await post<ICompany>("/api/companies", {
+        name: companyData.name,
+        nit: companyData.nit,
+        status: true,
+      });
+
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        // Reload companies list
+        await loadCompanies();
+
+        setMessage({
+          title: "Empresa Creada",
+          description: "La empresa ha sido creada exitosamente.",
+          show: true,
+          OkTitle: "Aceptar",
+          onOk: () => {
+            setMessage((prev) => ({ ...prev, show: false }));
+          },
+          background: true,
+        });
+
+        setShowCreateCompanyModal(false);
+      } else {
+        throw new Error(response.operation.message || "Error al crear la empresa");
+      }
+    } catch (error: any) {
+      console.error("Error creating company:", error);
+
+      // Extract error message from API response
+      let errorMessage = "Error al crear la empresa";
+
+      if (error?.response?.data?.operation?.message) {
+        const apiMessage = error.response.data.operation.message;
+
+        // Check for specific database constraint errors
+        if (apiMessage.includes("Duplicate entry") && apiMessage.includes("company.UKniu8sfil2gxywcru9ah3r4ec5")) {
+          if (apiMessage.includes("name")) {
+            errorMessage = "Ya existe una empresa con este nombre. Por favor, elija un nombre diferente.";
+          } else if (apiMessage.includes("nit")) {
+            errorMessage = "Ya existe una empresa con este NIT. Por favor, verifique el NIT.";
+          }
+        } else if (apiMessage.includes("Duplicate entry") && apiMessage.includes("company.UK")) {
+          errorMessage = "Los datos de la empresa ya existen en el sistema. Verifique el nombre y NIT.";
+        } else {
+          errorMessage = apiMessage;
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      setMessage({
+        title: "Error al Crear Empresa",
+        description: errorMessage,
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+    }
+  };
+
   const handleAssignEmployee = () => {
     if (selectedRows.length === 1 && !selectedRows[0].position.employeeCache) {
       setShowAssignEmployeeModal(true);
@@ -651,6 +718,7 @@ export default function useTimelineHook() {
     handleCompanyChange,
     handleRowSelectionChange,
     handleCellClick,
+    handleCreateCompany,
     handleAssignEmployee,
     handleUnassignEmployee,
     handleMoveEmployee,
@@ -664,6 +732,10 @@ export default function useTimelineHook() {
     showAssignEmployeeModal,
     setShowAssignEmployeeModal,
     handleAssignEmployeeConfirm,
+    // Create company modal state
+    showCreateCompanyModal,
+    setShowCreateCompanyModal,
+    handleCreateCompanyConfirm,
     // Change template modal state
     showChangeTemplateModal,
     setShowChangeTemplateModal,
