@@ -5,6 +5,7 @@ import { TimelineActions } from "../components/timeline-actions.component";
 import AssignEmployeeModal from "../components/assign-employee-modal.component";
 import ChangeScheduleTemplateModal from "../components/change-schedule-template-modal.component";
 import { CreateCompanyModal } from "../components/create-company-modal.component";
+import { CreatePositionModal } from "../components/create-position-modal.component";
 import TimeBlockEditorModal from "../components/time-block-editor-modal.component";
 import TimeBlockManagerModal from "../components/time-block-manager-modal.component";
 import useTimelineHook from "../hooks/use-timeline.hook";
@@ -21,6 +22,7 @@ const TimelinePage = (): React.JSX.Element => {
     handleRowSelectionChange,
     handleCellClick,
     handleCreateCompany,
+    handleCreatePosition,
     handleAssignEmployee,
     handleUnassignEmployee,
     handleMoveEmployee,
@@ -36,6 +38,9 @@ const TimelinePage = (): React.JSX.Element => {
     showCreateCompanyModal,
     setShowCreateCompanyModal,
     handleCreateCompanyConfirm,
+    showCreatePositionModal,
+    setShowCreatePositionModal,
+    handleCreatePositionConfirm,
     showChangeTemplateModal,
     setShowChangeTemplateModal,
     handleChangeTemplateConfirm,
@@ -68,6 +73,13 @@ const TimelinePage = (): React.JSX.Element => {
               label="Crear empresa"
               icon="pi pi-plus"
               onClick={handleCreateCompany}
+              className="p-button-secondary"
+            />
+            <Button
+              label="Crear posición"
+              icon="pi pi-plus"
+              onClick={handleCreatePosition}
+              disabled={!selectedCompanyId}
               className="p-button-secondary"
             />
             <Button
@@ -138,6 +150,14 @@ const TimelinePage = (): React.JSX.Element => {
           visible={showCreateCompanyModal}
           onHide={() => setShowCreateCompanyModal(false)}
           onCreate={handleCreateCompanyConfirm}
+        />
+
+        <CreatePositionModal
+          visible={showCreatePositionModal}
+          onHide={() => setShowCreatePositionModal(false)}
+          onCreate={handleCreatePositionConfirm}
+          selectedCompanyId={selectedCompanyId}
+          selectedCompanyName={companies.find(c => c.id === selectedCompanyId)?.name}
         />
 
         <ChangeScheduleTemplateModal

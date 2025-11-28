@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { AppContext } from "../../../common/contexts/app.context";
 import { ITimelineRow, ITimelineData } from "../../../common/interfaces/timeline.interfaces";
 import { ICompany } from "../../../common/interfaces/company.interfaces";
+import { IScheduleTemplate } from "../../../common/interfaces/schedule.interfaces";
 import { EResponseCodes } from "../../../common/constants/api.enum";
 
 import useCrudService from "../../../common/hooks/crud-service.hook";
@@ -154,6 +155,7 @@ export default function useTimelineHook() {
   // Modal state
   const [showAssignEmployeeModal, setShowAssignEmployeeModal] = useState(false);
   const [showCreateCompanyModal, setShowCreateCompanyModal] = useState(false);
+  const [showCreatePositionModal, setShowCreatePositionModal] = useState(false);
   const [showTimeBlockEditorModal, setShowTimeBlockEditorModal] = useState(false);
   const [showTimeBlockManagerModal, setShowTimeBlockManagerModal] = useState(false);
   const [selectedTimeBlock, setSelectedTimeBlock] = useState<any>(null);
@@ -165,6 +167,12 @@ export default function useTimelineHook() {
   // Action handlers
   const handleCreateCompany = () => {
     setShowCreateCompanyModal(true);
+  };
+
+  const handleCreatePosition = () => {
+    if (selectedCompanyId) {
+      setShowCreatePositionModal(true);
+    }
   };
 
   const handleCreateCompanyConfirm = async (companyData: { name: string; nit: string }) => {
@@ -221,6 +229,81 @@ export default function useTimelineHook() {
 
       setMessage({
         title: "Error al Crear Empresa",
+        description: errorMessage,
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+    }
+  };
+
+  const handleCreatePositionConfirm = async (positionData: { name: string; companyId: number }) => {
+    try {
+      // First load schedule templates to get the default one
+      const scheduleResponse = await get<IScheduleTemplate[]>("/api/schedules");
+      if (!(scheduleResponse.operation.code === EResponseCodes.OK || scheduleResponse.operation.code === EResponseCodes.SUCCESS)) {
+        throw new Error("No se pudieron cargar las plantillas de horario");
+      }
+
+      const schedulesData = (scheduleResponse as any).data?.data || (scheduleResponse as any).data || [];
+      const scheduleTemplates = Array.isArray(schedulesData) ? schedulesData : [];
+
+      if (scheduleTemplates.length === 0) {
+        throw new Error("No hay plantillas de horario disponibles. Debe crear al menos una plantilla de horario primero.");
+      }
+
+      // Use the first schedule template as default
+      const defaultScheduleTemplate = scheduleTemplates[0];
+
+      const positionPayload = {
+        name: positionData.name,
+        company: { id: positionData.companyId },
+        scheduleTemplate: { id: defaultScheduleTemplate.id },
+        status: true,
+      };
+
+      const response = await post("/api/positions", positionPayload);
+
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        // Reload timeline data to show the new position
+        await loadTimelineData();
+
+        setMessage({
+          title: "Posición Creada",
+          description: "La posición ha sido creada exitosamente.",
+          show: true,
+          OkTitle: "Aceptar",
+          onOk: () => {
+            setMessage((prev) => ({ ...prev, show: false }));
+          },
+          background: true,
+        });
+
+        setShowCreatePositionModal(false);
+      } else {
+        throw new Error(response.operation.message || "Error al crear la posición");
+      }
+    } catch (error: any) {
+      console.error("Error creating position:", error);
+
+      // Extract error message from API response
+      let errorMessage = "Error al crear la posición";
+
+      if (error?.response?.data?.operation?.message) {
+        const apiMessage = error.response.data.operation.message;
+
+        // Check for specific database constraint errors
+        if (apiMessage.includes("Duplicate entry")) {
+          errorMessage = "Ya existe una posición con este nombre en la empresa seleccionada.";
+        } else {
+          errorMessage = apiMessage;
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      setMessage({
+        title: "Error al Crear Posición",
         description: errorMessage,
         show: true,
         OkTitle: "Aceptar",
@@ -719,6 +802,7 @@ export default function useTimelineHook() {
     handleRowSelectionChange,
     handleCellClick,
     handleCreateCompany,
+    handleCreatePosition,
     handleAssignEmployee,
     handleUnassignEmployee,
     handleMoveEmployee,
@@ -736,6 +820,10 @@ export default function useTimelineHook() {
     showCreateCompanyModal,
     setShowCreateCompanyModal,
     handleCreateCompanyConfirm,
+    // Create position modal state
+    showCreatePositionModal,
+    setShowCreatePositionModal,
+    handleCreatePositionConfirm,
     // Change template modal state
     showChangeTemplateModal,
     setShowChangeTemplateModal,
