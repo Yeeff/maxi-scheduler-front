@@ -6,7 +6,7 @@ const Dotenv = require("dotenv-webpack");
 module.exports = (webpackConfigEnv, argv) => {
   const defaultConfig = singleSpaDefaults({
     orgName: "horizonx",
-    projectName: "payroll",
+    projectName: "scheduler",
     webpackConfigEnv,
     argv,
   });
@@ -34,3 +34,4 @@ module.exports = (webpackConfigEnv, argv) => {
     plugins: [new Dotenv()],
   });
 };
+

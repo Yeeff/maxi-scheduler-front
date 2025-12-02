@@ -1,6 +1,6 @@
 @import "./mixins.scss";
 
-div[id="single-spa-application:@horizonx/payroll"] {
+div[id="single-spa-application:@horizonx/scheduler"] {
   height: 100%;
   width: 100vw;
 }
@@ -461,7 +461,7 @@ div[id="single-spa-application:@horizonx/payroll"] {
 }
 
 @media (min-width: 1024px) {
-  div[id="single-spa-application:@horizonx/payroll"] {
+  div[id="single-spa-application:@horizonx/scheduler"] {
     width: initial;
   }
 

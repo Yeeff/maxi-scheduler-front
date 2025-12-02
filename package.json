@@ -1,5 +1,5 @@
 {
-  "name": "@horizonx/payroll",
+  "name": "@horizonx/scheduler",
   "scripts": {
     "start": "webpack serve --port 9005",
     "build": "webpack --progress",
@@ -74,5 +74,5 @@
     "url-loader": "^4.1.1",
     "yup": "^1.2.0"
   },
-  "types": "dist/horizonx-payroll.d.ts"
+  "types": "dist/horizonx-scheduler.d.ts"
 }

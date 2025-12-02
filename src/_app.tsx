@@ -35,11 +35,11 @@ function App() {
         <Router>
           <Suspense fallback={<p>Loading...</p>}>
             <Routes>
-              <Route path={"/nomina/"} element={<HomePage />} />
-              <Route path={"/nomina/horarios/*"} element={<ScheduleRoutes />} />
-              <Route path={"/nomina/empresas/*"} element={<CompanyRoutes />} />
-              <Route path={"/nomina/cargos/*"} element={<PositionRoutes />} />
-              <Route path={"/nomina/timeline/*"} element={<TimelineRoutes />} />
+              <Route path={"/scheduler/"} element={<HomePage />} />
+              <Route path={"/scheduler/horarios/*"} element={<ScheduleRoutes />} />
+              <Route path={"/scheduler/empresas/*"} element={<CompanyRoutes />} />
+              <Route path={"/scheduler/cargos/*"} element={<PositionRoutes />} />
+              <Route path={"/scheduler/timeline/*"} element={<TimelineRoutes />} />
             </Routes>
           </Suspense>
         </Router>
