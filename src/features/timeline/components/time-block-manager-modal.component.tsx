@@ -39,6 +39,7 @@ const TimeBlockManagerModal = ({
   companyId,
 }: ITimeBlockManagerModalProps): React.JSX.Element => {
   const [timeBlocks, setTimeBlocks] = useState<ITimeBlock[]>([]);
+  const [leaveTypes, setLeaveTypes] = useState<{ id: number; name: string; code: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [showEditorModal, setShowEditorModal] = useState(false);
   const [selectedBlockForEdit, setSelectedBlockForEdit] = useState<ITimeBlock | null>(null);
@@ -48,8 +49,22 @@ const TimeBlockManagerModal = ({
 
   const dayLabel = DAYS_OF_WEEK.find(day => day.key === dayKey)?.label || dayKey;
 
+  const loadLeaveTypes = async () => {
+    try {
+      const response = await get('/api/leave-types/active');
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        const leaveTypesData = (response as any).data?.data || (response as any).data || [];
+        setLeaveTypes(Array.isArray(leaveTypesData) ? leaveTypesData : []);
+      }
+    } catch (error) {
+      console.error("Error loading leave types:", error);
+      setLeaveTypes([]);
+    }
+  };
+
   useEffect(() => {
     if (visible && positionId && date) {
+      loadLeaveTypes();
       loadTimeBlocks();
     }
   }, [visible, positionId, date]);
@@ -67,7 +82,7 @@ const TimeBlockManagerModal = ({
           id: block.id,
           startTime: block.actualStartTime || block.plannedStartTime || "",
           endTime: block.actualEndTime || block.plannedEndTime || "",
-          type: block.type || "work",
+          type: block.leaveType?.code || "work",
           employeeId: block.employeeCache?.id,
           employeeName: block.employeeCache?.name || "Unknown",
           isCurrentEmployee: false,
@@ -118,14 +133,14 @@ const TimeBlockManagerModal = ({
     setShowEditorModal(true);
   };
 
-  const handleEditorSave = async (timeBlockId: number, employeeId: number, startTime: string, endTime: string, type: string) => {
+  const handleEditorSave = async (timeBlockId: number, employeeId: number, startTime: string, endTime: string, leaveTypeId: number) => {
     try {
       const response = await put(`/api/daily-schedules/time-block`, {
         timeBlockId,
         employeeId,
         startTime,
         endTime,
-        type
+        leaveTypeId
       });
 
       if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
@@ -140,7 +155,7 @@ const TimeBlockManagerModal = ({
     }
   };
 
-  const handleEditorCreate = async (positionId: number, employeeId: number, date: string, startTime: string, endTime: string, type: string) => {
+  const handleEditorCreate = async (positionId: number, employeeId: number, date: string, startTime: string, endTime: string, leaveTypeId: number) => {
     try {
       const response = await post(`/api/daily-schedules/time-block`, {
         positionId,
@@ -148,7 +163,7 @@ const TimeBlockManagerModal = ({
         date,
         startTime,
         endTime,
-        type
+        leaveTypeId
       });
 
       if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
@@ -183,12 +198,9 @@ const TimeBlockManagerModal = ({
   };
 
   const renderType = (row: ITimeBlock) => {
-    const typeLabels = {
-      work: 'Trabajo',
-      break: 'Descanso',
-      off: 'Libre'
-    };
-    return typeLabels[row.type as keyof typeof typeLabels] || row.type;
+    // Find the leave type by code and return its name
+    const leaveType = leaveTypes.find(type => type.code === row.type);
+    return leaveType ? leaveType.name : row.type;
   };
 
   const footer = (

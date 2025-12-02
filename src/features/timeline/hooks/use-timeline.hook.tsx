@@ -662,10 +662,10 @@ export default function useTimelineHook() {
   };
 
   // Time block editor handlers
-  const handleTimeBlockSave = async (timeBlockId: number, employeeId: number, startTime: string, endTime: string, type: string) => {
+  const handleTimeBlockSave = async (timeBlockId: number, employeeId: number, startTime: string, endTime: string, leaveTypeId: number) => {
     try {
       setIsGeneratingSchedules(true); // Reuse loading state for simplicity
-      await put(`/api/daily-schedules/time-block`, { timeBlockId, employeeId, startTime, endTime, type });
+      await put(`/api/daily-schedules/time-block`, { timeBlockId, employeeId, startTime, endTime, leaveTypeId });
 
       setMessage({
         title: "Horario Actualizado",
@@ -694,10 +694,10 @@ export default function useTimelineHook() {
     }
   };
 
-  const handleTimeBlockCreate = async (positionId: number, employeeId: number, date: string, startTime: string, endTime: string, type: string = "work") => {
+  const handleTimeBlockCreate = async (positionId: number, employeeId: number, date: string, startTime: string, endTime: string, leaveTypeId: number) => {
     try {
       setIsGeneratingSchedules(true);
-      console.log("Creating time block:", { positionId, employeeId, date, startTime, endTime });
+      console.log("Creating time block:", { positionId, employeeId, date, startTime, endTime, leaveTypeId });
 
       const response = await post(`/api/daily-schedules/time-block`, {
         positionId,
@@ -705,7 +705,7 @@ export default function useTimelineHook() {
         date,
         startTime,
         endTime,
-        type
+        leaveTypeId
       });
 
       // Validar que la respuesta sea exitosa

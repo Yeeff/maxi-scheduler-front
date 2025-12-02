@@ -18,11 +18,19 @@ interface IEmployeeCache {
   status: boolean;
 }
 
+interface ILeaveType {
+  id: number;
+  name: string;
+  code: string;
+  description?: string;
+  isActive: boolean;
+}
+
 interface ITimeBlockEditorModalProps {
   visible: boolean;
   onHide: () => void;
-  onSave: (timeBlockId: number, employeeId: number, startTime: string, endTime: string, type: string) => void;
-  onCreate?: (positionId: number, employeeId: number, date: string, startTime: string, endTime: string, type: string) => void;
+  onSave: (timeBlockId: number, employeeId: number, startTime: string, endTime: string, leaveTypeId: number) => void;
+  onCreate?: (positionId: number, employeeId: number, date: string, startTime: string, endTime: string, leaveTypeId: number) => void;
   timeBlock?: ITimeBlock | null;
   selectedDate?: string;
   positionName?: string;
@@ -44,10 +52,12 @@ const TimeBlockEditorModal = ({
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState<IEmployeeCache | null>(null);
-  const [selectedType, setSelectedType] = useState("work");
+  const [selectedLeaveTypeId, setSelectedLeaveTypeId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [loadingLeaveTypes, setLoadingLeaveTypes] = useState(false);
   const [employees, setEmployees] = useState<IEmployeeCache[]>([]);
+  const [leaveTypes, setLeaveTypes] = useState<ILeaveType[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredEmployees, setFilteredEmployees] = useState<IEmployeeCache[]>([]);
   const [initialEmployeeId, setInitialEmployeeId] = useState<number | null>(null);
@@ -56,6 +66,39 @@ const TimeBlockEditorModal = ({
   const isCreateMode = !timeBlock || !timeBlock.id;
 
   const { get } = useCrudService(process.env.urlApiScheduler);
+
+  // Load leave types on component mount
+  const loadLeaveTypes = async () => {
+    try {
+      setLoadingLeaveTypes(true);
+      const response = await get<ILeaveType[]>('/api/leave-types/active');
+
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        const leaveTypesData = (response as any).data?.data || (response as any).data || [];
+        setLeaveTypes(Array.isArray(leaveTypesData) ? leaveTypesData : []);
+
+        // Set default leave type (work) if available
+        const workType = leaveTypesData.find((type: ILeaveType) => type.code === 'work');
+        if (workType && selectedLeaveTypeId === null) {
+          setSelectedLeaveTypeId(workType.id);
+        }
+      } else {
+        console.error("Error loading leave types:", response.operation.message);
+        setLeaveTypes([]);
+      }
+    } catch (error) {
+      console.error("Error loading leave types:", error);
+      setLeaveTypes([]);
+    } finally {
+      setLoadingLeaveTypes(false);
+    }
+  };
+
+  useEffect(() => {
+    if (visible) {
+      loadLeaveTypes();
+    }
+  }, [visible]);
 
   useEffect(() => {
     // Filter employees based on search term
@@ -78,8 +121,16 @@ const TimeBlockEditorModal = ({
         if (scheduleData) {
           setStartTime(scheduleData.actualStartTime || scheduleData.plannedStartTime || "");
           setEndTime(scheduleData.actualEndTime || scheduleData.plannedEndTime || "");
-          setSelectedType(scheduleData.type || "work");
-          
+
+          // Set leave type from leaveType relationship
+          if (scheduleData.leaveType?.id) {
+            setSelectedLeaveTypeId(scheduleData.leaveType.id);
+          } else {
+            // Fallback to default work type
+            const workType = leaveTypes.find(type => type.code === 'work');
+            setSelectedLeaveTypeId(workType?.id || null);
+          }
+
           // Store initial employee ID for edit mode
           if (scheduleData.employeeCache?.id) {
             setInitialEmployeeId(scheduleData.employeeCache.id);
@@ -91,7 +142,9 @@ const TimeBlockEditorModal = ({
       // Fallback to prop data
       setStartTime(timeBlock?.startTime || "");
       setEndTime(timeBlock?.endTime || "");
-      setSelectedType(timeBlock?.type || "work");
+      // Set default leave type for fallback
+      const workType = leaveTypes.find(type => type.code === 'work');
+      setSelectedLeaveTypeId(workType?.id || null);
       if (timeBlock?.employeeId) {
         setInitialEmployeeId(timeBlock.employeeId);
       }
@@ -143,7 +196,9 @@ const TimeBlockEditorModal = ({
         // CREATE mode: clear fields
         setStartTime("");
         setEndTime("");
-        setSelectedType("work");
+        // Set default leave type (work)
+        const workType = leaveTypes.find(type => type.code === 'work');
+        setSelectedLeaveTypeId(workType?.id || null);
         setSelectedEmployee(null);
         setSearchTerm("");
         setEmployees([]);
@@ -156,14 +211,16 @@ const TimeBlockEditorModal = ({
           // Fallback to prop data if no ID
           setStartTime(timeBlock?.startTime || "");
           setEndTime(timeBlock?.endTime || "");
-          setSelectedType(timeBlock?.type || "work");
+          // Set default leave type for fallback
+          const workType = leaveTypes.find(type => type.code === 'work');
+          setSelectedLeaveTypeId(workType?.id || null);
           if (timeBlock?.employeeId) {
             setInitialEmployeeId(timeBlock.employeeId);
           }
         }
       }
     }
-  }, [visible, timeBlock, isCreateMode]);
+  }, [visible, timeBlock, isCreateMode, leaveTypes]);
 
   // Load employees when both times are set in CREATE mode
   useEffect(() => {
@@ -199,6 +256,11 @@ const TimeBlockEditorModal = ({
       return;
     }
 
+    if (!selectedLeaveTypeId) {
+      alert("Por favor seleccione un tipo de bloque");
+      return;
+    }
+
     if (isCreateMode) {
       // CREATE mode
       if (!onCreate || !positionId || !selectedDate) {
@@ -213,7 +275,7 @@ const TimeBlockEditorModal = ({
           selectedDate,
           startTime,
           endTime,
-          selectedType
+          selectedLeaveTypeId
         );
         handleHide();
       } catch (error) {
@@ -229,7 +291,7 @@ const TimeBlockEditorModal = ({
       }
       setLoading(true);
       try {
-        await onSave(timeBlock.id, selectedEmployee.id, startTime, endTime, selectedType);
+        await onSave(timeBlock.id, selectedEmployee.id, startTime, endTime, selectedLeaveTypeId);
         handleHide();
       } catch (error) {
         console.error("Error saving time block:", error);
@@ -243,7 +305,9 @@ const TimeBlockEditorModal = ({
     setStartTime("");
     setEndTime("");
     setSelectedEmployee(null);
-    setSelectedType("work");
+    // Reset to default leave type
+    const workType = leaveTypes.find(type => type.code === 'work');
+    setSelectedLeaveTypeId(workType?.id || null);
     setSearchTerm("");
     setEmployees([]);
     setInitialEmployeeId(null);
@@ -282,25 +346,25 @@ const TimeBlockEditorModal = ({
         icon={isCreateMode ? "pi pi-plus" : "pi pi-check"}
         onClick={handleSave}
         loading={loading}
-        disabled={!selectedEmployee || !startTime || !endTime}
+        disabled={!selectedEmployee || !startTime || !endTime || !selectedLeaveTypeId}
         style={{
-          background: (selectedEmployee && startTime && endTime) ? '#094a90' : '#6c757d',
+          background: (selectedEmployee && startTime && endTime && selectedLeaveTypeId) ? '#094a90' : '#6c757d',
           border: 'none',
           color: 'white',
           padding: '8px 16px',
           borderRadius: '4px',
-          cursor: (selectedEmployee && startTime && endTime) ? 'pointer' : 'not-allowed',
+          cursor: (selectedEmployee && startTime && endTime && selectedLeaveTypeId) ? 'pointer' : 'not-allowed',
           fontSize: '14px',
           fontWeight: '500',
           transition: 'all 0.2s ease'
         }}
         onMouseEnter={(e) => {
-          if (selectedEmployee && startTime && endTime) {
+          if (selectedEmployee && startTime && endTime && selectedLeaveTypeId) {
             e.currentTarget.style.backgroundColor = '#073a70';
           }
         }}
         onMouseLeave={(e) => {
-          if (selectedEmployee && startTime && endTime) {
+          if (selectedEmployee && startTime && endTime && selectedLeaveTypeId) {
             e.currentTarget.style.backgroundColor = '#094a90';
           }
         }}
@@ -484,24 +548,32 @@ const TimeBlockEditorModal = ({
 
       {/* 4. Type Selection */}
       <div style={{ marginBottom: '20px' }}>
-        <label htmlFor="typeSelect" style={{
-          display: 'block',
-          color: '#094a90',
-          fontWeight: '600',
-          marginBottom: '8px',
-          fontSize: '14px'
-        }}>
-          Tipo de Bloque: <span style={{ color: 'red' }}>*</span>
-        </label>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+          <label htmlFor="typeSelect" style={{
+            color: '#094a90',
+            fontWeight: '600',
+            fontSize: '14px',
+            marginRight: '8px'
+          }}>
+            Tipo de Bloque: <span style={{ color: 'red' }}>*</span>
+          </label>
+          {loadingLeaveTypes && (
+            <ProgressSpinner
+              style={{ width: '20px', height: '20px' }}
+              strokeWidth="4"
+            />
+          )}
+        </div>
         <Dropdown
           id="typeSelect"
-          value={selectedType}
-          options={[
-            { label: 'Trabajo', value: 'work' },
-            { label: 'Descanso', value: 'break' }
-          ]}
-          onChange={(e) => setSelectedType(e.value)}
-          placeholder="Seleccionar tipo"
+          value={selectedLeaveTypeId}
+          options={leaveTypes.map(type => ({
+            label: type.name,
+            value: type.id
+          }))}
+          onChange={(e) => setSelectedLeaveTypeId(e.value)}
+          placeholder={loadingLeaveTypes ? "Cargando tipos..." : "Seleccionar tipo"}
+          disabled={loadingLeaveTypes}
           style={{
             width: '100%',
             border: '1px solid #dee2e6',
