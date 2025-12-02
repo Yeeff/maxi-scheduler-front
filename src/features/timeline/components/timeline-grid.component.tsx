@@ -321,34 +321,85 @@ export const TimelineGrid = ({
                   display: 'flex',
                   alignItems: 'center',
                   borderBottom: '1px solid #e0e0e0',
-                  backgroundColor: '#f8f9fa'
+                  backgroundColor: '#f8f9fa',
+                  minHeight: '32px'
                 }}>
+                  {/* Position Column */}
                   <div style={{
                     width: '220px',
-                    padding: '12px',
+                    padding: '6px 12px',
                     fontSize: '12px',
                     color: '#6c757d',
                     borderRight: '1px solid #dee2e6',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    marginLeft: '-6px'
                   }}>
                     <Checkbox
                       checked={selectedRows.some(selected => selected.id === row.id)}
                       onChange={() => handleRowSelection(row)}
                     />
-                    {row.position.name} - {row.position.location}
+                    <div style={{ flex: 1 }}>
+                      <div style={{
+                        fontSize: '13px',
+                        color: '#6c757d',
+                        fontWeight: 'bold',
+                        marginBottom: '2px',
+                        backgroundColor: 'rgba(108, 117, 125, 0.08)',
+                        padding: '2px 4px',
+                        borderRadius: '2px'
+                      }}>
+                        {row.position.name} - {row.position.location}
+                      </div>
+                      <div style={{
+                        fontSize: '11px',
+                        color: '#6c757d',
+                        fontStyle: 'italic'
+                      }}>
+                        Sin empleado asignado
+                      </div>
+                    </div>
                   </div>
-                  <div style={{
-                    flex: 1,
-                    padding: '12px',
-                    textAlign: 'center',
-                    color: '#6c757d',
-                    fontStyle: 'italic',
-                    fontSize: '11px'
-                  }}>
-                    No hay empleados asignados
-                  </div>
+
+                  {/* Days Columns - Clickable even without employees */}
+                  {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => (
+                    <div
+                      key={day}
+                      className="time-blocks-cell"
+                      onClick={() => {
+                        console.log("Cell clicked - position:", row.position.name, "day:", day, "(no employee assigned)");
+                        onCellClick(row, day);
+                      }}
+                      style={{
+                        cursor: 'pointer',
+                        minHeight: '32px',
+                        position: 'relative',
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRight: '1px solid #dee2e6',
+                        padding: '4px',
+                        backgroundColor: 'rgba(220, 53, 69, 0.03)',
+                        transition: 'background-color 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(220, 53, 69, 0.08)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(220, 53, 69, 0.03)';
+                      }}
+                    >
+                      <div className="no-schedule text-gray small" style={{
+                        fontSize: '10px',
+                        color: '#6c757d',
+                        fontStyle: 'italic'
+                      }}>
+                        -
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ]
         )
