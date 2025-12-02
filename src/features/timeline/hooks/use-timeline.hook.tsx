@@ -16,7 +16,7 @@ export default function useTimelineHook() {
   // State
   const [timelineData, setTimelineData] = useState<ITimelineRow[]>([]);
   const [companies, setCompanies] = useState<ICompany[]>([]);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<number | undefined>(undefined);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
   const [selectedRows, setSelectedRows] = useState<ITimelineRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [isGeneratingSchedules, setIsGeneratingSchedules] = useState(false);
@@ -52,8 +52,8 @@ export default function useTimelineHook() {
     try {
       setLoading(true);
 
-      // Only load timeline data if a company is selected
-      if (!selectedCompanyId) {
+      // Only load timeline data if a company is selected (not null means "Ninguna")
+      if (selectedCompanyId === null) {
         setTimelineData([]);
         return;
       }
@@ -99,7 +99,7 @@ export default function useTimelineHook() {
     }
   };
 
-  const handleCompanyChange = (companyId?: number) => {
+  const handleCompanyChange = (companyId: number | null) => {
     setSelectedCompanyId(companyId);
     setSelectedRows([]); // Clear selection when filter changes
   };
@@ -170,7 +170,7 @@ export default function useTimelineHook() {
   };
 
   const handleCreatePosition = () => {
-    if (selectedCompanyId) {
+    if (selectedCompanyId !== null) {
       setShowCreatePositionModal(true);
     }
   };
@@ -605,7 +605,7 @@ export default function useTimelineHook() {
   };
 
   const handleGenerateWeekFromPrevious = async () => {
-    if (!selectedCompanyId) {
+    if (selectedCompanyId === null) {
       setMessage({
         title: "Error",
         description: "Debe seleccionar una empresa primero",

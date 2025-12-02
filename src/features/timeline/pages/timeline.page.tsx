@@ -96,7 +96,7 @@ const TimelinePage = (): React.JSX.Element => {
         <TimelineActions
           selectedRows={selectedRows}
           companies={companies}
-          selectedCompanyId={selectedCompanyId}
+          selectedCompanyId={selectedCompanyId ?? null}
           onCompanyChange={handleCompanyChange}
           onAssignEmployee={handleAssignEmployee}
           onUnassignEmployee={handleUnassignEmployee}

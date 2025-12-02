@@ -8,8 +8,8 @@ import { ITimelineRow } from "../../../common/interfaces/timeline.interfaces";
 interface ITimelineActionsProps {
   selectedRows: ITimelineRow[];
   companies: { id?: number; name: string }[];
-  selectedCompanyId?: number;
-  onCompanyChange: (companyId?: number) => void;
+  selectedCompanyId: number | null;
+  onCompanyChange: (companyId: number | null) => void;
   onAssignEmployee: () => void;
   onUnassignEmployee: () => void;
   onMoveEmployee: () => void;
@@ -43,7 +43,7 @@ export const TimelineActions = ({
   const hasSelectedRows = selectedRows.length > 0;
 
   const companyOptions = [
-    { label: 'Todas las empresas', value: undefined },
+    { label: 'Ninguna', value: null },
     ...companies.map(company => ({
       label: company.name,
       value: company.id
