@@ -57,6 +57,7 @@ const TimelinePage = (): React.JSX.Element => {
     selectedDayForManager,
     handleTimeBlockEdit,
     handleTimeBlockCreateFromManager,
+    getDayDate,
     canAssignEmployee,
     canUnassignEmployee,
     canAssociateTemplate,
@@ -186,21 +187,7 @@ const TimelinePage = (): React.JSX.Element => {
           onHide={() => setShowTimeBlockManagerModal(false)}
           positionId={selectedPositionForManager || 0}
           positionName={timelineData.find(row => row.position.id === selectedPositionForManager)?.position.name || ''}
-          date={(() => {
-            if (!selectedDayForManager) return '';
-            const daysMap: { [key: string]: number } = {
-              'MONDAY': 0, 'TUESDAY': 1, 'WEDNESDAY': 2, 'THURSDAY': 3,
-              'FRIDAY': 4, 'SATURDAY': 5, 'SUNDAY': 6
-            };
-            const dayIndex = daysMap[selectedDayForManager];
-            if (dayIndex === undefined) return '';
-            const selectedDate = new Date();
-            const today = new Date();
-            const dayOfWeek = today.getDay();
-            const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-            selectedDate.setDate(today.getDate() + mondayOffset + dayIndex);
-            return selectedDate.toISOString().split('T')[0];
-          })()}
+          date={getDayDate(selectedDayForManager || '') || ''}
           dayKey={selectedDayForManager || ''}
           companyId={selectedCompanyId || 0}
         />
