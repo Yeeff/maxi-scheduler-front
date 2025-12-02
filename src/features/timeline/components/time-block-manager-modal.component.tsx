@@ -12,6 +12,7 @@ import { EResponseCodes } from "../../../common/constants/api.enum";
 interface ITimeBlockManagerModalProps {
   visible: boolean;
   onHide: () => void;
+  onRefresh?: () => void;
   positionId: number;
   positionName: string;
   date: string;
@@ -32,6 +33,7 @@ const DAYS_OF_WEEK = [
 const TimeBlockManagerModal = ({
   visible,
   onHide,
+  onRefresh,
   positionId,
   positionName,
   date,
@@ -48,6 +50,13 @@ const TimeBlockManagerModal = ({
   const { get, deleted, put, post } = useCrudService(process.env.urlApiScheduler);
 
   const dayLabel = DAYS_OF_WEEK.find(day => day.key === dayKey)?.label || dayKey;
+
+  const handleModalClose = () => {
+    onHide();
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
 
   const loadLeaveTypes = async () => {
     try {
@@ -215,7 +224,7 @@ const TimeBlockManagerModal = ({
         label="Cerrar"
         icon="pi pi-times"
         className="p-button-text"
-        onClick={onHide}
+        onClick={handleModalClose}
       />
     </div>
   );
@@ -229,7 +238,7 @@ const TimeBlockManagerModal = ({
         modal
         className="p-fluid"
         footer={footer}
-        onHide={onHide}
+        onHide={handleModalClose}
         headerStyle={{
           backgroundColor: '#094a90',
           color: 'white',

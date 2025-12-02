@@ -846,6 +846,7 @@ export default function useTimelineHook() {
     handleTimeBlockCreateFromManager,
     // Utility functions
     getDayDate,
+    loadTimelineData,
     // Button states
     canAssignEmployee,
     canUnassignEmployee,
