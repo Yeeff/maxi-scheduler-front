@@ -22,6 +22,8 @@ export default function useTimelineHook() {
   const [isGeneratingSchedules, setIsGeneratingSchedules] = useState(false);
   const [isGeneratingWeek, setIsGeneratingWeek] = useState(false);
   const [weekStart, setWeekStart] = useState<string | null>(null);
+  const [isHistoryMode, setIsHistoryMode] = useState(false);
+  const [currentWeekStart, setCurrentWeekStart] = useState<string | null>(null);
 
   // Services
   const { get, put, post } = useCrudService(process.env.urlApiScheduler);
@@ -48,7 +50,7 @@ export default function useTimelineHook() {
     }
   };
 
-  const loadTimelineData = async () => {
+  const loadTimelineData = async (specificWeekStart?: string | null) => {
     try {
       setLoading(true);
 
@@ -58,10 +60,15 @@ export default function useTimelineHook() {
         return;
       }
 
-      // Backend now calculates default week start, so we only send companyId
       const params = new URLSearchParams({
         companyId: selectedCompanyId.toString()
       });
+
+      // Add weekStart parameter if provided (for history mode)
+      if (specificWeekStart) {
+        params.append('weekStart', specificWeekStart);
+      }
+
       const response = await get<ITimelineData>(`/api/daily-schedules/timeline?${params.toString()}`);
 
       if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
@@ -111,7 +118,7 @@ export default function useTimelineHook() {
   // Función para convertir nombre del día a fecha real
   const getDayDate = (dayName: string): string | null => {
     if (!weekStart) return null;
-    
+
     const daysMap: { [key: string]: number } = {
       'MONDAY': 0,
       'TUESDAY': 1,
@@ -121,26 +128,23 @@ export default function useTimelineHook() {
       'SATURDAY': 5,
       'SUNDAY': 6
     };
-    
+
     const dayIndex = daysMap[dayName];
     if (dayIndex === undefined) return null;
-    
+
     // Parsear la fecha sin considerar zona horaria
     const [year, month, day] = weekStart.split('-').map(Number);
     const weekStartDate = new Date(year, month - 1, day);
-    
+
     // Calcular la fecha del día
     const targetDate = new Date(weekStartDate);
     targetDate.setDate(targetDate.getDate() + dayIndex);
-    
-    // Formato YYYY-MM-DD
-    const resultYear = targetDate.getFullYear();
-    const resultMonth = String(targetDate.getMonth() + 1).padStart(2, '0');
-    const resultDay = String(targetDate.getDate()).padStart(2, '0');
-    
-    console.log("getDayDate - weekStart:", weekStart, "dayName:", dayName, "dayIndex:", dayIndex, "result:", `${resultYear}-${resultMonth}-${resultDay}`);
-    
-    return `${resultYear}-${resultMonth}-${resultDay}`;
+
+    const result = formatLocalDate(targetDate);
+
+    console.log("getDayDate - weekStart:", weekStart, "dayName:", dayName, "dayIndex:", dayIndex, "result:", result);
+
+    return result;
   };
 
   const handleCellClick = (row: ITimelineRow, day: string) => {
@@ -620,7 +624,7 @@ export default function useTimelineHook() {
       setIsGeneratingWeek(true);
 
       // Calculate reference date (today)
-      const referenceDate = new Date().toISOString().split('T')[0];
+      const referenceDate = formatLocalDate(new Date());
 
       const request = {
         companyId: selectedCompanyId,
@@ -785,6 +789,129 @@ export default function useTimelineHook() {
     },
   ];
 
+  // History mode functions
+  const toggleHistoryMode = () => {
+    if (isHistoryMode) {
+      // Exit history mode - go back to current week
+      setIsHistoryMode(false);
+      setCurrentWeekStart(null);
+      loadTimelineData(); // Load current week
+    } else {
+      // Enter history mode - start with previous week
+      setIsHistoryMode(true);
+      const previousWeek = getPreviousWeekStart();
+      setCurrentWeekStart(previousWeek);
+      loadTimelineData(previousWeek);
+    }
+  };
+
+  const navigateToPreviousWeek = () => {
+    if (!isHistoryMode || !currentWeekStart) return;
+
+    const previousWeek = getPreviousWeekStart(currentWeekStart);
+
+    // Prevent navigating more than 1 year back
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    const previousWeekDate = new Date(previousWeek);
+
+    if (previousWeekDate < oneYearAgo) {
+      setMessage({
+        title: "Límite alcanzado",
+        description: "No se puede navegar más de un año hacia atrás.",
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+      return;
+    }
+
+    setCurrentWeekStart(previousWeek);
+    loadTimelineData(previousWeek);
+  };
+
+  const navigateToNextWeek = () => {
+    if (!isHistoryMode || !currentWeekStart) return;
+
+    const nextWeek = getNextWeekStart(currentWeekStart);
+
+    // Prevent navigating to future weeks
+    const today = new Date();
+    const nextWeekDate = new Date(nextWeek);
+
+    if (nextWeekDate > today) {
+      setMessage({
+        title: "No disponible",
+        description: "No se puede navegar a semanas futuras.",
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+      return;
+    }
+
+    setCurrentWeekStart(nextWeek);
+    loadTimelineData(nextWeek);
+  };
+
+  const getWeekStart = (date: Date): Date => {
+    const d = new Date(date);
+    const day = d.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+    return new Date(d.setDate(diff));
+  };
+
+  const getPreviousWeekStart = (fromDate?: string): string => {
+    let baseDate: Date;
+    if (fromDate) {
+      // Parse as local date to avoid timezone shift
+      const [year, month, day] = fromDate.split('-').map(Number);
+      baseDate = new Date(year, month - 1, day);
+    } else {
+      baseDate = new Date();
+    }
+    const currentWeekStart = getWeekStart(baseDate);
+    const previousWeek = new Date(currentWeekStart);
+    previousWeek.setDate(currentWeekStart.getDate() - 7);
+    return formatLocalDate(previousWeek);
+  };
+
+  const getNextWeekStart = (fromDate: string): string => {
+    // Parse as local date to avoid timezone shift
+    const [year, month, day] = fromDate.split('-').map(Number);
+    const baseDate = new Date(year, month - 1, day);
+    const nextWeek = new Date(baseDate);
+    nextWeek.setDate(baseDate.getDate() + 7);
+    return formatLocalDate(nextWeek);
+  };
+
+  const formatLocalDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const getCurrentWeekDisplay = (): string => {
+    if (!isHistoryMode || !currentWeekStart) return '';
+
+    // Parse as local date to avoid timezone shift
+    const [year, month, day] = currentWeekStart.split('-').map(Number);
+    const startDate = new Date(year, month - 1, day);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    };
+
+    return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+  };
+
   // Computed properties for button states
   const canAssignEmployee = selectedRows.length === 1 && !selectedRows[0]?.position.employeeCache;
   const canUnassignEmployee = selectedRows.length === 1 && !!selectedRows[0]?.position.employeeCache;
@@ -798,6 +925,7 @@ export default function useTimelineHook() {
     selectedRows,
     loading,
     isGeneratingWeek,
+    weekStart,
     handleCompanyChange,
     handleRowSelectionChange,
     handleCellClick,
@@ -852,5 +980,12 @@ export default function useTimelineHook() {
     canUnassignEmployee,
     canAssociateTemplate,
     canGenerateSchedules,
+    // History mode
+    isHistoryMode,
+    toggleHistoryMode,
+    navigateToPreviousWeek,
+    navigateToNextWeek,
+    getCurrentWeekDisplay,
+    currentWeekStart,
   };
 }

@@ -16,6 +16,7 @@ interface ITimelineGridProps {
    loading?: boolean;
    onAssignEmployee?: (position: ITimelineRow) => void;
    onUnassignEmployee?: (position: ITimelineRow) => void;
+   currentWeekStart?: string | null; // Fecha de inicio de la semana actual
  }
 
 const DAYS_OF_WEEK = [
@@ -34,6 +35,44 @@ const timeToMinutes = (timeString: string): number => {
   return hours * 60 + minutes;
 };
 
+// Helper function to format date as local YYYY-MM-DD
+const formatLocalDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Helper function to get the actual date for each day of the week
+const getWeekDates = (weekStart?: string | null): { [key: string]: string } => {
+  if (!weekStart) {
+    // Use current week if no weekStart provided
+    // Adjust to Bogota timezone (UTC-5)
+    const now = new Date();
+    const bogotaOffset = -5; // UTC-5
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const bogotaTime = new Date(utc + (bogotaOffset * 3600000));
+    const monday = new Date(bogotaTime);
+    monday.setDate(bogotaTime.getDate() - bogotaTime.getDay() + 1); // Get Monday of current week
+    weekStart = formatLocalDate(monday);
+  }
+
+  // Parse the weekStart date string as local date (not UTC)
+  const [year, month, day] = weekStart.split('-').map(Number);
+  const startDate = new Date(year, month - 1, day);
+  const dates: { [key: string]: string } = {};
+
+  const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+
+  days.forEach((dayKey, index) => {
+    const date = new Date(startDate);
+    date.setDate(startDate.getDate() + index);
+    dates[dayKey] = formatLocalDate(date);
+  });
+
+  return dates;
+};
+
 export const TimelineGrid = ({
    data,
    selectedRows,
@@ -43,11 +82,19 @@ export const TimelineGrid = ({
    loading = false,
    onAssignEmployee,
    onUnassignEmployee,
+   currentWeekStart,
  }: ITimelineGridProps) => {
   const contextMenuRef = useRef<ContextMenu>(null);
   const [contextMenuTarget, setContextMenuTarget] = useState<any>(null);
 
+  // Calculate week dates for header display
+  const weekDates = getWeekDates(currentWeekStart);
+
   console.log('DEBUG: TimeBlocks data:', data);
+  console.log('DEBUG: Current week start (from API or calculated):', currentWeekStart);
+  console.log('DEBUG: Week dates calculated:', weekDates);
+  console.log('DEBUG: Current local time:', new Date().toString());
+  console.log('DEBUG: Current UTC time:', new Date().toUTCString());
 
   const handleContextMenu = (event: any, row: ITimelineRow) => {
     event.preventDefault();
@@ -306,16 +353,35 @@ export const TimelineGrid = ({
         }}>
           Posición - Empleado
         </div>
-        {DAYS_OF_WEEK.map(day => (
-          <div key={day.key} style={{
-            flex: 1,
-            padding: '8px 10px',
-            textAlign: 'center',
-            borderRight: '1px solid #dee2e6'
-          }}>
-            {day.short}
-          </div>
-        ))}
+        {DAYS_OF_WEEK.map(day => {
+          const date = weekDates[day.key];
+          // Parse date string as local date to avoid timezone shift
+          const [year, month, dayNum] = date.split('-').map(Number);
+          const dateObj = new Date(year, month - 1, dayNum);
+          const dayNumber = dateObj.getDate();
+          const isToday = date === formatLocalDate(new Date());
+
+          return (
+            <div key={day.key} style={{
+              flex: 1,
+              padding: '8px 10px',
+              textAlign: 'center',
+              borderRight: '1px solid #dee2e6',
+              backgroundColor: isToday ? 'rgba(9, 74, 144, 0.1)' : 'transparent'
+            }}>
+              <div style={{ fontSize: '10px', color: '#6c757d', marginBottom: '2px' }}>
+                {day.short}
+              </div>
+              <div style={{
+                fontSize: '12px',
+                fontWeight: 'bold',
+                color: isToday ? '#094a90' : '#495057'
+              }}>
+                {dayNumber}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Employee Rows */}
