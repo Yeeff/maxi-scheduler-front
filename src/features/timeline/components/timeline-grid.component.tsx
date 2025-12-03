@@ -5,6 +5,7 @@ import { ContextMenu } from "primereact/contextmenu";
 import { Checkbox } from "primereact/checkbox";
 
 import { ITimelineRow, ITimelineEmployee, ITimeBlock } from "../../../common/interfaces/timeline.interfaces";
+import { getBlockBackgroundColor, getBlockBorderColor, getBlockTextColor } from "../../../common/constants/block-colors.constants";
 
 interface ITimelineGridProps {
    data: ITimelineRow[];
@@ -45,6 +46,8 @@ export const TimelineGrid = ({
  }: ITimelineGridProps) => {
   const contextMenuRef = useRef<ContextMenu>(null);
   const [contextMenuTarget, setContextMenuTarget] = useState<any>(null);
+
+  console.log('DEBUG: TimeBlocks data:', data);
 
   const handleContextMenu = (event: any, row: ITimelineRow) => {
     event.preventDefault();
@@ -218,22 +221,22 @@ export const TimelineGrid = ({
                             left: `calc(${leftPercent}% + ${index * 4}px)`,
                             width: `${widthPercent}%`,
                             height: '24px',
-                            backgroundColor: getBlockColor(block.type, block.isCurrentEmployee ? true : false),
+                            backgroundColor: getBlockBackgroundColor(block.type, block.isCurrentEmployee ? true : false),
+                            border: `2px solid ${getBlockBorderColor(block.type)}`,
+                            color: getBlockTextColor(block.type),
                             borderRadius: '3px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '11px',
                             fontWeight: 'bold',
-                            color: '#ffffff',
                             textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-                            border: block.isCurrentEmployee ? '2px solid #000' : '1px solid rgba(0,0,0,0.3)',
                             boxShadow: block.isCurrentEmployee ? '0 1px 4px rgba(0,0,0,0.2)' : '0 1px 2px rgba(0,0,0,0.1)',
                             transform: block.isCurrentEmployee ? 'scale(1.02)' : 'scale(1)',
                             transition: 'all 0.2s ease',
                             letterSpacing: '0.5px'
                           }}
-                          title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ' (Histórico)'}`}
+                          title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ` (${block.leaveTypeName ||  block.type})`}`}
                         >
                           {formatTimeRange(block.startTime, block.endTime)}
                         </div>
@@ -251,19 +254,23 @@ export const TimelineGrid = ({
     );
   };
 
-  const getBlockColor = (type: string, currentEmployee?: boolean) => {
-    // Different shades for current vs historical employees
-    const baseColors = {
-      work: currentEmployee ? '#094a90' : 'rgba(9, 74, 144, 0.6)', // Azul fuerte vs azul tenue (misma tonalidad, más opaco)
-      break: currentEmployee ? '#ffc107' : 'rgba(255, 193, 7, 0.6)', // Amarillo fuerte vs amarillo tenue (misma tonalidad, más opaco)
-      off: '#dc3545' // Red for off time (same for all)
-    };
-
-    return baseColors[type as keyof typeof baseColors] || '#6c757d';
-  };
 
   const formatTimeRange = (start: string, end: string) => {
     return `${start}-${end}`;
+  };
+
+  const getBlockTypeLabel = (blockType: string): string => {
+    const typeLabels: { [key: string]: string } = {
+      work: 'Trabajo',
+      break: 'Pausa',
+      off: 'Ausencia',
+      vacation: 'Vacaciones',
+      sick: 'Enfermedad',
+      personal: 'Personal',
+      training: 'Capacitación'
+    };
+
+    return typeLabels[blockType.toLowerCase()] || blockType;
   };
 
   const renderSelectionCell = (row: ITimelineRow) => {
