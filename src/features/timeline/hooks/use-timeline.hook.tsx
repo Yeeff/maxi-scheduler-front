@@ -16,7 +16,9 @@ export default function useTimelineHook() {
   // State
   const [timelineData, setTimelineData] = useState<ITimelineRow[]>([]);
   const [companies, setCompanies] = useState<ICompany[]>([]);
+  const [employees, setEmployees] = useState<{ id: number; name: string; document?: string }[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
   const [selectedRows, setSelectedRows] = useState<ITimelineRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [isGeneratingSchedules, setIsGeneratingSchedules] = useState(false);
@@ -31,12 +33,13 @@ export default function useTimelineHook() {
   // Load initial data
   useEffect(() => {
     loadCompanies();
+    loadEmployees();
   }, []);
 
-  // Reload data when company filter changes
+  // Reload data when filters change
   useEffect(() => {
     loadTimelineData();
-  }, [selectedCompanyId]);
+  }, [selectedCompanyId, selectedEmployeeId]);
 
   const loadCompanies = async () => {
     try {
@@ -50,6 +53,18 @@ export default function useTimelineHook() {
     }
   };
 
+  const loadEmployees = async () => {
+    try {
+      const response = await get<{ id: number; name: string; document?: string }[]>("/api/employees-cache");
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        const employeesData = (response as any).data?.data || (response as any).data || [];
+        setEmployees(Array.isArray(employeesData) ? employeesData : []);
+      }
+    } catch (error) {
+      console.error("Error loading employees:", error);
+    }
+  };
+
   const loadTimelineData = async (specificWeekStart?: string | null) => {
     try {
       setLoading(true);
@@ -60,6 +75,11 @@ export default function useTimelineHook() {
       // Only add companyId if a specific company is selected (not null)
       if (selectedCompanyId !== null) {
         params.append('companyId', selectedCompanyId.toString());
+      }
+
+      // Only add employeeId if a specific employee is selected (not null)
+      if (selectedEmployeeId !== null) {
+        params.append('employeeId', selectedEmployeeId.toString());
       }
 
       // Add weekStart parameter if provided (for history mode)
@@ -111,6 +131,11 @@ export default function useTimelineHook() {
 
   const handleCompanyChange = (companyId: number | null) => {
     setSelectedCompanyId(companyId);
+    setSelectedRows([]); // Clear selection when filter changes
+  };
+
+  const handleEmployeeChange = (employeeId: number | null) => {
+    setSelectedEmployeeId(employeeId);
     setSelectedRows([]); // Clear selection when filter changes
   };
 
@@ -966,12 +991,15 @@ export default function useTimelineHook() {
   return {
     timelineData,
     companies,
+    employees,
     selectedCompanyId,
+    selectedEmployeeId,
     selectedRows,
     loading,
     isGeneratingWeek,
     weekStart,
     handleCompanyChange,
+    handleEmployeeChange,
     handleRowSelectionChange,
     handleCellClick,
     handleCreateCompany,

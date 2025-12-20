@@ -8,8 +8,11 @@ import { ITimelineRow } from "../../../common/interfaces/timeline.interfaces";
 interface ITimelineActionsProps {
   selectedRows: ITimelineRow[];
   companies: { id?: number; name: string }[];
+  employees: { id: number; name: string; document?: string }[];
   selectedCompanyId: number | null;
+  selectedEmployeeId: number | null;
   onCompanyChange: (companyId: number | null) => void;
+  onEmployeeChange: (employeeId: number | null) => void;
   onAssignEmployee: () => void;
   onUnassignEmployee: () => void;
   onMoveEmployee: () => void;
@@ -26,8 +29,11 @@ interface ITimelineActionsProps {
 export const TimelineActions = ({
   selectedRows,
   companies,
+  employees,
   selectedCompanyId,
+  selectedEmployeeId,
   onCompanyChange,
+  onEmployeeChange,
   onAssignEmployee,
   onUnassignEmployee,
   onMoveEmployee,
@@ -49,6 +55,14 @@ export const TimelineActions = ({
       value: company.id
     }))
   ];
+
+  const employeeOptions = [
+    { label: 'Ninguno', value: null },
+    ...employees.map(employee => ({
+      label: `${employee.name}${employee.document ? ` (${employee.document})` : ''}`,
+      value: employee.id
+    }))
+  ];
 return (
   <div className="timeline-actions" style={{ margin: '20px 0' }}>
     {/* Company Filter Section */}
@@ -59,23 +73,43 @@ return (
       backgroundColor: '#f8f9fa',
       marginBottom: '16px'
     }}>
-      <div className="company-filter">
-        <label className="text-black bold" style={{
-          display: 'block',
-          marginBottom: '6px',
-          fontSize: '14px',
-          fontWeight: '600'
-        }}>
-          Empresa/Cliente:
-        </label>
-        <Dropdown
-          value={selectedCompanyId}
-          options={companyOptions}
-          onChange={(e) => onCompanyChange(e.value)}
-          placeholder="Seleccionar empresa"
-          className="company-dropdown"
-          style={{ width: '250px' }}
-        />
+      <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
+        <div className="company-filter">
+          <label className="text-black bold" style={{
+            display: 'block',
+            marginBottom: '6px',
+            fontSize: '14px',
+            fontWeight: '600'
+          }}>
+            Empresa/Cliente:
+          </label>
+          <Dropdown
+            value={selectedCompanyId}
+            options={companyOptions}
+            onChange={(e) => onCompanyChange(e.value)}
+            placeholder="Seleccionar empresa"
+            className="company-dropdown"
+            style={{ width: '250px' }}
+          />
+        </div>
+        <div className="employee-filter">
+          <label className="text-black bold" style={{
+            display: 'block',
+            marginBottom: '6px',
+            fontSize: '14px',
+            fontWeight: '600'
+          }}>
+            Empleado:
+          </label>
+          <Dropdown
+            value={selectedEmployeeId}
+            options={employeeOptions}
+            onChange={(e) => onEmployeeChange(e.value)}
+            placeholder="Seleccionar empleado"
+            className="employee-dropdown"
+            style={{ width: '250px' }}
+          />
+        </div>
       </div>
     </div>
 

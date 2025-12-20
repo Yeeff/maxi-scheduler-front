@@ -15,12 +15,15 @@ const TimelinePage = (): React.JSX.Element => {
   const {
     timelineData,
     companies,
+    employees,
     selectedCompanyId,
+    selectedEmployeeId,
     selectedRows,
     loading,
     isGeneratingWeek,
     weekStart,
     handleCompanyChange,
+    handleEmployeeChange,
     handleRowSelectionChange,
     handleCellClick,
     handleCreateCompany,
@@ -113,8 +116,11 @@ const TimelinePage = (): React.JSX.Element => {
           <TimelineActions
             selectedRows={selectedRows}
             companies={companies}
+            employees={employees}
             selectedCompanyId={selectedCompanyId ?? null}
+            selectedEmployeeId={selectedEmployeeId ?? null}
             onCompanyChange={handleCompanyChange}
+            onEmployeeChange={handleEmployeeChange}
             onAssignEmployee={handleAssignEmployee}
             onUnassignEmployee={handleUnassignEmployee}
             onMoveEmployee={handleMoveEmployee}
