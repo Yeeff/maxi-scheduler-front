@@ -853,11 +853,15 @@ export default function useTimelineHook() {
   const toggleHistoryMode = () => {
     if (isHistoryMode) {
       // Exit history mode - go back to current week
+      setLoading(true);
+      setTimelineData([]); // Clear historical data immediately
       setIsHistoryMode(false);
       setCurrentWeekStart(null);
       loadTimelineData(); // Load current week
     } else {
       // Enter history mode - start with previous week
+      setLoading(true);
+      setTimelineData([]); // Clear current data immediately
       setIsHistoryMode(true);
       const previousWeek = getPreviousWeekStart();
       setCurrentWeekStart(previousWeek);
