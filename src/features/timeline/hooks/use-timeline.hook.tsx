@@ -74,8 +74,8 @@ export default function useTimelineHook() {
         let allPositions = timelineDataResponse.positions || [];
         setWeekStart(timelineDataResponse.weekStart || null); // Guardar weekStart
 
-        // Group positions by company when showing all companies (selectedCompanyId is null)
-        const groupedData = selectedCompanyId === null ? groupPositionsByCompany(allPositions) : allPositions;
+        // Always group positions by company for consistent organization
+        const groupedData = groupPositionsByCompany(allPositions);
 
         setTimelineData(groupedData);
 
