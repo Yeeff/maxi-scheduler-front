@@ -9,10 +9,14 @@ interface ITimelineActionsProps {
   selectedRows: ITimelineRow[];
   companies: { id?: number; name: string }[];
   employees: { id: number; name: string; document?: string }[];
+  leaveTypes: { id: number; name: string; code: string }[];
   selectedCompanyId: number | null;
   selectedEmployeeId: number | null;
+  selectedLeaveTypeId: number | null;
   onCompanyChange: (companyId: number | null) => void;
   onEmployeeChange: (employeeId: number | null) => void;
+  onLeaveTypeChange: (leaveTypeId: number | null) => void;
+  onClearFilters: () => void;
   onAssignEmployee: () => void;
   onUnassignEmployee: () => void;
   onMoveEmployee: () => void;
@@ -30,10 +34,14 @@ export const TimelineActions = ({
   selectedRows,
   companies,
   employees,
+  leaveTypes,
   selectedCompanyId,
   selectedEmployeeId,
+  selectedLeaveTypeId,
   onCompanyChange,
   onEmployeeChange,
+  onLeaveTypeChange,
+  onClearFilters,
   onAssignEmployee,
   onUnassignEmployee,
   onMoveEmployee,
@@ -61,6 +69,14 @@ export const TimelineActions = ({
     ...employees.map(employee => ({
       label: `${employee.name}${employee.document ? ` (${employee.document})` : ''}`,
       value: employee.id
+    }))
+  ];
+
+  const leaveTypeOptions = [
+    { label: 'Ninguno', value: null },
+    ...leaveTypes.map(leaveType => ({
+      label: leaveType.name,
+      value: leaveType.id
     }))
   ];
 return (
@@ -108,6 +124,48 @@ return (
             placeholder="Seleccionar empleado"
             className="employee-dropdown"
             style={{ width: '250px' }}
+          />
+        </div>
+        <div className="leave-type-filter">
+          <label className="text-black bold" style={{
+            display: 'block',
+            marginBottom: '6px',
+            fontSize: '14px',
+            fontWeight: '600'
+          }}>
+            Tipo de Bloque:
+          </label>
+          <Dropdown
+            value={selectedLeaveTypeId}
+            options={leaveTypeOptions}
+            onChange={(e) => onLeaveTypeChange(e.value)}
+            placeholder="Seleccionar tipo"
+            className="leave-type-dropdown"
+            style={{ width: '250px' }}
+          />
+        </div>
+        <div className="clear-filters" style={{ display: 'flex', alignItems: 'flex-end', marginLeft: '16px' }}>
+          <Button
+            label="Limpiar Filtros"
+            icon="pi pi-filter-slash"
+            onClick={onClearFilters}
+            className="p-button-secondary"
+            style={{
+              padding: '8px 16px',
+              fontSize: '14px',
+              fontWeight: '500',
+              border: '1px solid #6c757d',
+              backgroundColor: 'transparent',
+              color: '#6c757d'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = '#094a90';
+              e.currentTarget.style.color = '#094a90';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = '#6c757d';
+              e.currentTarget.style.color = '#6c757d';
+            }}
           />
         </div>
       </div>

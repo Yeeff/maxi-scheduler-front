@@ -17,8 +17,10 @@ export default function useTimelineHook() {
   const [timelineData, setTimelineData] = useState<ITimelineRow[]>([]);
   const [companies, setCompanies] = useState<ICompany[]>([]);
   const [employees, setEmployees] = useState<{ id: number; name: string; document?: string }[]>([]);
+  const [leaveTypes, setLeaveTypes] = useState<{ id: number; name: string; code: string }[]>([]);
   const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
+  const [selectedLeaveTypeId, setSelectedLeaveTypeId] = useState<number | null>(null);
   const [selectedRows, setSelectedRows] = useState<ITimelineRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [isGeneratingSchedules, setIsGeneratingSchedules] = useState(false);
@@ -34,12 +36,13 @@ export default function useTimelineHook() {
   useEffect(() => {
     loadCompanies();
     loadEmployees();
+    loadLeaveTypes();
   }, []);
 
   // Reload data when filters change
   useEffect(() => {
     loadTimelineData();
-  }, [selectedCompanyId, selectedEmployeeId]);
+  }, [selectedCompanyId, selectedEmployeeId, selectedLeaveTypeId]);
 
   const loadCompanies = async () => {
     try {
@@ -65,6 +68,18 @@ export default function useTimelineHook() {
     }
   };
 
+  const loadLeaveTypes = async () => {
+    try {
+      const response = await get<{ id: number; name: string; code: string }[]>("/api/leave-types");
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        const leaveTypesData = (response as any).data?.data || (response as any).data || [];
+        setLeaveTypes(Array.isArray(leaveTypesData) ? leaveTypesData : []);
+      }
+    } catch (error) {
+      console.error("Error loading leave types:", error);
+    }
+  };
+
   const loadTimelineData = async (specificWeekStart?: string | null) => {
     try {
       setLoading(true);
@@ -80,6 +95,11 @@ export default function useTimelineHook() {
       // Only add employeeId if a specific employee is selected (not null)
       if (selectedEmployeeId !== null) {
         params.append('employeeId', selectedEmployeeId.toString());
+      }
+
+      // Only add leaveTypeId if a specific leave type is selected (not null)
+      if (selectedLeaveTypeId !== null) {
+        params.append('leaveTypeId', selectedLeaveTypeId.toString());
       }
 
       // Add weekStart parameter if provided (for history mode)
@@ -137,6 +157,18 @@ export default function useTimelineHook() {
   const handleEmployeeChange = (employeeId: number | null) => {
     setSelectedEmployeeId(employeeId);
     setSelectedRows([]); // Clear selection when filter changes
+  };
+
+  const handleLeaveTypeChange = (leaveTypeId: number | null) => {
+    setSelectedLeaveTypeId(leaveTypeId);
+    setSelectedRows([]); // Clear selection when filter changes
+  };
+
+  const handleClearFilters = () => {
+    setSelectedCompanyId(null);
+    setSelectedEmployeeId(null);
+    setSelectedLeaveTypeId(null);
+    setSelectedRows([]); // Clear selection when filters are cleared
   };
 
   const handleRowSelectionChange = (rows: ITimelineRow[]) => {
@@ -992,14 +1024,18 @@ export default function useTimelineHook() {
     timelineData,
     companies,
     employees,
+    leaveTypes,
     selectedCompanyId,
     selectedEmployeeId,
+    selectedLeaveTypeId,
     selectedRows,
     loading,
     isGeneratingWeek,
     weekStart,
     handleCompanyChange,
     handleEmployeeChange,
+    handleLeaveTypeChange,
+    handleClearFilters,
     handleRowSelectionChange,
     handleCellClick,
     handleCreateCompany,
