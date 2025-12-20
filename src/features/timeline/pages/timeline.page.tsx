@@ -86,62 +86,65 @@ const TimelinePage = (): React.JSX.Element => {
       <div className="card-table">
         <div className="title-area" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <label className="text-black extra-large bold">Timeline de Horarios</label>
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <Button
-              label="Ver historial"
-              icon="pi pi-history"
-              onClick={toggleHistoryMode}
-              className="p-button-secondary"
-            />
-            <Button
-              label="Crear empresa"
-              icon="pi pi-plus"
-              onClick={handleCreateCompany}
-              className="p-button-secondary"
-            />
-            <Button
-              label="Crear posición"
-              icon="pi pi-plus"
-              onClick={handleCreatePosition}
-              disabled={!selectedCompanyId}
-              className="p-button-secondary"
-            />
-            <Button
-              label="Generar semana actual"
-              icon="pi pi-copy"
-              onClick={handleGenerateWeekFromPrevious}
-              loading={isGeneratingWeek}
-              className="p-button-primary"
-            />
-          </div>
+          {!isHistoryMode && (
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <Button
+                label="Ver historial"
+                icon="pi pi-history"
+                onClick={toggleHistoryMode}
+                className="p-button-secondary"
+              />
+              <Button
+                label="Crear empresa"
+                icon="pi pi-plus"
+                onClick={handleCreateCompany}
+                className="p-button-secondary"
+              />
+              <Button
+                label="Crear posición"
+                icon="pi pi-plus"
+                onClick={handleCreatePosition}
+                disabled={!selectedCompanyId}
+                className="p-button-secondary"
+              />
+              <Button
+                label="Generar semana actual"
+                icon="pi pi-copy"
+                onClick={handleGenerateWeekFromPrevious}
+                loading={isGeneratingWeek}
+                className="p-button-primary"
+              />
+            </div>
+          )}
         </div>
 
-        {!isHistoryMode ? (
-          <TimelineActions
-            selectedRows={selectedRows}
-            companies={companies}
-            employees={employees}
-            leaveTypes={leaveTypes}
-            selectedCompanyId={selectedCompanyId ?? null}
-            selectedEmployeeId={selectedEmployeeId ?? null}
-            selectedLeaveTypeId={selectedLeaveTypeId ?? null}
-            onCompanyChange={handleCompanyChange}
-            onEmployeeChange={handleEmployeeChange}
-            onLeaveTypeChange={handleLeaveTypeChange}
-            onClearFilters={handleClearFilters}
-            onAssignEmployee={handleAssignEmployee}
-            onUnassignEmployee={handleUnassignEmployee}
-            onMoveEmployee={handleMoveEmployee}
-            onLinkScheduleTemplate={handleLinkScheduleTemplate}
-            onChangeScheduleTemplate={handleChangeScheduleTemplate}
-            onGenerateSchedules={handleGenerateSchedules}
-            onBulkGenerateSchedules={handleBulkGenerateSchedules}
-            canAssignEmployee={canAssignEmployee}
-            canUnassignEmployee={canUnassignEmployee}
-            canAssociateTemplate={canAssociateTemplate}
-            canGenerateSchedules={canGenerateSchedules}
-          />
-        ) : (
+        <TimelineActions
+          selectedRows={selectedRows}
+          companies={companies}
+          employees={employees}
+          leaveTypes={leaveTypes}
+          selectedCompanyId={selectedCompanyId ?? null}
+          selectedEmployeeId={selectedEmployeeId ?? null}
+          selectedLeaveTypeId={selectedLeaveTypeId ?? null}
+          onCompanyChange={handleCompanyChange}
+          onEmployeeChange={handleEmployeeChange}
+          onLeaveTypeChange={handleLeaveTypeChange}
+          onClearFilters={handleClearFilters}
+          onAssignEmployee={handleAssignEmployee}
+          onUnassignEmployee={handleUnassignEmployee}
+          onMoveEmployee={handleMoveEmployee}
+          onLinkScheduleTemplate={handleLinkScheduleTemplate}
+          onChangeScheduleTemplate={handleChangeScheduleTemplate}
+          onGenerateSchedules={handleGenerateSchedules}
+          onBulkGenerateSchedules={handleBulkGenerateSchedules}
+          canAssignEmployee={canAssignEmployee}
+          canUnassignEmployee={canUnassignEmployee}
+          canAssociateTemplate={canAssociateTemplate}
+          canGenerateSchedules={canGenerateSchedules}
+          isHistoryMode={isHistoryMode}
+        />
+
+        {isHistoryMode && (
           <TimelineNavigation
             currentWeekDisplay={getCurrentWeekDisplay()}
             onPreviousWeek={navigateToPreviousWeek}

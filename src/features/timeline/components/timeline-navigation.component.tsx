@@ -16,7 +16,7 @@ export const TimelineNavigation = ({
 }: ITimelineNavigationProps) => {
   return (
     <div className="timeline-navigation" style={{
-      border: '1px solid #dee2e6',
+      border: '2px solid #094a90',
       borderRadius: '4px',
       padding: '12px',
       backgroundColor: 'white',
