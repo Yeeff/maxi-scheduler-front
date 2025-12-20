@@ -41,8 +41,8 @@ export default function useTimelineHook() {
 
   // Reload data when filters change
   useEffect(() => {
-    loadTimelineData();
-  }, [selectedCompanyId, selectedEmployeeId, selectedLeaveTypeId]);
+    loadTimelineData(isHistoryMode ? currentWeekStart : undefined);
+  }, [selectedCompanyId, selectedEmployeeId, selectedLeaveTypeId, isHistoryMode, currentWeekStart]);
 
   const loadCompanies = async () => {
     try {
