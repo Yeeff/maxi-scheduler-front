@@ -54,15 +54,13 @@ export default function useTimelineHook() {
     try {
       setLoading(true);
 
-      // Only load timeline data if a company is selected (not null means "Ninguna")
-      if (selectedCompanyId === null) {
-        setTimelineData([]);
-        return;
-      }
+      // Build query parameters
+      const params = new URLSearchParams();
 
-      const params = new URLSearchParams({
-        companyId: selectedCompanyId.toString()
-      });
+      // Only add companyId if a specific company is selected (not null)
+      if (selectedCompanyId !== null) {
+        params.append('companyId', selectedCompanyId.toString());
+      }
 
       // Add weekStart parameter if provided (for history mode)
       if (specificWeekStart) {
@@ -73,13 +71,18 @@ export default function useTimelineHook() {
 
       if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
         const timelineDataResponse = (response as any).data?.data || (response as any).data || { positions: [] };
-        setTimelineData(timelineDataResponse.positions || []);
+        let allPositions = timelineDataResponse.positions || [];
         setWeekStart(timelineDataResponse.weekStart || null); // Guardar weekStart
+
+        // Group positions by company when showing all companies (selectedCompanyId is null)
+        const groupedData = selectedCompanyId === null ? groupPositionsByCompany(allPositions) : allPositions;
+
+        setTimelineData(groupedData);
 
         // Update selectedRows to synchronize with new data
         const updatedSelectedRows = selectedRows
           .map(selectedRow =>
-            timelineDataResponse.positions.find((row: ITimelineRow) => row.position.id === selectedRow.position.id)
+            allPositions.find((row: ITimelineRow) => row.position.id === selectedRow.position.id)
           )
           .filter(Boolean) as ITimelineRow[];
         setSelectedRows(updatedSelectedRows);
@@ -890,6 +893,48 @@ export default function useTimelineHook() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+
+  // Group positions by company for display when showing all companies
+  const groupPositionsByCompany = (positions: ITimelineRow[]): ITimelineRow[] => {
+    // Group positions by company
+    const positionsByCompany = positions.reduce((acc, position) => {
+      const companyId = position.position.company?.id;
+      if (!companyId) return acc;
+
+      if (!acc[companyId]) {
+        acc[companyId] = {
+          company: position.position.company,
+          positions: []
+        };
+      }
+      acc[companyId].positions.push(position);
+      return acc;
+    }, {} as Record<number, { company: any, positions: ITimelineRow[] }>);
+
+    // Create a special "company header" row for each company
+    const groupedRows: ITimelineRow[] = [];
+
+    Object.values(positionsByCompany).forEach(({ company, positions: companyPositions }) => {
+      // Add company header row
+      const companyHeaderRow: ITimelineRow = {
+        id: `company-${company.id}`,
+        position: {
+          id: -company.id, // Negative ID to distinguish from real positions
+          name: company.name,
+          company: company,
+          status: true,
+          scheduleTemplate: { id: 0, name: '', description: '', details: [] }
+        },
+        employees: []
+      };
+      groupedRows.push(companyHeaderRow);
+
+      // Add positions for this company
+      groupedRows.push(...companyPositions);
+    });
+
+    return groupedRows;
   };
 
   const getCurrentWeekDisplay = (): string => {

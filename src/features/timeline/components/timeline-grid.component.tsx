@@ -103,6 +103,11 @@ export const TimelineGrid = ({
   };
 
   const handleRowSelection = (row: ITimelineRow) => {
+     // Don't allow selection of company header rows (negative IDs)
+     if (row.position.id < 0) {
+       return;
+     }
+
      const isSelected = selectedRows.some(selected => selected.id === row.id);
      if (isSelected) {
        onSelectionChange(selectedRows.filter(selected => selected.id !== row.id));
@@ -124,6 +129,11 @@ export const TimelineGrid = ({
   };
 
   const renderPositionEmployeeCell = (row: ITimelineRow) => {
+    // Company header rows don't have position-employee info
+    if (row.position.id < 0) {
+      return null;
+    }
+
     return (
       <div className="position-employee-cell">
         <div className="position-name text-black bold">{row.position.name}</div>
@@ -321,6 +331,11 @@ export const TimelineGrid = ({
   };
 
   const renderSelectionCell = (row: ITimelineRow) => {
+    // Don't show checkbox for company header rows
+    if (row.position.id < 0) {
+      return null;
+    }
+
     const isSelected = selectedRows.some(selected => selected.id === row.id);
     return (
       <Checkbox
@@ -386,8 +401,62 @@ export const TimelineGrid = ({
 
       {/* Employee Rows */}
       {data.length > 0 ? (
-        data.flatMap(row =>
-          row.employees && row.employees.length > 0
+        data.flatMap(row => {
+          // Check if this is a company header row (negative ID)
+          if (row.position.id < 0) {
+            return (
+              <div key={row.id} className="company-header-row" style={{
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: '#e3f2fd',
+                borderBottom: '2px solid #094a90',
+                minHeight: '40px',
+                fontWeight: 'bold',
+                color: '#094a90'
+              }}>
+                {/* Company Header Column */}
+                <div style={{
+                  width: '220px',
+                  padding: '8px 12px',
+                  fontSize: '14px',
+                  borderRight: '1px solid #dee2e6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div style={{
+                    width: '16px',
+                    height: '16px',
+                    backgroundColor: '#094a90',
+                    borderRadius: '50%',
+                    flexShrink: 0
+                  }}></div>
+                  <div style={{ flex: 1 }}>
+                    {row.position.name}
+                  </div>
+                </div>
+
+                {/* Days Columns - Empty for header */}
+                {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => (
+                  <div
+                    key={day}
+                    style={{
+                      flex: 1,
+                      padding: '8px 10px',
+                      textAlign: 'center',
+                      borderRight: '1px solid #dee2e6',
+                      backgroundColor: '#e3f2fd'
+                    }}
+                  >
+                    {/* Empty header cell */}
+                  </div>
+                ))}
+              </div>
+            );
+          }
+
+          // Regular position row
+          return row.employees && row.employees.length > 0
             ? row.employees.map((employee, index) => renderEmployeeRow(employee, row, index, row.employees))
             : [
                 <div key={row.id} className="no-employees-row" style={{
@@ -474,8 +543,8 @@ export const TimelineGrid = ({
                     </div>
                   ))}
                 </div>
-              ]
-        )
+              ];
+        })
       ) : (
         <div style={{
           padding: '40px',
