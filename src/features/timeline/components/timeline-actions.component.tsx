@@ -30,6 +30,7 @@ interface ITimelineActionsProps {
   canGenerateSchedules: boolean;
   navigateToPreviousWeek: () => void;
   navigateToNextWeek: () => void;
+  getCurrentWeekDisplay: () => string;
 }
 
 export const TimelineActions = ({
@@ -57,6 +58,7 @@ export const TimelineActions = ({
   canGenerateSchedules,
   navigateToPreviousWeek,
   navigateToNextWeek,
+  getCurrentWeekDisplay,
 }: ITimelineActionsProps) => {
   const hasSelectedRows = selectedRows.length > 0;
 
@@ -206,6 +208,15 @@ return (
             e.currentTarget.style.backgroundColor = 'transparent';
           }}
         />
+        <span style={{
+          fontSize: '14px',
+          fontWeight: '600',
+          color: '#094a90',
+          minWidth: '200px',
+          textAlign: 'center'
+        }}>
+          {getCurrentWeekDisplay()}
+        </span>
         <Button
           icon="pi pi-arrow-right"
           className="p-button-text p-button-secondary"

@@ -73,6 +73,7 @@ const TimelinePage = (): React.JSX.Element => {
     canGenerateSchedules,
     navigateToPreviousWeek,
     navigateToNextWeek,
+    getCurrentWeekDisplay,
   } = useTimelineHook();
 
   return (
@@ -129,6 +130,7 @@ const TimelinePage = (): React.JSX.Element => {
           canGenerateSchedules={canGenerateSchedules}
           navigateToPreviousWeek={navigateToPreviousWeek}
           navigateToNextWeek={navigateToNextWeek}
+          getCurrentWeekDisplay={getCurrentWeekDisplay}
         />
 
         {/* Selected items info - positioned above the table */}

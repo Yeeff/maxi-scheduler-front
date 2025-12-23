@@ -920,6 +920,26 @@ export default function useTimelineHook() {
     return `${year}-${month}-${day}`;
   };
 
+  const getCurrentWeekDisplay = (): string => {
+    if (!weekStart) return '';
+
+    // Parse as local date to avoid timezone shift
+    const [year, month, day] = weekStart.split('-').map(Number);
+    const startDate = new Date(year, month - 1, day);
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6);
+
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    };
+
+    return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+  };
+
   // Group positions by company for display when showing all companies
   const groupPositionsByCompany = (positions: ITimelineRow[]): ITimelineRow[] => {
     // Group positions by company
@@ -1041,5 +1061,6 @@ export default function useTimelineHook() {
     // Week navigation
     navigateToPreviousWeek,
     navigateToNextWeek,
+    getCurrentWeekDisplay,
   };
 }
