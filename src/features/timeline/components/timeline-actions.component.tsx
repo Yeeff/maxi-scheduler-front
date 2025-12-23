@@ -28,6 +28,7 @@ interface ITimelineActionsProps {
   canUnassignEmployee: boolean;
   canAssociateTemplate: boolean;
   canGenerateSchedules: boolean;
+  navigateToCurrentWeek: () => void;
   navigateToPreviousWeek: () => void;
   navigateToNextWeek: () => void;
   getCurrentWeekDisplay: () => string;
@@ -56,6 +57,7 @@ export const TimelineActions = ({
   canUnassignEmployee,
   canAssociateTemplate,
   canGenerateSchedules,
+  navigateToCurrentWeek,
   navigateToPreviousWeek,
   navigateToNextWeek,
   getCurrentWeekDisplay,
@@ -228,6 +230,26 @@ return (
               color: '#094a90',
               border: 'none',
               background: 'transparent'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(9, 74, 144, 0.1)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+            }}
+          />
+          <Button
+            label="Hoy"
+            className="p-button-text p-button-secondary"
+            onClick={navigateToCurrentWeek}
+            style={{
+              padding: '6px 12px',
+              borderRadius: '4px',
+              color: '#094a90',
+              border: '1px solid #094a90',
+              background: 'transparent',
+              fontSize: '12px',
+              fontWeight: '500'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = 'rgba(9, 74, 144, 0.1)';

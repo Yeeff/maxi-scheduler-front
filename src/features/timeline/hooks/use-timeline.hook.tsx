@@ -849,6 +849,10 @@ export default function useTimelineHook() {
   ];
 
   // Week navigation functions
+  const navigateToCurrentWeek = () => {
+    setWeekStart(null); // null will trigger loading current week
+  };
+
   const navigateToPreviousWeek = () => {
     if (!weekStart) return;
 
@@ -1060,6 +1064,7 @@ export default function useTimelineHook() {
     canAssociateTemplate,
     canGenerateSchedules,
     // Week navigation
+    navigateToCurrentWeek,
     navigateToPreviousWeek,
     navigateToNextWeek,
     getCurrentWeekDisplay,

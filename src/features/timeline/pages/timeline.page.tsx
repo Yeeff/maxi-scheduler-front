@@ -86,6 +86,7 @@ const TimelinePage = (): React.JSX.Element => {
     canUnassignEmployee,
     canAssociateTemplate,
     canGenerateSchedules,
+    navigateToCurrentWeek,
     navigateToPreviousWeek,
     navigateToNextWeek,
     getCurrentWeekDisplay,
@@ -143,6 +144,7 @@ const TimelinePage = (): React.JSX.Element => {
           canUnassignEmployee={canUnassignEmployee}
           canAssociateTemplate={canAssociateTemplate}
           canGenerateSchedules={canGenerateSchedules}
+          navigateToCurrentWeek={navigateToCurrentWeek}
           navigateToPreviousWeek={navigateToPreviousWeek}
           navigateToNextWeek={navigateToNextWeek}
           getCurrentWeekDisplay={getCurrentWeekDisplay}
