@@ -85,6 +85,7 @@ export const TimelineGrid = ({
    currentWeekStart,
  }: ITimelineGridProps) => {
   const contextMenuRef = useRef<ContextMenu>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const [contextMenuTarget, setContextMenuTarget] = useState<any>(null);
 
   // Calculate week dates for header display
@@ -126,6 +127,14 @@ export const TimelineGrid = ({
     if (onUnassignEmployee) {
       onUnassignEmployee(position);
     }
+  };
+
+  const handleCellHover = (positionId: string, day: string, isEnter: boolean) => {
+    if (!gridRef.current) return;
+    const cells = gridRef.current.querySelectorAll(`[data-position="${positionId}"][data-day="${day}"]`);
+    cells.forEach(cell => {
+      (cell as HTMLElement).style.backgroundColor = isEnter ? 'rgba(9, 74, 144, 0.1)' : '';
+    });
   };
 
   const renderPositionEmployeeCell = (row: ITimelineRow) => {
@@ -239,10 +248,14 @@ export const TimelineGrid = ({
             <div
               key={day}
               className="time-blocks-cell"
+              data-position={position.id}
+              data-day={day}
               onClick={() => {
                 console.log("Cell clicked - position:", position.position.name, "day:", day);
                 onCellClick(position, day);
               }}
+              onMouseEnter={() => handleCellHover(position.id, day, true)}
+              onMouseLeave={() => handleCellHover(position.id, day, false)}
               style={{
                 cursor: 'pointer',
                 minHeight: '32px',
@@ -375,7 +388,7 @@ export const TimelineGrid = ({
   };
 
   return (
-    <div className="timeline-custom-grid" style={{
+    <div ref={gridRef} className="timeline-custom-grid" style={{
       border: '1px solid #dee2e6',
       borderRadius: '4px',
       overflow: 'hidden'
@@ -538,10 +551,14 @@ export const TimelineGrid = ({
                     <div
                       key={day}
                       className="time-blocks-cell"
+                      data-position={row.id}
+                      data-day={day}
                       onClick={() => {
                         console.log("Cell clicked - position:", row.position.name, "day:", day, "(no employee assigned)");
                         onCellClick(row, day);
                       }}
+                      onMouseEnter={() => handleCellHover(row.id, day, true)}
+                      onMouseLeave={() => handleCellHover(row.id, day, false)}
                       style={{
                         cursor: 'pointer',
                         minHeight: '32px',
@@ -554,12 +571,6 @@ export const TimelineGrid = ({
                         padding: '4px',
                         backgroundColor: 'rgba(220, 53, 69, 0.03)',
                         transition: 'background-color 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(220, 53, 69, 0.08)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(220, 53, 69, 0.03)';
                       }}
                     >
                       <div className="no-schedule text-gray small" style={{
