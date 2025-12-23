@@ -80,6 +80,7 @@ export default function useTimelineHook() {
 
   const loadTimelineData = async (specificWeekStart?: string | null) => {
     try {
+      setTimelineData([]); // Clear old data immediately for better UX
       setLoading(true);
 
       // Build query parameters

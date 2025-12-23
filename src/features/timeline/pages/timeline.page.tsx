@@ -10,6 +10,21 @@ import TimeBlockEditorModal from "../components/time-block-editor-modal.componen
 import TimeBlockManagerModal from "../components/time-block-manager-modal.component";
 import useTimelineHook from "../hooks/use-timeline.hook";
 
+// Add spinner animation
+const spinnerStyle = `
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+`;
+
+// Inject the style
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = spinnerStyle;
+  document.head.appendChild(style);
+}
+
 const TimelinePage = (): React.JSX.Element => {
   const {
     timelineData,
@@ -151,7 +166,44 @@ const TimelinePage = (): React.JSX.Element => {
           </div>
         )}
 
-        <div className="timeline-container">
+        <div className="timeline-container" style={{ position: 'relative' }}>
+          {loading && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10
+            }}>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '16px'
+              }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '4px solid #f3f3f3',
+                  borderTop: '4px solid #094a90',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }}></div>
+                <span style={{
+                  color: '#094a90',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}>
+                  Cargando datos...
+                </span>
+              </div>
+            </div>
+          )}
           <TimelineGrid
             data={timelineData}
             selectedRows={selectedRows}
