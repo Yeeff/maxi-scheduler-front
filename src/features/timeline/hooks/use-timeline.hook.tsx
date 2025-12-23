@@ -882,21 +882,7 @@ export default function useTimelineHook() {
 
     const nextWeek = getNextWeekStart(weekStart);
 
-    // Prevent navigating to future weeks
-    const today = new Date();
-    const nextWeekDate = new Date(nextWeek);
-
-    if (nextWeekDate > today) {
-      setMessage({
-        title: "No disponible",
-        description: "No se puede navegar a semanas futuras.",
-        show: true,
-        OkTitle: "Aceptar",
-        background: true,
-      });
-      return;
-    }
-
+    // Allow navigation to future weeks
     setWeekStart(nextWeek);
   };
 
