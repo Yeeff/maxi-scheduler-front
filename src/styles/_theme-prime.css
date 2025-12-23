@@ -1,3 +1,11 @@
+@font-face {
+  font-family: "PrimeIcons";
+  src: url("https://cdn.jsdelivr.net/npm/primeicons@7.0.0/fonts/primeicons.eot");
+  src: url("https://cdn.jsdelivr.net/npm/primeicons@7.0.0/fonts/primeicons.eot?#iefix") format("embedded-opentype"), url("https://cdn.jsdelivr.net/npm/primeicons@7.0.0/fonts/primeicons.woff2") format("woff2"), url("https://cdn.jsdelivr.net/npm/primeicons@7.0.0/fonts/primeicons.woff") format("woff"), url("https://cdn.jsdelivr.net/npm/primeicons@7.0.0/fonts/primeicons.ttf") format("truetype"), url("https://cdn.jsdelivr.net/npm/primeicons@7.0.0/fonts/primeicons.svg?#primeicons") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   --surface-a:#ffffff;
   --surface-b:#f8f9fa;
@@ -76,6 +84,7 @@
 
 .pi {
   font-size: 1rem;
+  font-family: "PrimeIcons" !important;
 }
 
 .p-icon {

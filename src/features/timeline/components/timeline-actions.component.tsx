@@ -153,7 +153,7 @@ return (
         <div className="clear-filters" style={{ display: 'flex', alignItems: 'flex-end', marginLeft: '16px' }}>
           <Button
             label="Limpiar Filtros"
-            icon="pi pi-filter-slash"
+            icon="pi pi-filter"
             onClick={onClearFilters}
             className="p-button-secondary"
             style={{
