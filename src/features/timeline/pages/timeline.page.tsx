@@ -2,7 +2,6 @@ import React from "react";
 import { Button } from "primereact/button";
 import { TimelineGrid } from "../components/timeline-grid.component";
 import { TimelineActions } from "../components/timeline-actions.component";
-import { TimelineNavigation } from "../components/timeline-navigation.component";
 import AssignEmployeeModal from "../components/assign-employee-modal.component";
 import ChangeScheduleTemplateModal from "../components/change-schedule-template-modal.component";
 import { CreateCompanyModal } from "../components/create-company-modal.component";
@@ -72,13 +71,8 @@ const TimelinePage = (): React.JSX.Element => {
     canUnassignEmployee,
     canAssociateTemplate,
     canGenerateSchedules,
-    // History mode
-    isHistoryMode,
-    toggleHistoryMode,
     navigateToPreviousWeek,
     navigateToNextWeek,
-    getCurrentWeekDisplay,
-    currentWeekStart,
   } = useTimelineHook();
 
   return (
@@ -86,36 +80,28 @@ const TimelinePage = (): React.JSX.Element => {
       <div className="card-table">
         <div className="title-area" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <label className="text-black extra-large bold">Timeline de Horarios</label>
-          {!isHistoryMode && (
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-              <Button
-                label="Ver historial"
-                icon="pi pi-history"
-                onClick={toggleHistoryMode}
-                className="p-button-secondary"
-              />
-              <Button
-                label="Crear empresa"
-                icon="pi pi-plus"
-                onClick={handleCreateCompany}
-                className="p-button-secondary"
-              />
-              <Button
-                label="Crear posición"
-                icon="pi pi-plus"
-                onClick={handleCreatePosition}
-                disabled={!selectedCompanyId}
-                className="p-button-secondary"
-              />
-              <Button
-                label="Generar semana actual"
-                icon="pi pi-copy"
-                onClick={handleGenerateWeekFromPrevious}
-                loading={isGeneratingWeek}
-                className="p-button-primary"
-              />
-            </div>
-          )}
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <Button
+              label="Crear empresa"
+              icon="pi pi-plus"
+              onClick={handleCreateCompany}
+              className="p-button-secondary"
+            />
+            <Button
+              label="Crear posición"
+              icon="pi pi-plus"
+              onClick={handleCreatePosition}
+              disabled={!selectedCompanyId}
+              className="p-button-secondary"
+            />
+            <Button
+              label="Generar semana actual"
+              icon="pi pi-copy"
+              onClick={handleGenerateWeekFromPrevious}
+              loading={isGeneratingWeek}
+              className="p-button-primary"
+            />
+          </div>
         </div>
 
         <TimelineActions
@@ -141,17 +127,9 @@ const TimelinePage = (): React.JSX.Element => {
           canUnassignEmployee={canUnassignEmployee}
           canAssociateTemplate={canAssociateTemplate}
           canGenerateSchedules={canGenerateSchedules}
-          isHistoryMode={isHistoryMode}
+          navigateToPreviousWeek={navigateToPreviousWeek}
+          navigateToNextWeek={navigateToNextWeek}
         />
-
-        {isHistoryMode && (
-          <TimelineNavigation
-            currentWeekDisplay={getCurrentWeekDisplay()}
-            onPreviousWeek={navigateToPreviousWeek}
-            onNextWeek={navigateToNextWeek}
-            onExitHistory={toggleHistoryMode}
-          />
-        )}
 
         {/* Selected items info - positioned above the table */}
         {selectedRows.length > 0 && (
@@ -179,7 +157,7 @@ const TimelinePage = (): React.JSX.Element => {
             onCellClick={handleCellClick}
             contextMenuModel={contextMenuModel}
             loading={loading}
-            currentWeekStart={isHistoryMode ? currentWeekStart : weekStart}
+            currentWeekStart={weekStart}
           />
         </div>
 

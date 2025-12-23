@@ -26,8 +26,6 @@ export default function useTimelineHook() {
   const [isGeneratingSchedules, setIsGeneratingSchedules] = useState(false);
   const [isGeneratingWeek, setIsGeneratingWeek] = useState(false);
   const [weekStart, setWeekStart] = useState<string | null>(null);
-  const [isHistoryMode, setIsHistoryMode] = useState(false);
-  const [currentWeekStart, setCurrentWeekStart] = useState<string | null>(null);
 
   // Services
   const { get, put, post } = useCrudService(process.env.urlApiScheduler);
@@ -39,10 +37,10 @@ export default function useTimelineHook() {
     loadLeaveTypes();
   }, []);
 
-  // Reload data when filters change
+  // Reload data when filters or week start change
   useEffect(() => {
-    loadTimelineData(isHistoryMode ? currentWeekStart : undefined);
-  }, [selectedCompanyId, selectedEmployeeId, selectedLeaveTypeId, isHistoryMode, currentWeekStart]);
+    loadTimelineData(weekStart);
+  }, [selectedCompanyId, selectedEmployeeId, selectedLeaveTypeId, weekStart]);
 
   const loadCompanies = async () => {
     try {
@@ -849,30 +847,11 @@ export default function useTimelineHook() {
     },
   ];
 
-  // History mode functions
-  const toggleHistoryMode = () => {
-    if (isHistoryMode) {
-      // Exit history mode - go back to current week
-      setLoading(true);
-      setTimelineData([]); // Clear historical data immediately
-      setIsHistoryMode(false);
-      setCurrentWeekStart(null);
-      loadTimelineData(); // Load current week
-    } else {
-      // Enter history mode - start with previous week
-      setLoading(true);
-      setTimelineData([]); // Clear current data immediately
-      setIsHistoryMode(true);
-      const previousWeek = getPreviousWeekStart();
-      setCurrentWeekStart(previousWeek);
-      loadTimelineData(previousWeek);
-    }
-  };
-
+  // Week navigation functions
   const navigateToPreviousWeek = () => {
-    if (!isHistoryMode || !currentWeekStart) return;
+    if (!weekStart) return;
 
-    const previousWeek = getPreviousWeekStart(currentWeekStart);
+    const previousWeek = getPreviousWeekStart(weekStart);
 
     // Prevent navigating more than 1 year back
     const oneYearAgo = new Date();
@@ -890,14 +869,13 @@ export default function useTimelineHook() {
       return;
     }
 
-    setCurrentWeekStart(previousWeek);
-    loadTimelineData(previousWeek);
+    setWeekStart(previousWeek);
   };
 
   const navigateToNextWeek = () => {
-    if (!isHistoryMode || !currentWeekStart) return;
+    if (!weekStart) return;
 
-    const nextWeek = getNextWeekStart(currentWeekStart);
+    const nextWeek = getNextWeekStart(weekStart);
 
     // Prevent navigating to future weeks
     const today = new Date();
@@ -914,29 +892,15 @@ export default function useTimelineHook() {
       return;
     }
 
-    setCurrentWeekStart(nextWeek);
-    loadTimelineData(nextWeek);
+    setWeekStart(nextWeek);
   };
 
-  const getWeekStart = (date: Date): Date => {
-    const d = new Date(date);
-    const day = d.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
-    return new Date(d.setDate(diff));
-  };
-
-  const getPreviousWeekStart = (fromDate?: string): string => {
-    let baseDate: Date;
-    if (fromDate) {
-      // Parse as local date to avoid timezone shift
-      const [year, month, day] = fromDate.split('-').map(Number);
-      baseDate = new Date(year, month - 1, day);
-    } else {
-      baseDate = new Date();
-    }
-    const currentWeekStart = getWeekStart(baseDate);
-    const previousWeek = new Date(currentWeekStart);
-    previousWeek.setDate(currentWeekStart.getDate() - 7);
+  const getPreviousWeekStart = (fromDate: string): string => {
+    // Parse as local date to avoid timezone shift
+    const [year, month, day] = fromDate.split('-').map(Number);
+    const baseDate = new Date(year, month - 1, day);
+    const previousWeek = new Date(baseDate);
+    previousWeek.setDate(baseDate.getDate() - 7);
     return formatLocalDate(previousWeek);
   };
 
@@ -998,25 +962,6 @@ export default function useTimelineHook() {
     return groupedRows;
   };
 
-  const getCurrentWeekDisplay = (): string => {
-    if (!isHistoryMode || !currentWeekStart) return '';
-
-    // Parse as local date to avoid timezone shift
-    const [year, month, day] = currentWeekStart.split('-').map(Number);
-    const startDate = new Date(year, month - 1, day);
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 6);
-
-    const formatDate = (date: Date) => {
-      return date.toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-    };
-
-    return `${formatDate(startDate)} - ${formatDate(endDate)}`;
-  };
 
   // Computed properties for button states
   const canAssignEmployee = selectedRows.length === 1 && !selectedRows[0]?.position.employeeCache;
@@ -1093,12 +1038,8 @@ export default function useTimelineHook() {
     canUnassignEmployee,
     canAssociateTemplate,
     canGenerateSchedules,
-    // History mode
-    isHistoryMode,
-    toggleHistoryMode,
+    // Week navigation
     navigateToPreviousWeek,
     navigateToNextWeek,
-    getCurrentWeekDisplay,
-    currentWeekStart,
   };
 }

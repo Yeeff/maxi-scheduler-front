@@ -28,7 +28,8 @@ interface ITimelineActionsProps {
   canUnassignEmployee: boolean;
   canAssociateTemplate: boolean;
   canGenerateSchedules: boolean;
-  isHistoryMode?: boolean;
+  navigateToPreviousWeek: () => void;
+  navigateToNextWeek: () => void;
 }
 
 export const TimelineActions = ({
@@ -54,7 +55,8 @@ export const TimelineActions = ({
   canUnassignEmployee,
   canAssociateTemplate,
   canGenerateSchedules,
-  isHistoryMode = false,
+  navigateToPreviousWeek,
+  navigateToNextWeek,
 }: ITimelineActionsProps) => {
   const hasSelectedRows = selectedRows.length > 0;
 
@@ -174,20 +176,55 @@ return (
     </div>
 
     {/* Actions Buttons Section */}
-    {!isHistoryMode && (
-      <div className="actions-buttons-section" style={{
-        border: '1px solid #dee2e6',
-        borderRadius: '4px',
-        padding: '12px',
-        backgroundColor: 'white'
+    <div className="actions-buttons-section" style={{
+      border: '1px solid #dee2e6',
+      borderRadius: '4px',
+      padding: '12px',
+      backgroundColor: 'white'
+    }}>
+      <div className="toolbar-actions" style={{
+        display: 'flex',
+        gap: '16px',
+        alignItems: 'center',
+        flexWrap: 'wrap'
       }}>
-        <div className="toolbar-actions" style={{
-          display: 'flex',
-          gap: '16px',
-          alignItems: 'center',
-          flexWrap: 'wrap'
-        }}>
-            <Button
+        <Button
+          icon="pi pi-arrow-left"
+          className="p-button-text p-button-secondary"
+          onClick={navigateToPreviousWeek}
+          style={{
+            padding: '8px',
+            borderRadius: '4px',
+            color: '#094a90',
+            border: 'none',
+            background: 'transparent'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(9, 74, 144, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        />
+        <Button
+          icon="pi pi-arrow-right"
+          className="p-button-text p-button-secondary"
+          onClick={navigateToNextWeek}
+          style={{
+            padding: '8px',
+            borderRadius: '4px',
+            color: '#094a90',
+            border: 'none',
+            background: 'transparent'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(9, 74, 144, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        />
+        <Button
               label="Asignar empleado"
               icon="pi pi-user-plus"
               className="timeline-action-button"
@@ -315,9 +352,8 @@ return (
                 e.currentTarget.style.backgroundColor = 'transparent';
               }}
             />
-          </div>
         </div>
-    )}
+      </div>
     </div>
   );
 };
