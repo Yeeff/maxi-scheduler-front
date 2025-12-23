@@ -309,9 +309,9 @@ div[id="single-spa-application:@horizonx/scheduler"] {
 
 .p-button-download {
   background-color: rgba(0, 0, 0, 0);
-  color: #524dec;
+  color: #094a90;
   border-radius: 100px;
-  border: 1px solid #524dec;
+  border: 1px solid #094a90;
   cursor: pointer;
   margin: 0.5em;
 }
@@ -340,7 +340,7 @@ div[id="single-spa-application:@horizonx/scheduler"] {
 }
 
 .payroll-relatives-button-confirm {
-  @include generate-button(0, #524dec, transparent, transparent solid 1px);
+  @include generate-button(0, #094a90, transparent, transparent solid 1px);
   font-size: 2em;
   margin: 0.2em;
 
@@ -365,7 +365,7 @@ div[id="single-spa-application:@horizonx/scheduler"] {
 }
 
 .payroll-relatives-button-cancel-edit {
-  @include generate-button(0, #524dec, transparent, transparent solid 1px);
+  @include generate-button(0, #094a90, transparent, transparent solid 1px);
   font-size: 2em;
   margin: 0.2em;
 

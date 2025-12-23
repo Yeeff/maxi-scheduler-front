@@ -189,17 +189,15 @@ const TimeBlockManagerModal = ({
 
   const renderActions = (row: ITimeBlock) => {
     return (
-      <div style={{ display: 'flex', gap: '8px' }}>
+      <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
         <Button
-          label="Editar"
           icon="pi pi-pencil"
-          className="p-button-sm p-button-primary"
+          className="p-button-icon-only p-button-sm p-button-primary"
           onClick={() => handleEditBlock(row)}
         />
         <Button
-          label="Eliminar"
           icon="pi pi-trash"
-          className="p-button-sm p-button-danger"
+          className="p-button-icon-only p-button-sm p-button-danger"
           onClick={() => handleDeleteBlock(row)}
         />
       </div>
@@ -270,7 +268,7 @@ const TimeBlockManagerModal = ({
           <Column field="startTime" header="Inicio" sortable style={{ fontSize: '14px' }} />
           <Column field="endTime" header="Fin" sortable style={{ fontSize: '14px' }} />
           <Column field="type" header="Tipo" body={renderType} sortable style={{ fontSize: '14px' }} />
-          <Column header="Acciones" body={renderActions} style={{ width: '200px' }} />
+          <Column header="Acciones" body={renderActions} style={{ width: '120px' }} />
         </DataTable>
       </Dialog>
 
