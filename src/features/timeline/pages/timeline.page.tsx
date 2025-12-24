@@ -37,6 +37,7 @@ const TimelinePage = (): React.JSX.Element => {
     selectedRows,
     loading,
     isGeneratingWeek,
+    isGeneratingMonth,
     weekStart,
     handleCompanyChange,
     handleEmployeeChange,
@@ -54,6 +55,7 @@ const TimelinePage = (): React.JSX.Element => {
     handleGenerateSchedules,
     handleBulkGenerateSchedules,
     handleGenerateWeekFromPrevious,
+    handleGenerateMonthFromPrevious,
     contextMenuModel,
     showAssignEmployeeModal,
     setShowAssignEmployeeModal,
@@ -116,6 +118,13 @@ const TimelinePage = (): React.JSX.Element => {
               icon="pi pi-copy"
               onClick={handleGenerateWeekFromPrevious}
               loading={isGeneratingWeek}
+              className="p-button-primary"
+            />
+            <Button
+              label="Generar mes actual"
+              icon="pi pi-calendar"
+              onClick={handleGenerateMonthFromPrevious}
+              loading={isGeneratingMonth}
               className="p-button-primary"
             />
           </div>

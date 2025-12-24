@@ -25,7 +25,9 @@ export default function useTimelineHook() {
   const [loading, setLoading] = useState(false);
   const [isGeneratingSchedules, setIsGeneratingSchedules] = useState(false);
   const [isGeneratingWeek, setIsGeneratingWeek] = useState(false);
+  const [isGeneratingMonth, setIsGeneratingMonth] = useState(false);
   const [weekStart, setWeekStart] = useState<string | null>(null);
+  const [justLoadedCurrent, setJustLoadedCurrent] = useState(false);
 
   // Services
   const { get, put, post } = useCrudService(process.env.urlApiScheduler);
@@ -39,8 +41,12 @@ export default function useTimelineHook() {
 
   // Reload data when filters or week start change
   useEffect(() => {
+    if (justLoadedCurrent) {
+      setJustLoadedCurrent(false);
+      return;
+    }
     loadTimelineData(weekStart);
-  }, [selectedCompanyId, selectedEmployeeId, selectedLeaveTypeId, weekStart]);
+  }, [selectedCompanyId, selectedEmployeeId, selectedLeaveTypeId, weekStart, justLoadedCurrent]);
 
   const loadCompanies = async () => {
     try {
@@ -112,6 +118,10 @@ export default function useTimelineHook() {
         const timelineDataResponse = (response as any).data?.data || (response as any).data || { positions: [] };
         let allPositions = timelineDataResponse.positions || [];
         setWeekStart(timelineDataResponse.weekStart || null); // Guardar weekStart
+
+        if (specificWeekStart === null) {
+          setJustLoadedCurrent(true);
+        }
 
         // Always group positions by company for consistent organization
         const groupedData = groupPositionsByCompany(allPositions);
@@ -724,6 +734,51 @@ export default function useTimelineHook() {
     }
   };
 
+  const handleGenerateMonthFromPrevious = async () => {
+    try {
+      setIsGeneratingMonth(true);
+
+      // Calculate reference date (today)
+      const referenceDate = formatLocalDate(new Date());
+
+      const request = {
+        referenceDate: referenceDate
+      };
+
+      const response = await post("/api/daily-schedules/generate-month", request);
+
+      if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
+        const result = (response as any).data?.data || (response as any).data || {};
+
+        setMessage({
+          title: "Mes Generado",
+          description: result.message || `Se generaron ${result.generatedCount || 0} horarios desde el mes anterior.`,
+          show: true,
+          OkTitle: "Aceptar",
+          onOk: () => {
+            loadTimelineData();
+            setMessage((prev) => ({ ...prev, show: false }));
+          },
+          background: true,
+        });
+      } else {
+        throw new Error(response.operation.message || "Error al generar el mes");
+      }
+    } catch (error) {
+      console.error("Error generating month:", error);
+      const errorMessage = (error as any)?.response?.data?.operation?.message || (error as any)?.message || "Error al generar el mes desde el anterior";
+      setMessage({
+        title: "Error",
+        description: errorMessage,
+        show: true,
+        OkTitle: "Aceptar",
+        background: true,
+      });
+    } finally {
+      setIsGeneratingMonth(false);
+    }
+  };
+
   // Time block editor handlers
   const handleTimeBlockSave = async (timeBlockId: number, employeeId: number, startTime: string, endTime: string, leaveTypeId: number) => {
     try {
@@ -991,6 +1046,7 @@ export default function useTimelineHook() {
     selectedRows,
     loading,
     isGeneratingWeek,
+    isGeneratingMonth,
     weekStart,
     handleCompanyChange,
     handleEmployeeChange,
@@ -1008,6 +1064,7 @@ export default function useTimelineHook() {
     handleGenerateSchedules,
     handleBulkGenerateSchedules,
     handleGenerateWeekFromPrevious,
+    handleGenerateMonthFromPrevious,
     contextMenuModel,
     // Modal state
     showAssignEmployeeModal,
