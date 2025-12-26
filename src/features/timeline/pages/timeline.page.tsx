@@ -138,6 +138,7 @@ const TimelinePage = (): React.JSX.Element => {
           selectedCompanyId={selectedCompanyId ?? null}
           selectedEmployeeId={selectedEmployeeId ?? null}
           selectedLeaveTypeId={selectedLeaveTypeId ?? null}
+          loading={loading}
           onCompanyChange={handleCompanyChange}
           onEmployeeChange={handleEmployeeChange}
           onLeaveTypeChange={handleLeaveTypeChange}

@@ -13,6 +13,7 @@ interface ITimelineActionsProps {
   selectedCompanyId: number | null;
   selectedEmployeeId: number | null;
   selectedLeaveTypeId: number | null;
+  loading: boolean;
   onCompanyChange: (companyId: number | null) => void;
   onEmployeeChange: (employeeId: number | null) => void;
   onLeaveTypeChange: (leaveTypeId: number | null) => void;
@@ -42,6 +43,7 @@ export const TimelineActions = ({
   selectedCompanyId,
   selectedEmployeeId,
   selectedLeaveTypeId,
+  loading,
   onCompanyChange,
   onEmployeeChange,
   onLeaveTypeChange,
@@ -197,15 +199,19 @@ return (
             icon="pi pi-arrow-left"
             className="p-button-text p-button-secondary"
             onClick={navigateToPreviousWeek}
+            disabled={loading}
             style={{
               padding: '8px',
               borderRadius: '4px',
-              color: '#094a90',
+              color: loading ? '#6c757d' : '#094a90',
               border: 'none',
-              background: 'transparent'
+              background: 'transparent',
+              cursor: loading ? 'not-allowed' : 'pointer'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(9, 74, 144, 0.1)';
+              if (!loading) {
+                e.currentTarget.style.backgroundColor = 'rgba(9, 74, 144, 0.1)';
+              }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
@@ -224,15 +230,19 @@ return (
             icon="pi pi-arrow-right"
             className="p-button-text p-button-secondary"
             onClick={navigateToNextWeek}
+            disabled={loading}
             style={{
               padding: '8px',
               borderRadius: '4px',
-              color: '#094a90',
+              color: loading ? '#6c757d' : '#094a90',
               border: 'none',
-              background: 'transparent'
+              background: 'transparent',
+              cursor: loading ? 'not-allowed' : 'pointer'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(9, 74, 144, 0.1)';
+              if (!loading) {
+                e.currentTarget.style.backgroundColor = 'rgba(9, 74, 144, 0.1)';
+              }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
@@ -242,17 +252,21 @@ return (
             label="Hoy"
             className="p-button-text p-button-secondary"
             onClick={navigateToCurrentWeek}
+            disabled={loading}
             style={{
               padding: '6px 12px',
               borderRadius: '4px',
-              color: '#094a90',
-              border: '1px solid #094a90',
+              color: loading ? '#6c757d' : '#094a90',
+              border: loading ? '1px solid #6c757d' : '1px solid #094a90',
               background: 'transparent',
               fontSize: '12px',
-              fontWeight: '500'
+              fontWeight: '500',
+              cursor: loading ? 'not-allowed' : 'pointer'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'rgba(9, 74, 144, 0.1)';
+              if (!loading) {
+                e.currentTarget.style.backgroundColor = 'rgba(9, 74, 144, 0.1)';
+              }
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = 'transparent';
