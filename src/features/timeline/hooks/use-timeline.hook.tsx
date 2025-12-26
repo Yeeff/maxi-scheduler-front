@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { AppContext } from "../../../common/contexts/app.context";
@@ -28,6 +28,9 @@ export default function useTimelineHook() {
   const [isGeneratingMonth, setIsGeneratingMonth] = useState(false);
   const [weekStart, setWeekStart] = useState<string | null>(null);
   const [justLoadedCurrent, setJustLoadedCurrent] = useState(false);
+
+  // Refs
+  const loadingTimelineRef = useRef(false);
 
   // Services
   const { get, put, post } = useCrudService(process.env.urlApiScheduler);
@@ -85,7 +88,10 @@ export default function useTimelineHook() {
   };
 
   const loadTimelineData = async (specificWeekStart?: string | null) => {
+    if (loadingTimelineRef.current) return; // Prevent concurrent calls
+
     try {
+      loadingTimelineRef.current = true;
       setTimelineData([]); // Clear old data immediately for better UX
       setLoading(true);
 
@@ -155,6 +161,7 @@ export default function useTimelineHook() {
       });
     } finally {
       setLoading(false);
+      loadingTimelineRef.current = false;
     }
   };
 
