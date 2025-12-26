@@ -346,7 +346,7 @@ export default function useTimelineHook() {
 
       if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
         // Reload timeline data to show the new position
-        await loadTimelineData();
+        await loadTimelineData(weekStart);
 
         setMessage({
           title: "Posición Creada",
@@ -414,7 +414,7 @@ export default function useTimelineHook() {
           OkTitle: "Aceptar",
           onOk: () => {
             // Reload timeline data
-            loadTimelineData();
+            loadTimelineData(weekStart);
             setMessage((prev) => ({ ...prev, show: false }));
           },
           background: true,
@@ -493,7 +493,7 @@ export default function useTimelineHook() {
         OkTitle: "Aceptar",
         onOk: () => {
           // Reload timeline data
-          loadTimelineData();
+          loadTimelineData(weekStart);
           setMessage((prev) => ({ ...prev, show: false }));
         },
         background: true,
@@ -549,7 +549,7 @@ export default function useTimelineHook() {
           OkTitle: "Aceptar",
           onOk: () => {
             // Reload timeline data
-            loadTimelineData();
+            loadTimelineData(weekStart);
             setMessage((prev) => ({ ...prev, show: false }));
           },
           background: true,
@@ -644,7 +644,7 @@ export default function useTimelineHook() {
             OkTitle: "Aceptar",
             onOk: () => {
               // Reload timeline data
-              loadTimelineData();
+              loadTimelineData(weekStart);
               setMessage((prev) => ({ ...prev, show: false }));
             },
             background: true,
@@ -658,7 +658,7 @@ export default function useTimelineHook() {
             OkTitle: "Aceptar",
             onOk: () => {
               // Reload timeline data even with partial success
-              loadTimelineData();
+              loadTimelineData(weekStart);
               setMessage((prev) => ({ ...prev, show: false }));
             },
             background: true,
@@ -718,7 +718,7 @@ export default function useTimelineHook() {
           show: true,
           OkTitle: "Aceptar",
           onOk: () => {
-            loadTimelineData();
+            loadTimelineData(weekStart);
             setMessage((prev) => ({ ...prev, show: false }));
           },
           background: true,
@@ -763,7 +763,7 @@ export default function useTimelineHook() {
           show: true,
           OkTitle: "Aceptar",
           onOk: () => {
-            loadTimelineData();
+            loadTimelineData(weekStart);
             setMessage((prev) => ({ ...prev, show: false }));
           },
           background: true,
@@ -798,7 +798,7 @@ export default function useTimelineHook() {
         show: true,
         OkTitle: "Aceptar",
         onOk: () => {
-          loadTimelineData();
+          loadTimelineData(weekStart);
           setMessage((prev) => ({ ...prev, show: false }));
         },
         background: true,
@@ -841,7 +841,7 @@ export default function useTimelineHook() {
           show: true,
           OkTitle: "Aceptar",
           onOk: () => {
-            loadTimelineData();
+            loadTimelineData(weekStart);
             setMessage((prev) => ({ ...prev, show: false }));
           },
           background: true,

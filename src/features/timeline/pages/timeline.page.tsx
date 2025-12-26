@@ -272,7 +272,7 @@ const TimelinePage = (): React.JSX.Element => {
         <TimeBlockManagerModal
           visible={showTimeBlockManagerModal}
           onHide={() => setShowTimeBlockManagerModal(false)}
-          onRefresh={loadTimelineData}
+          onRefresh={() => loadTimelineData(weekStart)}
           positionId={selectedPositionForManager || 0}
           positionName={timelineData.find(row => row.position.id === selectedPositionForManager)?.position.name || ''}
           date={getDayDate(selectedDayForManager || '') || ''}
