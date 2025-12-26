@@ -1042,6 +1042,9 @@ export default function useTimelineHook() {
   const canAssociateTemplate = selectedRows.length === 1 && !!selectedRows[0]?.position.employeeCache;
   const canGenerateSchedules = selectedRows.length > 0;
 
+  // Check if current week is current or future (allow actions)
+  const isCurrentOrFutureWeek = !weekStart || new Date(weekStart).getTime() + 6 * 24 * 60 * 60 * 1000 >= new Date().getTime();
+
   return {
     timelineData,
     companies,
@@ -1118,5 +1121,7 @@ export default function useTimelineHook() {
     navigateToPreviousWeek,
     navigateToNextWeek,
     getCurrentWeekDisplay,
+    // Week state
+    isCurrentOrFutureWeek,
   };
 }

@@ -92,6 +92,7 @@ const TimelinePage = (): React.JSX.Element => {
     navigateToPreviousWeek,
     navigateToNextWeek,
     getCurrentWeekDisplay,
+    isCurrentOrFutureWeek,
   } = useTimelineHook();
 
   return (
@@ -158,6 +159,7 @@ const TimelinePage = (): React.JSX.Element => {
           navigateToPreviousWeek={navigateToPreviousWeek}
           navigateToNextWeek={navigateToNextWeek}
           getCurrentWeekDisplay={getCurrentWeekDisplay}
+          isCurrentOrFutureWeek={isCurrentOrFutureWeek}
         />
 
         {/* Selected items info - positioned above the table */}
