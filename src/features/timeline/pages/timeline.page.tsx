@@ -45,6 +45,7 @@ const TimelinePage = (): React.JSX.Element => {
     handleClearFilters,
     handleRowSelectionChange,
     handleCellClick,
+    handleCellSelect,
     handleCreateCompany,
     handleCreatePosition,
     handleAssignEmployee,
@@ -80,6 +81,7 @@ const TimelinePage = (): React.JSX.Element => {
     setShowTimeBlockManagerModal,
     selectedPositionForManager,
     selectedDayForManager,
+    selectedCell,
     handleTimeBlockEdit,
     handleTimeBlockCreateFromManager,
     handleBlockClick,
@@ -226,12 +228,14 @@ const TimelinePage = (): React.JSX.Element => {
             selectedRows={selectedRows}
             onSelectionChange={handleRowSelectionChange}
             onCellClick={handleCellClick}
+            onCellSelect={handleCellSelect}
             onBlockClick={handleBlockClick}
             onCreateBlockClick={handleCreateBlockClick}
             onCreateBlockDoubleClick={handleCreateBlockDoubleClick}
             contextMenuModel={contextMenuModel}
             loading={loading}
             currentWeekStart={weekStart}
+            selectedCell={selectedCell}
           />
         </div>
 

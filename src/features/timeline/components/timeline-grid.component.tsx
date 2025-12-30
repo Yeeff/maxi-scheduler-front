@@ -12,6 +12,7 @@ interface ITimelineGridProps {
     selectedRows: ITimelineRow[];
     onSelectionChange: (rows: ITimelineRow[]) => void;
     onCellClick: (row: ITimelineRow, day: string) => void;
+    onCellSelect?: (positionId: string, day: string) => void;
     onBlockClick?: (block: ITimeBlock, position: ITimelineRow, day: string) => void;
     onCreateBlockClick?: (position: ITimelineRow, day: string) => void;
     onCreateBlockDoubleClick?: (position: ITimelineRow, day: string) => void;
@@ -20,6 +21,7 @@ interface ITimelineGridProps {
     onAssignEmployee?: (position: ITimelineRow) => void;
     onUnassignEmployee?: (position: ITimelineRow) => void;
     currentWeekStart?: string | null; // Fecha de inicio de la semana actual
+    selectedCell?: { positionId: string, day: string } | null;
   }
 
 const DAYS_OF_WEEK = [
@@ -81,6 +83,7 @@ export const TimelineGrid = ({
     selectedRows,
     onSelectionChange,
     onCellClick,
+    onCellSelect,
     onBlockClick,
     onCreateBlockClick,
     onCreateBlockDoubleClick,
@@ -89,6 +92,7 @@ export const TimelineGrid = ({
     onAssignEmployee,
     onUnassignEmployee,
     currentWeekStart,
+    selectedCell,
   }: ITimelineGridProps) => {
    const contextMenuRef = useRef<ContextMenu>(null);
    const gridRef = useRef<HTMLDivElement>(null);
@@ -138,8 +142,9 @@ export const TimelineGrid = ({
   const handleCellHover = (positionId: string, day: string, isEnter: boolean) => {
     if (!gridRef.current) return;
     const cells = gridRef.current.querySelectorAll(`[data-position="${positionId}"][data-day="${day}"]`);
+    const isSelected = selectedCell?.positionId === positionId && selectedCell?.day === day;
     cells.forEach(cell => {
-      (cell as HTMLElement).style.backgroundColor = isEnter ? 'rgba(9, 74, 144, 0.1)' : '';
+      (cell as HTMLElement).style.backgroundColor = isEnter ? 'rgba(9, 74, 144, 0.1)' : (isSelected ? '#fff3cd' : '');
     });
   };
 
@@ -250,6 +255,8 @@ export const TimelineGrid = ({
         {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => {
           const timeBlocks = employee.scheduleData[day as keyof typeof employee.scheduleData] || [];
 
+          const isSelected = selectedCell?.positionId === position.id && selectedCell?.day === day;
+
           return (
             <div
               key={day}
@@ -271,7 +278,8 @@ export const TimelineGrid = ({
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRight: '1px solid #dee2e6',
-                padding: '4px'
+                padding: '4px',
+                backgroundColor: isSelected ? '#fff3cd' : undefined
               }}
             >
               {(() => {
@@ -343,6 +351,10 @@ export const TimelineGrid = ({
                             lineHeight: '1.2',
                             cursor: 'pointer'
                           }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onCellSelect?.(position.id, day);
+                          }}
                           onDoubleClick={(e) => {
                             e.stopPropagation();
                             onBlockClick?.(block, position, day);
@@ -369,7 +381,7 @@ export const TimelineGrid = ({
                     onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onCellClick(position, day);
+                      onCellSelect?.(position.id, day);
                     }}
                     onDoubleClick={(e) => {
                       e.stopPropagation();
@@ -582,32 +594,35 @@ export const TimelineGrid = ({
                   </div>
 
                   {/* Days Columns - Clickable even without employees */}
-                  {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => (
-                    <div
-                      key={day}
-                      className="time-blocks-cell"
-                      data-position={row.id}
-                      data-day={day}
-                      onClick={() => {
-                        console.log("Cell clicked - position:", row.position.name, "day:", day, "(no employee assigned)");
-                        onCellClick(row, day);
-                      }}
-                      onMouseEnter={() => handleCellHover(row.id, day, true)}
-                      onMouseLeave={() => handleCellHover(row.id, day, false)}
-                      style={{
-                        cursor: 'pointer',
-                        minHeight: '32px',
-                        position: 'relative',
-                        flex: 1,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRight: '1px solid #dee2e6',
-                        padding: '4px',
-                        backgroundColor: 'rgba(220, 53, 69, 0.03)',
-                        transition: 'background-color 0.2s ease'
-                      }}
-                    >
+                  {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => {
+                    const isSelected = selectedCell?.positionId === row.id && selectedCell?.day === day;
+
+                    return (
+                      <div
+                        key={day}
+                        className="time-blocks-cell"
+                        data-position={row.id}
+                        data-day={day}
+                        onClick={() => {
+                          console.log("Cell clicked - position:", row.position.name, "day:", day, "(no employee assigned)");
+                          onCellClick(row, day);
+                        }}
+                        onMouseEnter={() => handleCellHover(row.id, day, true)}
+                        onMouseLeave={() => handleCellHover(row.id, day, false)}
+                        style={{
+                          cursor: 'pointer',
+                          minHeight: '32px',
+                          position: 'relative',
+                          flex: 1,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRight: '1px solid #dee2e6',
+                          padding: '4px',
+                          backgroundColor: isSelected ? '#fff3cd' : 'rgba(220, 53, 69, 0.03)',
+                          transition: 'background-color 0.2s ease'
+                        }}
+                      >
                       <div className="no-schedule text-gray small" style={{
                         fontSize: '10px',
                         color: '#6c757d',
@@ -616,7 +631,8 @@ export const TimelineGrid = ({
                         -
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ];
         })
