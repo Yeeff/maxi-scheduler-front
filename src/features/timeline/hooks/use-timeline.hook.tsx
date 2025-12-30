@@ -245,8 +245,8 @@ export default function useTimelineHook() {
     }, 300);
   };
 
-  const handleCellSelect = (positionId: string, day: string) => {
-    setSelectedCell({ positionId, day });
+  const handleCellSelect = (positionId: string, employeeId: string, day: string) => {
+    setSelectedCell({ positionId, employeeId, day });
   };
 
   // Modal state
@@ -260,7 +260,7 @@ export default function useTimelineHook() {
   const [selectedDateForTimeBlock, setSelectedDateForTimeBlock] = useState<string | null>(null);
   const [selectedPositionForManager, setSelectedPositionForManager] = useState<number | null>(null);
   const [selectedDayForManager, setSelectedDayForManager] = useState<string | null>(null);
-  const [selectedCell, setSelectedCell] = useState<{ positionId: string, day: string } | null>(null);
+  const [selectedCell, setSelectedCell] = useState<{ positionId: string, employeeId: string, day: string } | null>(null);
 
   // Action handlers
   const handleCreateCompany = () => {

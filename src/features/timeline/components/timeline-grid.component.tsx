@@ -12,7 +12,7 @@ interface ITimelineGridProps {
     selectedRows: ITimelineRow[];
     onSelectionChange: (rows: ITimelineRow[]) => void;
     onCellClick: (row: ITimelineRow, day: string) => void;
-    onCellSelect?: (positionId: string, day: string) => void;
+    onCellSelect?: (positionId: string, employeeId: string, day: string) => void;
     onBlockClick?: (block: ITimeBlock, position: ITimelineRow, day: string) => void;
     onCreateBlockClick?: (position: ITimelineRow, day: string) => void;
     onCreateBlockDoubleClick?: (position: ITimelineRow, day: string) => void;
@@ -21,7 +21,7 @@ interface ITimelineGridProps {
     onAssignEmployee?: (position: ITimelineRow) => void;
     onUnassignEmployee?: (position: ITimelineRow) => void;
     currentWeekStart?: string | null; // Fecha de inicio de la semana actual
-    selectedCell?: { positionId: string, day: string } | null;
+    selectedCell?: { positionId: string, employeeId: string, day: string } | null;
   }
 
 const DAYS_OF_WEEK = [
@@ -139,10 +139,10 @@ export const TimelineGrid = ({
     }
   };
 
-  const handleCellHover = (positionId: string, day: string, isEnter: boolean) => {
+  const handleCellHover = (positionId: string, employeeId: string, day: string, isEnter: boolean) => {
     if (!gridRef.current) return;
-    const cells = gridRef.current.querySelectorAll(`[data-position="${positionId}"][data-day="${day}"]`);
-    const isSelected = selectedCell?.positionId === positionId && selectedCell?.day === day;
+    const cells = gridRef.current.querySelectorAll(`[data-position="${positionId}"][data-employee="${employeeId}"][data-day="${day}"]`);
+    const isSelected = selectedCell?.positionId === positionId && selectedCell?.employeeId === employeeId && selectedCell?.day === day;
     cells.forEach(cell => {
       (cell as HTMLElement).style.backgroundColor = isEnter ? 'rgba(9, 74, 144, 0.1)' : (isSelected ? '#fff3cd' : '');
     });
@@ -255,20 +255,21 @@ export const TimelineGrid = ({
         {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => {
           const timeBlocks = employee.scheduleData[day as keyof typeof employee.scheduleData] || [];
 
-          const isSelected = selectedCell?.positionId === position.id && selectedCell?.day === day;
+          const isSelected = selectedCell?.positionId === position.id.toString() && selectedCell?.employeeId === employee.id.toString() && selectedCell?.day === day;
 
           return (
             <div
               key={day}
               className="time-blocks-cell"
               data-position={position.id}
+              data-employee={employee.id}
               data-day={day}
               onClick={() => {
                 console.log("Cell clicked - position:", position.position.name, "day:", day);
                 onCellClick(position, day);
               }}
-              onMouseEnter={() => handleCellHover(position.id, day, true)}
-              onMouseLeave={() => handleCellHover(position.id, day, false)}
+              onMouseEnter={() => handleCellHover(position.id.toString(), employee.id.toString(), day, true)}
+              onMouseLeave={() => handleCellHover(position.id.toString(), employee.id.toString(), day, false)}
               style={{
                 cursor: 'pointer',
                 minHeight: '32px',
@@ -353,7 +354,7 @@ export const TimelineGrid = ({
                           }}
                           onClick={(e) => {
                             e.stopPropagation();
-                            onCellSelect?.(position.id, day);
+                            onCellSelect?.(position.id.toString(), employee.id.toString(), day);
                           }}
                           onDoubleClick={(e) => {
                             e.stopPropagation();
@@ -381,7 +382,7 @@ export const TimelineGrid = ({
                     onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onCellSelect?.(position.id, day);
+                      onCellSelect?.(position.id.toString(), employee.id.toString(), day);
                     }}
                     onDoubleClick={(e) => {
                       e.stopPropagation();
@@ -595,20 +596,21 @@ export const TimelineGrid = ({
 
                   {/* Days Columns - Clickable even without employees */}
                   {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => {
-                    const isSelected = selectedCell?.positionId === row.id && selectedCell?.day === day;
+                    const isSelected = selectedCell?.positionId === row.id.toString() && selectedCell?.employeeId === 'null' && selectedCell?.day === day;
 
                     return (
                       <div
                         key={day}
                         className="time-blocks-cell"
                         data-position={row.id}
+                        data-employee="null"
                         data-day={day}
                         onClick={() => {
                           console.log("Cell clicked - position:", row.position.name, "day:", day, "(no employee assigned)");
                           onCellClick(row, day);
                         }}
-                        onMouseEnter={() => handleCellHover(row.id, day, true)}
-                        onMouseLeave={() => handleCellHover(row.id, day, false)}
+                        onMouseEnter={() => handleCellHover(row.id.toString(), 'null', day, true)}
+                        onMouseLeave={() => handleCellHover(row.id.toString(), 'null', day, false)}
                         style={{
                           cursor: 'pointer',
                           minHeight: '32px',
