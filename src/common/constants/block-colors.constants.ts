@@ -20,66 +20,54 @@ export interface IBlockColors {
  */
 export const BLOCK_COLORS: IBlockColors = {
   // Trabajo regular
-  work: {
+  WORK: {
     currentEmployee: '#094a90', // Azul fuerte para empleados actuales
     historicalEmployee: 'rgba(9, 74, 144, 0.6)', // Azul tenue para empleados históricos
     border: '#063970',
-    text: '#ffffff'
-  },
-
-  // Pausas/Descansos
-  break: {
-    currentEmployee: '#ffc107', // Amarillo fuerte para empleados actuales
-    historicalEmployee: 'rgba(255, 193, 7, 0.6)', // Amarillo tenue para empleados históricos
-    border: '#e0a800',
     text: '#000000'
   },
 
+  // Pausas/Descansos
+  DESC: {
+    currentEmployee: '#ff9d00ff', // Amarillo fuerte para empleados actuales
+    historicalEmployee: 'rgba(225, 157, 12, 0.6)', // Amarillo tenue para empleados históricos
+    border: '#ff9d00ff',
+    text: '#000000'
+  },
   // Tiempo libre/ausencia
-  off: {
+  AUS: {
     currentEmployee: '#dc3545', // Rojo fuerte para empleados actuales
     historicalEmployee: 'rgba(220, 53, 69, 0.6)', // Rojo tenue para empleados históricos
     border: '#bd2130',
-    text: '#ffffff'
+    text: '#000000'
   },
 
-  // Vacaciones
-  vacation: {
-    currentEmployee: '#28a745', // Verde fuerte para empleados actuales
-    historicalEmployee: 'rgba(40, 167, 69, 0.6)', // Verde tenue para empleados históricos
-    border: '#1e7e34',
-    text: '#ffffff'
+  SUS: {
+    currentEmployee: '#dc3545', // Rojo fuerte para empleados actuales
+    historicalEmployee: 'rgba(220, 53, 69, 0.6)', // Rojo tenue para empleados históricos
+    border: '#bd2130',
+    text: '#000000'
   },
 
-  // Enfermedad/Incapacidad
-  sick: {
-    currentEmployee: '#fd7e14', // Naranja fuerte para empleados actuales
-    historicalEmployee: 'rgba(253, 126, 20, 0.6)', // Naranja tenue para empleados históricos
-    border: '#e8590c',
-    text: '#ffffff'
+  INC_ARL: {
+    currentEmployee: '#e17474ff', // Rojo fuerte para empleados actuales
+    historicalEmployee: 'rgba(213, 118, 128, 0.6)', // Rojo tenue para empleados históricos
+    border: '#e17474ff',
+    text: '#000000'
   },
 
-  // Licencia personal
-  personal: {
-    currentEmployee: '#6f42c1', // Púrpura fuerte para empleados actuales
-    historicalEmployee: 'rgba(111, 66, 193, 0.6)', // Púrpura tenue para empleados históricos
-    border: '#5a359a',
-    text: '#ffffff'
-  },
-
-  // Capacitación
-  training: {
-    currentEmployee: '#17a2b8', // Cyan fuerte para empleados actuales
-    historicalEmployee: 'rgba(23, 162, 184, 0.6)', // Cyan tenue para empleados históricos
-    border: '#138496',
-    text: '#ffffff'
+  RET: {
+    currentEmployee: '#1b7742ff', // Rojo fuerte para empleados actuales
+    historicalEmployee: 'rgba(51, 182, 105, 0.6)', // Rojo tenue para empleados históricos
+    border: '#1b7742ff',
+    text: '#000000'
   },
 
   // Color por defecto para tipos no definidos
   default: {
-    currentEmployee: '#6c757d', // Gris fuerte para empleados actuales
-    historicalEmployee: 'rgba(108, 117, 125, 0.6)', // Gris tenue para empleados históricos
-    border: '#545b62',
+    currentEmployee: '#efe418ff', // Gris fuerte para empleados actuales
+    historicalEmployee: 'rgba(209, 237, 49, 0.6)', // Gris tenue para empleados históricos
+    border: '#efe418ff',
     text: '#ffffff'
   }
 };
@@ -90,7 +78,7 @@ export const BLOCK_COLORS: IBlockColors = {
  * @returns La configuración de colores para ese tipo de bloque
  */
 export const getBlockColorConfig = (blockType: string): IBlockColorConfig => {
-  return BLOCK_COLORS[blockType.toLowerCase()] || BLOCK_COLORS.default;
+  return BLOCK_COLORS[blockType] || BLOCK_COLORS.default;
 };
 
 /**
