@@ -83,6 +83,7 @@ const TimelinePage = (): React.JSX.Element => {
     handleTimeBlockEdit,
     handleTimeBlockCreateFromManager,
     handleBlockClick,
+    handleCreateBlockClick,
     getDayDate,
     loadTimelineData,
     canAssignEmployee,
@@ -225,6 +226,7 @@ const TimelinePage = (): React.JSX.Element => {
             onSelectionChange={handleRowSelectionChange}
             onCellClick={handleCellClick}
             onBlockClick={handleBlockClick}
+            onCreateBlockClick={handleCreateBlockClick}
             contextMenuModel={contextMenuModel}
             loading={loading}
             currentWeekStart={weekStart}

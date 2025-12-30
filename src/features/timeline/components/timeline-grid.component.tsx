@@ -13,6 +13,7 @@ interface ITimelineGridProps {
    onSelectionChange: (rows: ITimelineRow[]) => void;
    onCellClick: (row: ITimelineRow, day: string) => void;
    onBlockClick?: (block: ITimeBlock, position: ITimelineRow, day: string) => void;
+   onCreateBlockClick?: (position: ITimelineRow, day: string) => void;
    contextMenuModel: any[];
    loading?: boolean;
    onAssignEmployee?: (position: ITimelineRow) => void;
@@ -80,6 +81,7 @@ export const TimelineGrid = ({
    onSelectionChange,
    onCellClick,
    onBlockClick,
+   onCreateBlockClick,
    contextMenuModel,
    loading = false,
    onAssignEmployee,
@@ -350,7 +352,27 @@ export const TimelineGrid = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="no-schedule text-gray small" style={{ fontSize: '10px' }}>-</div>
+                  <div
+                    className="no-schedule text-gray small"
+                    style={{
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      opacity: 0.6,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'opacity 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onCreateBlockClick?.(position, day);
+                    }}
+                    title="Crear nuevo bloque"
+                  >
+                    <i className="pi pi-plus" style={{ fontSize: '10px' }}></i>
+                  </div>
                 );
               })()}
             </div>

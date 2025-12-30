@@ -910,6 +910,14 @@ export default function useTimelineHook() {
     setShowTimeBlockEditorModal(true);
   };
 
+  const handleCreateBlockClick = (position: ITimelineRow, day: string) => {
+    const realDate = getDayDate(day);
+    setSelectedTimeBlock(null); // Ensure create mode
+    setSelectedRowForTimeBlock(position);
+    setSelectedDateForTimeBlock(realDate);
+    setShowTimeBlockEditorModal(true);
+  };
+
   // Context menu model for right-click actions - minimalistic style
   const contextMenuModel = [
     {
@@ -1133,6 +1141,7 @@ export default function useTimelineHook() {
     handleTimeBlockEdit,
     handleTimeBlockCreateFromManager,
     handleBlockClick,
+    handleCreateBlockClick,
     // Utility functions
     getDayDate,
     loadTimelineData,
