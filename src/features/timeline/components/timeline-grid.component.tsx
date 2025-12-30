@@ -12,6 +12,7 @@ interface ITimelineGridProps {
    selectedRows: ITimelineRow[];
    onSelectionChange: (rows: ITimelineRow[]) => void;
    onCellClick: (row: ITimelineRow, day: string) => void;
+   onBlockClick?: (block: ITimeBlock, position: ITimelineRow, day: string) => void;
    contextMenuModel: any[];
    loading?: boolean;
    onAssignEmployee?: (position: ITimelineRow) => void;
@@ -78,15 +79,16 @@ export const TimelineGrid = ({
    selectedRows,
    onSelectionChange,
    onCellClick,
+   onBlockClick,
    contextMenuModel,
    loading = false,
    onAssignEmployee,
    onUnassignEmployee,
    currentWeekStart,
  }: ITimelineGridProps) => {
-  const contextMenuRef = useRef<ContextMenu>(null);
-  const gridRef = useRef<HTMLDivElement>(null);
-  const [contextMenuTarget, setContextMenuTarget] = useState<any>(null);
+   const contextMenuRef = useRef<ContextMenu>(null);
+   const gridRef = useRef<HTMLDivElement>(null);
+   const [contextMenuTarget, setContextMenuTarget] = useState<any>(null);
 
   // Calculate week dates for header display
   const weekDates = getWeekDates(currentWeekStart);
@@ -334,7 +336,12 @@ export const TimelineGrid = ({
                             fontWeight: 'bold',
                             color: '#000000', // Black text for better readability
                             boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-                            lineHeight: '1.2'
+                            lineHeight: '1.2',
+                            cursor: 'pointer'
+                          }}
+                          onDoubleClick={(e) => {
+                            e.stopPropagation();
+                            onBlockClick?.(block, position, day);
                           }}
                         >
                           {formatTimeRange(block.startTime, block.endTime)}

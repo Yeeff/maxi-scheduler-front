@@ -13,6 +13,9 @@ export default function useTimelineHook() {
   const navigate = useNavigate();
   const { setMessage } = useContext(AppContext);
 
+  // Refs
+  const doubleClickRef = useRef(false);
+
   // State
   const [timelineData, setTimelineData] = useState<ITimelineRow[]>([]);
   const [companies, setCompanies] = useState<ICompany[]>([]);
@@ -224,12 +227,22 @@ export default function useTimelineHook() {
   };
 
   const handleCellClick = (row: ITimelineRow, day: string) => {
-    // Open the time block manager modal for the position and day
-    const realDate = getDayDate(day);
-    console.log("Cell clicked - opening manager modal for position:", row.position.name, "day:", day, "date:", realDate);
-    setSelectedPositionForManager(row.position.id);
-    setSelectedDayForManager(day);
-    setShowTimeBlockManagerModal(true);
+    if (doubleClickRef.current) {
+      doubleClickRef.current = false;
+      return;
+    }
+
+    // Delay the action to allow double click detection
+    setTimeout(() => {
+      if (!doubleClickRef.current) {
+        // Open the time block manager modal for the position and day
+        const realDate = getDayDate(day);
+        console.log("Cell clicked - opening manager modal for position:", row.position.name, "day:", day, "date:", realDate);
+        setSelectedPositionForManager(row.position.id);
+        setSelectedDayForManager(day);
+        setShowTimeBlockManagerModal(true);
+      }
+    }, 300);
   };
 
   // Modal state
@@ -886,6 +899,17 @@ export default function useTimelineHook() {
     setShowTimeBlockEditorModal(true);
   };
 
+  const handleBlockClick = (block: any, position: ITimelineRow, day: string) => {
+    doubleClickRef.current = true;
+    const realDate = getDayDate(day);
+    setSelectedTimeBlock({
+      ...block,
+      positionId: position.position.id,
+      date: realDate
+    });
+    setShowTimeBlockEditorModal(true);
+  };
+
   // Context menu model for right-click actions - minimalistic style
   const contextMenuModel = [
     {
@@ -1108,6 +1132,7 @@ export default function useTimelineHook() {
     selectedDayForManager,
     handleTimeBlockEdit,
     handleTimeBlockCreateFromManager,
+    handleBlockClick,
     // Utility functions
     getDayDate,
     loadTimelineData,
