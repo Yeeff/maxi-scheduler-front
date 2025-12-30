@@ -261,6 +261,7 @@ export default function useTimelineHook() {
   const [selectedPositionForManager, setSelectedPositionForManager] = useState<number | null>(null);
   const [selectedDayForManager, setSelectedDayForManager] = useState<string | null>(null);
   const [selectedCell, setSelectedCell] = useState<{ positionId: string, employeeId: string, day: string } | null>(null);
+  const [copiedBlock, setCopiedBlock] = useState<any>(null);
 
   // Action handlers
   const handleCreateCompany = () => {
@@ -1150,6 +1151,8 @@ export default function useTimelineHook() {
     selectedPositionForManager,
     selectedDayForManager,
     selectedCell,
+    copiedBlock,
+    setCopiedBlock,
     handleTimeBlockEdit,
     handleTimeBlockCreateFromManager,
     handleBlockClick,

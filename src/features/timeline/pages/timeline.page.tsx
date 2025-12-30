@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "primereact/button";
 import { TimelineGrid } from "../components/timeline-grid.component";
 import { TimelineActions } from "../components/timeline-actions.component";
@@ -82,6 +82,8 @@ const TimelinePage = (): React.JSX.Element => {
     selectedPositionForManager,
     selectedDayForManager,
     selectedCell,
+    copiedBlock,
+    setCopiedBlock,
     handleTimeBlockEdit,
     handleTimeBlockCreateFromManager,
     handleBlockClick,
@@ -99,6 +101,31 @@ const TimelinePage = (): React.JSX.Element => {
     getCurrentWeekDisplay,
     isCurrentOrFutureWeek,
   } = useTimelineHook();
+
+  // Handle Ctrl+C to copy selected block
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === 'c' && selectedCell) {
+        // Find the selected block
+        const position = timelineData.find(p => p.position.id.toString() === selectedCell.positionId);
+        if (position) {
+          const employee = position.employees?.find(e => e.id.toString() === selectedCell.employeeId);
+          if (employee) {
+            const timeBlocks = employee.scheduleData[selectedCell.day as keyof typeof employee.scheduleData] || [];
+            if (timeBlocks.length > 0) {
+              // For now, copy the first block or all? Probably the first one, or maybe all.
+              // Since it's a cell, perhaps all blocks in that cell.
+              setCopiedBlock(timeBlocks);
+              console.log('Copied block data:', timeBlocks);
+            }
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedCell, timelineData, setCopiedBlock]);
 
   return (
     <div className="main-page">
