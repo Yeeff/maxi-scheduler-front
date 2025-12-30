@@ -8,18 +8,19 @@ import { ITimelineRow, ITimelineEmployee, ITimeBlock } from "../../../common/int
 import { getBlockBackgroundColor, getBlockBorderColor, getBlockTextColor } from "../../../common/constants/block-colors.constants";
 
 interface ITimelineGridProps {
-   data: ITimelineRow[];
-   selectedRows: ITimelineRow[];
-   onSelectionChange: (rows: ITimelineRow[]) => void;
-   onCellClick: (row: ITimelineRow, day: string) => void;
-   onBlockClick?: (block: ITimeBlock, position: ITimelineRow, day: string) => void;
-   onCreateBlockClick?: (position: ITimelineRow, day: string) => void;
-   contextMenuModel: any[];
-   loading?: boolean;
-   onAssignEmployee?: (position: ITimelineRow) => void;
-   onUnassignEmployee?: (position: ITimelineRow) => void;
-   currentWeekStart?: string | null; // Fecha de inicio de la semana actual
- }
+    data: ITimelineRow[];
+    selectedRows: ITimelineRow[];
+    onSelectionChange: (rows: ITimelineRow[]) => void;
+    onCellClick: (row: ITimelineRow, day: string) => void;
+    onBlockClick?: (block: ITimeBlock, position: ITimelineRow, day: string) => void;
+    onCreateBlockClick?: (position: ITimelineRow, day: string) => void;
+    onCreateBlockDoubleClick?: (position: ITimelineRow, day: string) => void;
+    contextMenuModel: any[];
+    loading?: boolean;
+    onAssignEmployee?: (position: ITimelineRow) => void;
+    onUnassignEmployee?: (position: ITimelineRow) => void;
+    currentWeekStart?: string | null; // Fecha de inicio de la semana actual
+  }
 
 const DAYS_OF_WEEK = [
   { key: 'MONDAY', label: 'Lunes', short: 'Lun' },
@@ -76,18 +77,19 @@ const getWeekDates = (weekStart?: string | null): { [key: string]: string } => {
 };
 
 export const TimelineGrid = ({
-   data,
-   selectedRows,
-   onSelectionChange,
-   onCellClick,
-   onBlockClick,
-   onCreateBlockClick,
-   contextMenuModel,
-   loading = false,
-   onAssignEmployee,
-   onUnassignEmployee,
-   currentWeekStart,
- }: ITimelineGridProps) => {
+    data,
+    selectedRows,
+    onSelectionChange,
+    onCellClick,
+    onBlockClick,
+    onCreateBlockClick,
+    onCreateBlockDoubleClick,
+    contextMenuModel,
+    loading = false,
+    onAssignEmployee,
+    onUnassignEmployee,
+    currentWeekStart,
+  }: ITimelineGridProps) => {
    const contextMenuRef = useRef<ContextMenu>(null);
    const gridRef = useRef<HTMLDivElement>(null);
    const [contextMenuTarget, setContextMenuTarget] = useState<any>(null);
@@ -367,7 +369,11 @@ export const TimelineGrid = ({
                     onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
                     onClick={(e) => {
                       e.stopPropagation();
-                      onCreateBlockClick?.(position, day);
+                      onCellClick(position, day);
+                    }}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      onCreateBlockDoubleClick?.(position, day);
                     }}
                     title="Crear nuevo bloque"
                   >

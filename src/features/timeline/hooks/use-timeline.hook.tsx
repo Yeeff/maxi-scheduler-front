@@ -918,6 +918,11 @@ export default function useTimelineHook() {
     setShowTimeBlockEditorModal(true);
   };
 
+  const handleCreateBlockDoubleClick = (position: ITimelineRow, day: string) => {
+    doubleClickRef.current = true;
+    handleCreateBlockClick(position, day);
+  };
+
   // Context menu model for right-click actions - minimalistic style
   const contextMenuModel = [
     {
@@ -1142,6 +1147,7 @@ export default function useTimelineHook() {
     handleTimeBlockCreateFromManager,
     handleBlockClick,
     handleCreateBlockClick,
+    handleCreateBlockDoubleClick,
     // Utility functions
     getDayDate,
     loadTimelineData,
