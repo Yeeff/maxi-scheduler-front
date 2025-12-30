@@ -42,6 +42,7 @@ export interface ITimeBlock {
   endTime: string; // HH:mm
   type: 'work' | 'break' | 'off';
   leaveTypeName?: string; // Nombre del tipo de leave desde la base de datos
+  leaveTypeId?: number; // ID del tipo de leave
   scheduleTemplateId?: number;
   workScheduleId?: number;
   employeeId?: number;
