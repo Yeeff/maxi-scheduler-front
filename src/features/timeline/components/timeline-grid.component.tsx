@@ -307,7 +307,7 @@ export const TimelineGrid = ({
                               transform: block.isCurrentEmployee ? 'scaleY(1.1)' : 'scaleY(1)',
                               transition: 'all 0.2s ease'
                             }}
-                            title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)}${block.isCurrentEmployee ? ' (Actual)' : ` (${block.leaveTypeName ||  block.type})`}`}
+                            title={`${block.employeeName}: ${formatTimeRange(block.startTime, block.endTime)} - ${block.leaveTypeName || getBlockTypeLabel(block.type)}${block.isCurrentEmployee ? ' (Actual)' : ''}`}
                           />
                         );
                       })}
