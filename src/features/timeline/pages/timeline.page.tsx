@@ -102,7 +102,7 @@ const TimelinePage = (): React.JSX.Element => {
     isCurrentOrFutureWeek,
   } = useTimelineHook();
 
-  // Handle Ctrl+C to copy selected block
+  // Handle Ctrl+C to copy and Ctrl+V to paste selected block
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.key === 'c' && selectedCell) {
@@ -113,10 +113,30 @@ const TimelinePage = (): React.JSX.Element => {
           if (employee) {
             const timeBlocks = employee.scheduleData[selectedCell.day as keyof typeof employee.scheduleData] || [];
             if (timeBlocks.length > 0) {
-              // For now, copy the first block or all? Probably the first one, or maybe all.
-              // Since it's a cell, perhaps all blocks in that cell.
               setCopiedBlock(timeBlocks);
               console.log('Copied block data:', timeBlocks);
+            }
+          }
+        }
+      } else if (event.ctrlKey && event.key === 'v' && copiedBlock && selectedCell) {
+        // Paste the copied blocks to the selected cell
+        const targetPosition = timelineData.find(p => p.position.id.toString() === selectedCell.positionId);
+        if (targetPosition) {
+          const targetEmployee = targetPosition.employees?.find(e => e.id.toString() === selectedCell.employeeId);
+          if (targetEmployee) {
+            const targetDate = getDayDate(selectedCell.day);
+            if (targetDate && Array.isArray(copiedBlock)) {
+              console.log('Pasting blocks to:', { position: targetPosition.position.name, employee: targetEmployee.name, date: targetDate });
+              copiedBlock.forEach(block => {
+                handleTimeBlockCreate(
+                  targetPosition.position.id,
+                  targetEmployee.id,
+                  targetDate,
+                  block.startTime,
+                  block.endTime,
+                  block.leaveTypeId
+                );
+              });
             }
           }
         }
@@ -125,7 +145,7 @@ const TimelinePage = (): React.JSX.Element => {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedCell, timelineData, setCopiedBlock]);
+  }, [selectedCell, timelineData, copiedBlock, setCopiedBlock, getDayDate, handleTimeBlockCreate]);
 
   return (
     <div className="main-page">
