@@ -173,7 +173,7 @@ export const ShiftTemplatesModal = ({ visible, onHide }: IShiftTemplatesModalPro
   return (
     <Dialog
       visible={visible}
-      style={{ width: "80%" }}
+      style={{ width: "60%" }}
       header="Administrar Plantillas de Turnos"
       onHide={onHide}
       footer={
@@ -204,17 +204,18 @@ export const ShiftTemplatesModal = ({ visible, onHide }: IShiftTemplatesModalPro
           emptyMessage="No hay plantillas de turnos."
           scrollable
           className="p-datatable-sm"
+          tableStyle={{ tableLayout: 'fixed', width: '100%' }}
         >
-          <Column field="name" header="Nombre" sortable headerStyle={{ textAlign: 'left' }} bodyStyle={{ textAlign: 'left' }} />
-          <Column field="startTime" header="Inicio" sortable headerStyle={{ textAlign: 'center' }} bodyStyle={{ textAlign: 'center' }} />
-          <Column field="endTime" header="Fin" sortable headerStyle={{ textAlign: 'center' }} bodyStyle={{ textAlign: 'center' }} />
+          <Column field="name" header="Nombre" sortable style={{ width: '200px' }} headerStyle={{ textAlign: 'left' }} bodyStyle={{ textAlign: 'left' }} />
+          <Column field="startTime" header="Inicio" sortable style={{ width: '100px' }} headerStyle={{ textAlign: 'center' }} bodyStyle={{ textAlign: 'center' }} />
+          <Column field="endTime" header="Fin" sortable style={{ width: '100px' }} headerStyle={{ textAlign: 'center' }} bodyStyle={{ textAlign: 'center' }} />
           {/* Break functionality hidden from UI */}
           {/* <Column
             field="lunchDescription"
             header="Descanso"
             body={(row) => row.lunchDescription ? `${row.lunchDescription} (${row.lunchTimeInit} - ${row.lunchTimeEnd})` : "Sin descanso"}
           /> */}
-          <Column header="Acciones" body={renderActions} headerStyle={{ textAlign: 'center' }} bodyStyle={{ textAlign: 'center' }} />
+          <Column header="Acciones" body={renderActions} style={{ width: '150px' }} headerStyle={{ textAlign: 'center' }} bodyStyle={{ textAlign: 'center' }} />
         </DataTable>
 
         {showForm && (
