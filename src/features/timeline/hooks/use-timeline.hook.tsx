@@ -255,6 +255,7 @@ export default function useTimelineHook() {
   const [showCreatePositionModal, setShowCreatePositionModal] = useState(false);
   const [showTimeBlockEditorModal, setShowTimeBlockEditorModal] = useState(false);
   const [showTimeBlockManagerModal, setShowTimeBlockManagerModal] = useState(false);
+  const [showGenerateMonthModal, setShowGenerateMonthModal] = useState(false);
   const [selectedTimeBlock, setSelectedTimeBlock] = useState<any>(null);
   const [selectedRowForTimeBlock, setSelectedRowForTimeBlock] = useState<ITimelineRow | null>(null);
   const [selectedDateForTimeBlock, setSelectedDateForTimeBlock] = useState<string | null>(null);
@@ -760,12 +761,16 @@ export default function useTimelineHook() {
     }
   };
 
-  const handleGenerateMonthFromPrevious = async () => {
+  const handleOpenGenerateMonthModal = () => {
+    setShowGenerateMonthModal(true);
+  };
+
+  const handleGenerateMonthConfirm = async (selectedDate: Date) => {
     try {
       setIsGeneratingMonth(true);
 
-      // Calculate reference date (today)
-      const referenceDate = formatLocalDate(new Date());
+      // Use the selected date as reference
+      const referenceDate = formatLocalDate(selectedDate);
 
       const request = {
         referenceDate: referenceDate
@@ -778,7 +783,7 @@ export default function useTimelineHook() {
 
         setMessage({
           title: "Mes Generado",
-          description: result.message || `Se generaron ${result.generatedCount || 0} horarios desde el mes anterior.`,
+          description: result.message || `Se generaron ${result.generatedCount || 0} horarios para el mes seleccionado.`,
           show: true,
           OkTitle: "Aceptar",
           onOk: () => {
@@ -787,12 +792,13 @@ export default function useTimelineHook() {
           },
           background: true,
         });
+        setShowGenerateMonthModal(false);
       } else {
         throw new Error(response.operation.message || "Error al generar el mes");
       }
     } catch (error) {
       console.error("Error generating month:", error);
-      const errorMessage = (error as any)?.response?.data?.operation?.message || (error as any)?.message || "Error al generar el mes desde el anterior";
+      const errorMessage = (error as any)?.response?.data?.operation?.message || (error as any)?.message || "Error al generar el mes seleccionado";
       setMessage({
         title: "Error",
         description: errorMessage,
@@ -803,6 +809,12 @@ export default function useTimelineHook() {
     } finally {
       setIsGeneratingMonth(false);
     }
+  };
+
+  const handleGenerateMonthFromPrevious = async () => {
+    // For backward compatibility, generate current month
+    const currentDate = new Date();
+    await handleGenerateMonthConfirm(currentDate);
   };
 
   // Time block editor handlers
@@ -1118,6 +1130,8 @@ export default function useTimelineHook() {
     handleGenerateSchedules,
     handleBulkGenerateSchedules,
     handleGenerateWeekFromPrevious,
+    handleOpenGenerateMonthModal,
+    handleGenerateMonthConfirm,
     handleGenerateMonthFromPrevious,
     contextMenuModel,
     // Modal state
@@ -1150,6 +1164,9 @@ export default function useTimelineHook() {
     setShowTimeBlockManagerModal,
     selectedPositionForManager,
     selectedDayForManager,
+    // Generate month modal state
+    showGenerateMonthModal,
+    setShowGenerateMonthModal,
     selectedCell,
     copiedBlock,
     setCopiedBlock,

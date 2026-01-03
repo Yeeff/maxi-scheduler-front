@@ -6,6 +6,7 @@ import AssignEmployeeModal from "../components/assign-employee-modal.component";
 import ChangeScheduleTemplateModal from "../components/change-schedule-template-modal.component";
 import { CreateCompanyModal } from "../components/create-company-modal.component";
 import { CreatePositionModal } from "../components/create-position-modal.component";
+import { GenerateMonthModal } from "../components/generate-month-modal.component";
 import TimeBlockEditorModal from "../components/time-block-editor-modal.component";
 import TimeBlockManagerModal from "../components/time-block-manager-modal.component";
 import useTimelineHook from "../hooks/use-timeline.hook";
@@ -56,8 +57,11 @@ const TimelinePage = (): React.JSX.Element => {
     handleGenerateSchedules,
     handleBulkGenerateSchedules,
     handleGenerateWeekFromPrevious,
-    handleGenerateMonthFromPrevious,
+    handleOpenGenerateMonthModal,
+    handleGenerateMonthConfirm,
     contextMenuModel,
+    showGenerateMonthModal,
+    setShowGenerateMonthModal,
     showAssignEmployeeModal,
     setShowAssignEmployeeModal,
     handleAssignEmployeeConfirm,
@@ -174,9 +178,9 @@ const TimelinePage = (): React.JSX.Element => {
               className="p-button-primary"
             />
             <Button
-              label="Generar mes actual"
+              label="Generar mes"
               icon="pi pi-calendar"
-              onClick={handleGenerateMonthFromPrevious}
+              onClick={handleOpenGenerateMonthModal}
               loading={isGeneratingMonth}
               className="p-button-primary"
             />
@@ -337,6 +341,13 @@ const TimelinePage = (): React.JSX.Element => {
           date={getDayDate(selectedDayForManager || '') || ''}
           dayKey={selectedDayForManager || ''}
           companyId={selectedCompanyId || 0}
+        />
+
+        <GenerateMonthModal
+          visible={showGenerateMonthModal}
+          onHide={() => setShowGenerateMonthModal(false)}
+          onGenerate={handleGenerateMonthConfirm}
+          isLoading={isGeneratingMonth}
         />
       </div>
     </div>
