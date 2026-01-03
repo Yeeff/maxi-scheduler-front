@@ -10,7 +10,7 @@ function HomePage(): React.JSX.Element {
             alt='icono-nomina'
           />  
         </div>
-        <span className="text-dasboard large text-center">Módulo de nómina</span>
+        <span className="text-dasboard large text-center">Módulo de programación de horarios</span>
         
     </div>
   )
