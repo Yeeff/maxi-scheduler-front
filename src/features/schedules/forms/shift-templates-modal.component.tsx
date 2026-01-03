@@ -205,15 +205,16 @@ export const ShiftTemplatesModal = ({ visible, onHide }: IShiftTemplatesModalPro
           scrollable
           className="p-datatable-sm"
         >
-          <Column field="name" header="Nombre" sortable />
-          <Column field="startTime" header="Inicio" sortable />
-          <Column field="endTime" header="Fin" sortable />
-          <Column
+          <Column field="name" header="Nombre" sortable headerStyle={{ textAlign: 'left' }} bodyStyle={{ textAlign: 'left' }} />
+          <Column field="startTime" header="Inicio" sortable headerStyle={{ textAlign: 'center' }} bodyStyle={{ textAlign: 'center' }} />
+          <Column field="endTime" header="Fin" sortable headerStyle={{ textAlign: 'center' }} bodyStyle={{ textAlign: 'center' }} />
+          {/* Break functionality hidden from UI */}
+          {/* <Column
             field="lunchDescription"
             header="Descanso"
             body={(row) => row.lunchDescription ? `${row.lunchDescription} (${row.lunchTimeInit} - ${row.lunchTimeEnd})` : "Sin descanso"}
-          />
-          <Column header="Acciones" body={renderActions} />
+          /> */}
+          <Column header="Acciones" body={renderActions} headerStyle={{ textAlign: 'center' }} bodyStyle={{ textAlign: 'center' }} />
         </DataTable>
 
         {showForm && (
@@ -297,7 +298,8 @@ export const ShiftTemplatesModal = ({ visible, onHide }: IShiftTemplatesModalPro
                 )}
               </div>
 
-              <h4 className="text-black medium bold m-top-15">Descanso (Opcional)</h4>
+              {/* Break functionality hidden from UI */}
+              {/* <h4 className="text-black medium bold m-top-15">Descanso (Opcional)</h4>
 
               <InputComponent
                 idInput="lunchDescription"
@@ -329,7 +331,7 @@ export const ShiftTemplatesModal = ({ visible, onHide }: IShiftTemplatesModalPro
                   className="input-basic medium"
                   classNameLabel="text-black big bold"
                 />
-              </div>
+              </div> */}
             </div>
           </Dialog>
         )}

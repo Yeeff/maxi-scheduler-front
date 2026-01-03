@@ -86,17 +86,19 @@ const TimeBlockManagerModal = ({
       if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
         const blocksData = (response as any).data?.data || (response as any).data || [];
         
-        // Transform the data to match ITimeBlock interface
-        const transformedBlocks: ITimeBlock[] = blocksData.map((block: any) => ({
-          id: block.id,
-          startTime: block.actualStartTime || block.plannedStartTime || "",
-          endTime: block.actualEndTime || block.plannedEndTime || "",
-          type: block.leaveType?.code || "work",
-          employeeId: block.employeeCache?.id,
-          employeeName: block.employeeCache?.name || "Unknown",
-          isCurrentEmployee: false,
-        }));
-        
+        // Transform the data to match ITimeBlock interface and filter out break blocks
+        const transformedBlocks: ITimeBlock[] = blocksData
+          .filter((block: any) => (block.leaveType?.code || "work") !== "break") // Hide break blocks from manager
+          .map((block: any) => ({
+            id: block.id,
+            startTime: block.actualStartTime || block.plannedStartTime || "",
+            endTime: block.actualEndTime || block.plannedEndTime || "",
+            type: block.leaveType?.code || "work",
+            employeeId: block.employeeCache?.id,
+            employeeName: block.employeeCache?.name || "Unknown",
+            isCurrentEmployee: false,
+          }));
+
         setTimeBlocks(transformedBlocks);
       } else {
         console.error("Error loading time blocks:", response.operation.message);

@@ -567,10 +567,12 @@ const TimeBlockEditorModal = ({
         <Dropdown
           id="typeSelect"
           value={selectedLeaveTypeId}
-          options={leaveTypes.map(type => ({
-            label: type.name,
-            value: type.id
-          }))}
+          options={leaveTypes
+            .filter(type => type.code !== 'break') // Hide break option from UI
+            .map(type => ({
+              label: type.name,
+              value: type.id
+            }))}
           onChange={(e) => setSelectedLeaveTypeId(e.value)}
           placeholder={loadingLeaveTypes ? "Cargando tipos..." : "Seleccionar tipo"}
           disabled={loadingLeaveTypes}

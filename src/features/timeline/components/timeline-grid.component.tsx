@@ -284,7 +284,7 @@ export const TimelineGrid = ({
               }}
             >
               {(() => {
-                const activeBlocks = timeBlocks.filter(block => block.type !== 'off');
+                const activeBlocks = timeBlocks.filter(block => block.type !== 'off' && block.type !== 'break'); // Hide break blocks from UI
                 return activeBlocks.length > 0 ? (
                   <div className="time-visualization" style={{
                     position: 'relative',
@@ -409,7 +409,7 @@ export const TimelineGrid = ({
   const getBlockTypeLabel = (blockType: string): string => {
     const typeLabels: { [key: string]: string } = {
       work: 'Trabajo',
-      break: 'Pausa',
+      // break: 'Pausa', // Hidden from UI
       off: 'Ausencia',
       vacation: 'Vacaciones',
       sick: 'Enfermedad',

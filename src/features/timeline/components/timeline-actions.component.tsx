@@ -86,10 +86,12 @@ export const TimelineActions = ({
 
   const leaveTypeOptions = [
     { label: 'Ninguno', value: null },
-    ...leaveTypes.map(leaveType => ({
-      label: leaveType.name,
-      value: leaveType.id
-    }))
+    ...leaveTypes
+      .filter(leaveType => leaveType.code !== 'break') // Hide break option from filter
+      .map(leaveType => ({
+        label: leaveType.name,
+        value: leaveType.id
+      }))
   ];
 return (
   <div className="timeline-actions" style={{ margin: '20px 0' }}>

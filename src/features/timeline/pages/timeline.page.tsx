@@ -170,13 +170,13 @@ const TimelinePage = (): React.JSX.Element => {
               disabled={!selectedCompanyId}
               className="p-button-secondary"
             />
-            <Button
+            {/*<Button
               label="Generar semana actual"
               icon="pi pi-copy"
               onClick={handleGenerateWeekFromPrevious}
               loading={isGeneratingWeek}
               className="p-button-primary"
-            />
+            />*/}
             <Button
               label="Generar mes"
               icon="pi pi-calendar"
