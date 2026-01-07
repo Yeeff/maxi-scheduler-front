@@ -1029,24 +1029,20 @@ export default function useTimelineHook() {
   };
 
   const getCurrentWeekDisplay = (): string => {
-    if (!weekStart) return '';
+  if (!weekStart) return '';
 
-    // Parse as local date to avoid timezone shift
-    const [year, month, day] = weekStart.split('-').map(Number);
-    const startDate = new Date(year, month - 1, day);
-    const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 6);
+  const [year, month, day] = weekStart.split('-').map(Number);
+  const startDate = new Date(year, month - 1, day);
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + 6);
 
-    const formatDate = (date: Date) => {
-      return date.toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-    };
+  const startDay = startDate.getDate();
+  const endDay = endDate.getDate();
+  const endMonth = endDate.toLocaleDateString('es-ES', { month: 'short' });
+  const endYear = endDate.getFullYear();
 
-    return `${formatDate(startDate)} - ${formatDate(endDate)}`;
-  };
+  return `${startDay} - ${endDay} ${endMonth} ${endYear}`;
+};
 
   // Group positions by company for display when showing all companies
   const groupPositionsByCompany = (positions: ITimelineRow[]): ITimelineRow[] => {
