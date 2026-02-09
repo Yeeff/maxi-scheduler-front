@@ -256,6 +256,7 @@ export default function useTimelineHook() {
   const [showTimeBlockEditorModal, setShowTimeBlockEditorModal] = useState(false);
   const [showTimeBlockManagerModal, setShowTimeBlockManagerModal] = useState(false);
   const [showGenerateMonthModal, setShowGenerateMonthModal] = useState(false);
+  const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
   const [selectedTimeBlock, setSelectedTimeBlock] = useState<any>(null);
   const [selectedRowForTimeBlock, setSelectedRowForTimeBlock] = useState<ITimelineRow | null>(null);
   const [selectedDateForTimeBlock, setSelectedDateForTimeBlock] = useState<string | null>(null);
@@ -1163,6 +1164,9 @@ export default function useTimelineHook() {
     // Generate month modal state
     showGenerateMonthModal,
     setShowGenerateMonthModal,
+    // Availability modal state
+    showAvailabilityModal,
+    setShowAvailabilityModal,
     selectedCell,
     copiedBlock,
     setCopiedBlock,

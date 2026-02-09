@@ -9,6 +9,7 @@ import { CreatePositionModal } from "../components/create-position-modal.compone
 import { GenerateMonthModal } from "../components/generate-month-modal.component";
 import TimeBlockEditorModal from "../components/time-block-editor-modal.component";
 import TimeBlockManagerModal from "../components/time-block-manager-modal.component";
+import AvailabilityModal from "../components/availability-modal.component";
 import useTimelineHook from "../hooks/use-timeline.hook";
 
 // Add spinner animation
@@ -62,6 +63,8 @@ const TimelinePage = (): React.JSX.Element => {
     contextMenuModel,
     showGenerateMonthModal,
     setShowGenerateMonthModal,
+    showAvailabilityModal,
+    setShowAvailabilityModal,
     showAssignEmployeeModal,
     setShowAssignEmployeeModal,
     handleAssignEmployeeConfirm,
@@ -157,6 +160,12 @@ const TimelinePage = (): React.JSX.Element => {
         <div className="title-area" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <label className="text-black extra-large bold">Timeline de Horarios</label>
           <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <Button
+              label="Ver disponibilidad"
+              icon="pi pi-users"
+              onClick={() => setShowAvailabilityModal(true)}
+              className="p-button-info"
+            />
             <Button
               label="Crear empresa"
               icon="pi pi-plus"
@@ -348,6 +357,11 @@ const TimelinePage = (): React.JSX.Element => {
           onHide={() => setShowGenerateMonthModal(false)}
           onGenerate={handleGenerateMonthConfirm}
           isLoading={isGeneratingMonth}
+        />
+
+        <AvailabilityModal
+          visible={showAvailabilityModal}
+          onHide={() => setShowAvailabilityModal(false)}
         />
       </div>
     </div>
