@@ -25,30 +25,25 @@ const AvailabilityModal = ({
   visible,
   onHide,
 }: IAvailabilityModalProps): React.JSX.Element => {
-  // Initialize with next day and default time range
+  // Initialize with next day
   const getDefaultDate = () => {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    // Format as DD/MM/YYYY for display
-    const day = String(tomorrow.getDate()).padStart(2, "0");
-    const month = String(tomorrow.getMonth() + 1).padStart(2, "0");
-    const year = tomorrow.getFullYear();
-    return `${day}/${month}/${year}`;
+    return tomorrow;
   };
 
-  const parseDate = (dateStr: string) => {
-    // Parse DD/MM/YYYY to YYYY-MM-DD for API
-    const parts = dateStr.split("/");
-    if (parts.length === 3) {
-      return `${parts[2]}-${parts[1]}-${parts[0]}`;
-    }
-    return dateStr;
+  // Convert Date to YYYY-MM-DD for API and input value
+  const formatDateForInput = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
-  const [selectedDate, setSelectedDate] = useState<string>(getDefaultDate());
+  // State for input value (YYYY-MM-DD format)
+  const [dateInputValue, setDateInputValue] = useState<string>(formatDateForInput(getDefaultDate()));
   const [startTime, setStartTime] = useState("06:00");
   const [endTime, setEndTime] = useState("22:00");
-  const [dateError, setDateError] = useState<string>("");
   const [loadingEmployees, setLoadingEmployees] = useState(false);
   const [employees, setEmployees] = useState<IEmployeeCache[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -60,7 +55,7 @@ const AvailabilityModal = ({
   // Reset state when modal opens
   useEffect(() => {
     if (visible) {
-      setSelectedDate(getDefaultDate());
+      setDateInputValue(formatDateForInput(getDefaultDate()));
       setStartTime("06:00");
       setEndTime("22:00");
       setEmployees([]);
@@ -84,20 +79,12 @@ const AvailabilityModal = ({
   }, [employees, searchTerm]);
 
   const loadAvailableEmployees = async () => {
-    if (!selectedDate || !startTime || !endTime) {
+    if (!dateInputValue || !startTime || !endTime) {
       return;
     }
 
-    // Validate date format DD/MM/YYYY
-    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
-    if (!dateRegex.test(selectedDate)) {
-      setDateError("Formato de fecha inválido. Use DD/MM/AAAA");
-      return;
-    }
-    setDateError("");
-
-    // Convert DD/MM/YYYY to YYYY-MM-DD for API
-    const apiDate = parseDate(selectedDate);
+    // Use dateInputValue directly (already in YYYY-MM-DD format)
+    const apiDate = dateInputValue;
 
     try {
       setLoadingEmployees(true);
@@ -131,13 +118,13 @@ const AvailabilityModal = ({
   };
 
   const handleSearch = () => {
-    if (selectedDate && startTime && endTime) {
+    if (dateInputValue && startTime && endTime) {
       loadAvailableEmployees();
     }
   };
 
   const handleHide = () => {
-    setSelectedDate(getDefaultDate());
+    setDateInputValue(formatDateForInput(getDefaultDate()));
     setStartTime("06:00");
     setEndTime("22:00");
     setEmployees([]);
@@ -147,7 +134,7 @@ const AvailabilityModal = ({
     onHide();
   };
 
-  const isFormValid = selectedDate && startTime && endTime;
+  const isFormValid = dateInputValue && startTime && endTime;
 
   const statusBodyTemplate = (rowData: IEmployeeCache) => {
     return (
@@ -193,18 +180,31 @@ const AvailabilityModal = ({
         {/* Date Selection */}
         <div className="field">
           <label htmlFor="date">Fecha:</label>
-          <InputText
-            id="date"
-            type="text"
-            value={selectedDate}
-            onChange={(e) => {
-              setSelectedDate(e.target.value);
-              setDateError("");
-            }}
-            placeholder="DD/MM/AAAA"
-          />
-          <small style={{ color: "#6c757d" }}>Formato: DD/MM/AAAA</small>
-          {dateError && <small style={{ color: "#dc3545", display: "block", marginTop: "4px" }}>{dateError}</small>}
+          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+            <InputText
+              id="date"
+              type="date"
+              value={dateInputValue}
+              onChange={(e) => {
+                setDateInputValue(e.target.value);
+              }}
+              style={{ width: "200px" }}
+              onClick={(e) => {
+                // Select all text when clicked for easy editing
+                (e.target as HTMLInputElement).select();
+              }}
+            />
+            <Button
+              icon="pi pi-calendar"
+              className="p-button-outlined p-button-secondary"
+              onClick={() => document.getElementById("date")?.click()}
+              tooltip="Abrir selector de fecha"
+              tooltipOptions={{ position: "top" }}
+            />
+          </div>
+          <small style={{ color: "#6c757d" }}>
+            Formato: AAAA-MM-DD (use el selector o escriba la fecha)
+          </small>
         </div>
 
         {/* Time Range */}
