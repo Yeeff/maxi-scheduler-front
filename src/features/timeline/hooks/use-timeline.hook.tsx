@@ -899,41 +899,32 @@ export default function useTimelineHook() {
   const handleTimeBlockDelete = async (timeBlockId: number) => {
     if (!timeBlockId) return;
 
-    const confirmDelete = window.confirm('¿Está seguro de eliminar este bloque de tiempo?');
-    if (!confirmDelete) return;
-
-    try {
-      const response = await deleted(`/api/daily-schedules/${timeBlockId}`);
-      if (response.operation.code === EResponseCodes.SUCCESS || response.operation.code === EResponseCodes.OK) {
-        setMessage({
-          title: 'Bloque eliminado',
-          description: 'El bloque de tiempo ha sido eliminado exitosamente.',
-          show: true,
-          OkTitle: 'Aceptar',
-          onOk: () => {
-            loadTimelineData(weekStart);
-            setMessage((prev) => ({ ...prev, show: false }));
-          },
-        });
-      } else {
-        setMessage({
-          title: 'Error',
-          description: 'Error al eliminar el bloque: ' + response.operation.message,
-          show: true,
-          OkTitle: 'Aceptar',
-          background: true,
-        });
-      }
-    } catch (error) {
-      console.error('Error deleting time block:', error);
-      setMessage({
-        title: 'Error',
-        description: 'Error al eliminar el bloque de tiempo.',
-        show: true,
-        OkTitle: 'Aceptar',
-        background: true,
-      });
-    }
+    // Show confirmation modal instead of window.confirm
+    setMessage({
+      show: true,
+      title: 'Confirmar eliminación',
+      description: '¿Está seguro de eliminar este bloque de tiempo?',
+      cancelTitle: 'Cancelar',
+      OkTitle: 'Eliminar',
+      onOk: async () => {
+        try {
+          await deleted(`/api/daily-schedules/${timeBlockId}`);
+          // Close modal and reload data automatically without showing success message
+          setMessage((prev) => ({ ...prev, show: false }));
+          loadTimelineData(weekStart);
+        } catch (error) {
+          setMessage({
+            title: 'Error',
+            description: `Error al eliminar el bloque de tiempo: ${error instanceof Error ? error.message : 'Error desconocido'}`,
+            show: true,
+            OkTitle: 'Aceptar',
+            onOk: () => setMessage((prev) => ({ ...prev, show: false })),
+          });
+        }
+      },
+      onCancel: () => setMessage((prev) => ({ ...prev, show: false })),
+      onClickOutClose: true,
+    });
   };
 
   // Time block editor handlers
