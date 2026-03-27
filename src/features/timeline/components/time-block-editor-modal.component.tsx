@@ -97,6 +97,13 @@ const TimeBlockEditorModal = ({
     }
   };
 
+  // Load leave types when modal opens
+  useEffect(() => {
+    if (visible) {
+      loadLeaveTypes();
+    }
+  }, [visible]);
+
   // Pre-select the assigned employee when modal opens in create mode
   useEffect(() => {
     console.log('DEBUG: isCreateMode:', isCreateMode, 'timeBlock:', timeBlock);
