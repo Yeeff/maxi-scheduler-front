@@ -105,6 +105,7 @@ const TimelinePage = (): React.JSX.Element => {
     selectedDateForTimeBlock,
     handleTimeBlockSave,
     handleTimeBlockCreate,
+    handleTimeBlockDelete,
     showTimeBlockManagerModal,
     setShowTimeBlockManagerModal,
     selectedPositionForManager,
@@ -168,12 +169,26 @@ const TimelinePage = (): React.JSX.Element => {
             }
           }
         }
+      } else if ((event.key === 'Delete' || event.key === 'Supr') && selectedCell) {
+        // Delete the selected time block
+        const position = timelineData.find(p => p.position.id.toString() === selectedCell.positionId);
+        if (position) {
+          const employee = position.employees?.find(e => e.id.toString() === selectedCell.employeeId);
+          if (employee) {
+            const timeBlocks = employee.scheduleData[selectedCell.day as keyof typeof employee.scheduleData] || [];
+            // Find the first block that has an ID (should be only one per cell)
+            const blockToDelete = timeBlocks.find((block: any) => block.id);
+            if (blockToDelete && blockToDelete.id) {
+              handleTimeBlockDelete(blockToDelete.id);
+            }
+          }
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedCell, timelineData, copiedBlock, setCopiedBlock, getDayDate, handleTimeBlockCreate]);
+  }, [selectedCell, timelineData, copiedBlock, setCopiedBlock, getDayDate, handleTimeBlockCreate, handleTimeBlockDelete]);
 
   return (
     <div className="main-page">

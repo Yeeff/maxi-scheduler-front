@@ -36,7 +36,7 @@ export default function useTimelineHook() {
   const loadingTimelineRef = useRef(false);
 
   // Services
-  const { get, put, post } = useCrudService(process.env.urlApiScheduler);
+  const { get, put, post, deleted } = useCrudService(process.env.urlApiScheduler);
 
   // Load initial data
   useEffect(() => {
@@ -899,6 +899,47 @@ export default function useTimelineHook() {
     }
   };
 
+  // Delete time block handler
+  const handleTimeBlockDelete = async (timeBlockId: number) => {
+    if (!timeBlockId) return;
+
+    const confirmDelete = window.confirm('¿Está seguro de eliminar este bloque de tiempo?');
+    if (!confirmDelete) return;
+
+    try {
+      const response = await deleted(`/api/daily-schedules/${timeBlockId}`);
+      if (response.operation.code === EResponseCodes.SUCCESS || response.operation.code === EResponseCodes.OK) {
+        setMessage({
+          title: 'Bloque eliminado',
+          description: 'El bloque de tiempo ha sido eliminado exitosamente.',
+          show: true,
+          OkTitle: 'Aceptar',
+          onOk: () => {
+            loadTimelineData(weekStart);
+            setMessage((prev) => ({ ...prev, show: false }));
+          },
+        });
+      } else {
+        setMessage({
+          title: 'Error',
+          description: 'Error al eliminar el bloque: ' + response.operation.message,
+          show: true,
+          OkTitle: 'Aceptar',
+          background: true,
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting time block:', error);
+      setMessage({
+        title: 'Error',
+        description: 'Error al eliminar el bloque de tiempo.',
+        show: true,
+        OkTitle: 'Aceptar',
+        background: true,
+      });
+    }
+  };
+
   // Time block manager handlers
   const handleTimeBlockEdit = (timeBlock: any, row: ITimelineRow) => {
     const realDate = getDayDate(selectedDayForManager!);
@@ -1156,6 +1197,7 @@ export default function useTimelineHook() {
     selectedDateForTimeBlock,
     handleTimeBlockSave,
     handleTimeBlockCreate,
+    handleTimeBlockDelete,
     // Time block manager modal state
     showTimeBlockManagerModal,
     setShowTimeBlockManagerModal,
