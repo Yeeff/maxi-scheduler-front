@@ -296,7 +296,7 @@ return (
                 padding: '8px 16px',
                 borderRadius: '4px',
                 cursor: canAssignEmployee ? 'pointer' : 'not-allowed',
-                display: 'flex',
+                display: 'none', // Solo visible "Agregar empleado"
                 alignItems: 'center',
                 gap: '8px',
                 fontSize: '14px',
@@ -328,7 +328,7 @@ return (
                 padding: '8px 16px',
                 borderRadius: '4px',
                 cursor: canAddEmployee ? 'pointer' : 'not-allowed',
-                display: 'flex',
+                display: 'flex', // Solo este botón visible
                 alignItems: 'center',
                 gap: '8px',
                 fontSize: '14px',
@@ -360,7 +360,7 @@ return (
                 padding: '8px 16px',
                 borderRadius: '4px',
                 cursor: canUnassignEmployee ? 'pointer' : 'not-allowed',
-                display: 'flex',
+                display: 'none', // Solo visible "Agregar empleado"
                 alignItems: 'center',
                 gap: '8px',
                 fontSize: '14px',
@@ -392,7 +392,7 @@ return (
                 padding: '8px 16px',
                 borderRadius: '4px',
                 cursor: canAssociateTemplate ? 'pointer' : 'not-allowed',
-                display: 'flex',
+                display: 'none', // Solo visible "Agregar empleado"
                 alignItems: 'center',
                 gap: '8px',
                 fontSize: '14px',
@@ -424,7 +424,7 @@ return (
                 padding: '8px 16px',
                 borderRadius: '4px',
                 cursor: canGenerateSchedules ? 'pointer' : 'not-allowed',
-                display: 'flex',
+                display: 'none', // Solo visible "Agregar empleado"
                 alignItems: 'center',
                 gap: '8px',
                 fontSize: '14px',
