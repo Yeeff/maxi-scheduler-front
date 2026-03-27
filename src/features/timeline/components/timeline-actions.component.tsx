@@ -25,7 +25,9 @@ interface ITimelineActionsProps {
   onChangeScheduleTemplate: () => void;
   onGenerateSchedules: () => void;
   onBulkGenerateSchedules: () => void;
+  onAddEmployee: () => void;
   canAssignEmployee: boolean;
+  canAddEmployee: boolean;
   canUnassignEmployee: boolean;
   canAssociateTemplate: boolean;
   canGenerateSchedules: boolean;
@@ -56,7 +58,9 @@ export const TimelineActions = ({
   onChangeScheduleTemplate,
   onGenerateSchedules,
   onBulkGenerateSchedules,
+  onAddEmployee,
   canAssignEmployee,
+  canAddEmployee,
   canUnassignEmployee,
   canAssociateTemplate,
   canGenerateSchedules,
@@ -304,6 +308,38 @@ return (
                 if (canAssignEmployee) {
                   e.currentTarget.style.border = '1px solid #094a90';
                   e.currentTarget.style.backgroundColor = 'rgba(9, 74, 144, 0.1)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.border = 'none';
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            />
+            <Button
+              label="Agregar empleado"
+              icon="pi pi-plus"
+              className="timeline-action-button"
+              onClick={onAddEmployee}
+              disabled={!canAddEmployee}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: canAddEmployee ? '#28a745' : '#6c757d',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                cursor: canAddEmployee ? 'pointer' : 'not-allowed',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={(e) => {
+                if (canAddEmployee) {
+                  e.currentTarget.style.border = '1px solid #28a745';
+                  e.currentTarget.style.backgroundColor = 'rgba(40, 167, 69, 0.1)';
                 }
               }}
               onMouseLeave={(e) => {

@@ -34,6 +34,21 @@ const TimelinePage = (): React.JSX.Element => {
   // State for add employee row visibility
   const [showAddEmployeeRow, setShowAddEmployeeRow] = useState<Record<string, boolean>>({});
 
+  // Handler for adding employee from action bar
+  const handleAddEmployee = () => {
+    if (selectedRows.length > 0) {
+      // Get the position ID from the first selected row
+      const positionId = selectedRows[0].position.id;
+      if (positionId) {
+        // Toggle the showAddEmployeeRow state for this position
+        setShowAddEmployeeRow(prev => ({
+          ...prev,
+          [positionId]: !prev[positionId]
+        }));
+      }
+    }
+  };
+
   const {
     timelineData,
     companies,
@@ -222,7 +237,9 @@ const TimelinePage = (): React.JSX.Element => {
           onChangeScheduleTemplate={handleChangeScheduleTemplate}
           onGenerateSchedules={handleGenerateSchedules}
           onBulkGenerateSchedules={handleBulkGenerateSchedules}
+          onAddEmployee={handleAddEmployee}
           canAssignEmployee={canAssignEmployee}
+          canAddEmployee={selectedRows.length > 0}
           canUnassignEmployee={canUnassignEmployee}
           canAssociateTemplate={canAssociateTemplate}
           canGenerateSchedules={canGenerateSchedules}

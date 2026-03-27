@@ -242,23 +242,6 @@ export const TimelineGrid = ({
                 <span>
                   {position.position.name} - {position.position.location}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => setShowAddEmployeeRow(prev => ({ ...prev, [position.id]: !prev[position.id] }))}
-                  style={{
-                    background: showAddEmployeeRow[position.id] ? '#28a745' : '#6c757d',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '3px',
-                    padding: '2px 6px',
-                    fontSize: '11px',
-                    cursor: 'pointer',
-                    marginLeft: '8px'
-                  }}
-                  title={showAddEmployeeRow[position.id] ? 'Ocultar' : 'Agregar empleado'}
-                >
-                  {showAddEmployeeRow[position.id] ? '✓' : '+'}
-                </button>
               </div>
             )}
             <div style={{ 
