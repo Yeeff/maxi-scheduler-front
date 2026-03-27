@@ -214,18 +214,27 @@ export const TimelineGrid = ({
             onChange={() => handleRowSelection(position)}
           />
           <div style={{ flex: 1 }}>
-            <div style={{
-              fontSize: index === 0 ? '13px' : '11px',
-              color: index === 0 ? '#094a90' : '#6c757d',
-              fontWeight: index === 0 ? 'bold' : 'normal',
-              marginBottom: '2px',
-              backgroundColor: index === 0 ? 'rgba(9, 74, 144, 0.08)' : 'transparent',
-              padding: index === 0 ? '2px 4px' : '0px',
-              borderRadius: index === 0 ? '2px' : '0px'
+            {index === 0 && (
+              <div style={{
+                fontSize: '13px',
+                color: '#094a90',
+                fontWeight: 'bold',
+                marginBottom: '2px',
+                backgroundColor: 'rgba(9, 74, 144, 0.08)',
+                padding: '2px 4px',
+                borderRadius: '2px'
+              }}>
+                {position.position.name} - {position.position.location}
+              </div>
+            )}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '6px',
+              marginLeft: '16px',
+              fontWeight: 'normal',
+              color: '#212529'
             }}>
-              {position.position.name} - {position.position.location}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               {employee.name}
               {employee.currentEmployee && (
                 <span style={{
