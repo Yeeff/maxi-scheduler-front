@@ -77,9 +77,9 @@ const TimeBlockEditorModal = ({
         const leaveTypesData = (response as any).data?.data || (response as any).data || [];
         setLeaveTypes(Array.isArray(leaveTypesData) ? leaveTypesData : []);
 
-        // Set default leave type (work) if available
-        const workType = leaveTypesData.find((type: ILeaveType) => type.code === 'work');
-        if (workType && selectedLeaveTypeId === null) {
+        // Set default leave type (work) if available - case insensitive
+        const workType = leaveTypesData.find((type: ILeaveType) => type.code?.toLowerCase() === 'work');
+        if (workType) {
           setSelectedLeaveTypeId(workType.id);
         }
       } else {
@@ -126,8 +126,8 @@ const TimeBlockEditorModal = ({
           if (scheduleData.leaveType?.id) {
             setSelectedLeaveTypeId(scheduleData.leaveType.id);
           } else {
-            // Fallback to default work type
-            const workType = leaveTypes.find(type => type.code === 'work');
+            // Fallback to default work type - case insensitive
+            const workType = leaveTypes.find(type => type.code?.toLowerCase() === 'work');
             setSelectedLeaveTypeId(workType?.id || null);
           }
 
@@ -142,8 +142,8 @@ const TimeBlockEditorModal = ({
       // Fallback to prop data
       setStartTime(timeBlock?.startTime || "");
       setEndTime(timeBlock?.endTime || "");
-      // Set default leave type for fallback
-      const workType = leaveTypes.find(type => type.code === 'work');
+      // Set default leave type for fallback - case insensitive
+      const workType = leaveTypes.find(type => type.code?.toLowerCase() === 'work');
       setSelectedLeaveTypeId(workType?.id || null);
       if (timeBlock?.employeeId) {
         setInitialEmployeeId(timeBlock.employeeId);
@@ -196,8 +196,8 @@ const TimeBlockEditorModal = ({
         // CREATE mode: clear fields
         setStartTime("");
         setEndTime("");
-        // Set default leave type (work)
-        const workType = leaveTypes.find(type => type.code === 'work');
+        // Set default leave type (work) - case insensitive
+        const workType = leaveTypes.find(type => type.code?.toLowerCase() === 'work');
         setSelectedLeaveTypeId(workType?.id || null);
         setSelectedEmployee(null);
         setSearchTerm("");
@@ -211,8 +211,8 @@ const TimeBlockEditorModal = ({
           // Fallback to prop data if no ID
           setStartTime(timeBlock?.startTime || "");
           setEndTime(timeBlock?.endTime || "");
-          // Set default leave type for fallback
-          const workType = leaveTypes.find(type => type.code === 'work');
+          // Set default leave type for fallback - case insensitive
+          const workType = leaveTypes.find(type => type.code?.toLowerCase() === 'work');
           setSelectedLeaveTypeId(workType?.id || null);
           if (timeBlock?.employeeId) {
             setInitialEmployeeId(timeBlock.employeeId);
@@ -305,8 +305,8 @@ const TimeBlockEditorModal = ({
     setStartTime("");
     setEndTime("");
     setSelectedEmployee(null);
-    // Reset to default leave type
-    const workType = leaveTypes.find(type => type.code === 'work');
+    // Reset to default leave type - case insensitive
+    const workType = leaveTypes.find(type => type.code?.toLowerCase() === 'work');
     setSelectedLeaveTypeId(workType?.id || null);
     setSearchTerm("");
     setEmployees([]);
@@ -569,6 +569,12 @@ const TimeBlockEditorModal = ({
           value={selectedLeaveTypeId}
           options={leaveTypes
             .filter(type => type.code !== 'break') // Hide break option from UI
+            .sort((a, b) => {
+              // Put 'work' type first
+              if (a.code?.toLowerCase() === 'work') return -1;
+              if (b.code?.toLowerCase() === 'work') return 1;
+              return 0;
+            })
             .map(type => ({
               label: type.name,
               value: type.id
