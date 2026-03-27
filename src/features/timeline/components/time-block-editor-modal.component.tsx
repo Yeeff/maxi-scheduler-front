@@ -63,6 +63,7 @@ const TimeBlockEditorModal = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredEmployees, setFilteredEmployees] = useState<IEmployeeCache[]>([]);
   const [initialEmployeeId, setInitialEmployeeId] = useState<number | null>(null);
+  const [showEmployeeList, setShowEmployeeList] = useState(false);
 
   // Determine if we're in CREATE or EDIT mode
   const isCreateMode = !timeBlock || !timeBlock.id;
@@ -133,9 +134,16 @@ const TimeBlockEditorModal = ({
             setSelectedLeaveTypeId(workType?.id || null);
           }
 
-          // Store initial employee ID for edit mode
+          // Store initial employee ID for edit mode and set selected employee directly
           if (scheduleData.employeeCache?.id) {
             setInitialEmployeeId(scheduleData.employeeCache.id);
+            // Set the selected employee directly from the fetched data
+            setSelectedEmployee({
+              id: scheduleData.employeeCache.id,
+              name: scheduleData.employeeCache.name,
+              document: scheduleData.employeeCache.document,
+              status: scheduleData.employeeCache.status
+            });
           }
         }
       }
@@ -194,6 +202,9 @@ const TimeBlockEditorModal = ({
 
   useEffect(() => {
     if (visible) {
+      // Reset showEmployeeList when modal opens
+      setShowEmployeeList(false);
+      
       if (isCreateMode) {
         // CREATE mode: clear fields
         setStartTime("");
@@ -218,6 +229,13 @@ const TimeBlockEditorModal = ({
           setSelectedLeaveTypeId(workType?.id || null);
           if (timeBlock?.employeeId) {
             setInitialEmployeeId(timeBlock.employeeId);
+            // Also set the employee from props if available
+            setSelectedEmployee({
+              id: timeBlock.employeeId,
+              name: timeBlock.employeeName || 'Empleado',
+              document: '',
+              status: true
+            });
           }
         }
       }
@@ -231,21 +249,13 @@ const TimeBlockEditorModal = ({
     }
   }, [visible, isCreateMode, startTime, endTime]);
 
-  // Load employees when times change in EDIT mode (after initial load)
+  // Load employees when user clicks "Cambiar empleado" button in EDIT mode
   useEffect(() => {
-    if (visible && !isCreateMode && startTime && endTime && initialEmployeeId !== null) {
-      // Only reload if times have been modified
-      const originalStart = timeBlock?.startTime || "";
-      const originalEnd = timeBlock?.endTime || "";
-      
-      if (startTime !== originalStart || endTime !== originalEnd) {
-        loadAvailableEmployees(startTime, endTime, timeBlock?.id);
-      } else {
-        // Initial load in edit mode - load with current employee
-        loadAvailableEmployees(startTime, endTime, timeBlock?.id);
-      }
+    if (visible && !isCreateMode && showEmployeeList && startTime && endTime) {
+      // Only load employees when user explicitly wants to change
+      loadAvailableEmployees(startTime, endTime, timeBlock?.id);
     }
-  }, [visible, isCreateMode, startTime, endTime, initialEmployeeId]);
+  }, [visible, isCreateMode, showEmployeeList, startTime, endTime]);
 
   const handleSave = async () => {
     if (!selectedEmployee) {
@@ -313,6 +323,7 @@ const TimeBlockEditorModal = ({
     setSearchTerm("");
     setEmployees([]);
     setInitialEmployeeId(null);
+    setShowEmployeeList(false);
     onHide();
   };
 
@@ -512,73 +523,131 @@ const TimeBlockEditorModal = ({
           )}
         </div>
 
-        {startTime && endTime ? (
-          <>
-            <InputText
-              id="search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Buscar por nombre o documento..."
-              disabled={loadingEmployees}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                border: '1px solid #dee2e6',
-                borderRadius: '4px',
-                fontSize: '14px',
-                marginBottom: '12px',
-                transition: 'border-color 0.2s ease'
-              }}
-              onFocus={(e) => e.target.style.borderColor = '#094a90'}
-              onBlur={(e) => e.target.style.borderColor = '#dee2e6'}
-            />
-
-            <DataTable
-              value={filteredEmployees}
-              selectionMode="single"
-              selection={selectedEmployee}
-              onSelectionChange={(e) => setSelectedEmployee(e.value)}
-              dataKey="id"
-              loading={loadingEmployees}
-              scrollable
-              scrollHeight="200px"
-              emptyMessage={loadingEmployees ? "Cargando empleados disponibles..." : "No hay empleados disponibles para este horario"}
-              className="p-datatable-sm"
-              style={{
-                border: '1px solid #dee2e6',
-                borderRadius: '4px',
-                overflow: 'hidden',
-                marginBottom: '12px'
-              }}
-            >
-              <Column field="name" header="Nombre" sortable style={{ fontSize: '14px' }} />
-              <Column field="document" header="Documento" sortable style={{ fontSize: '14px' }} />
-            </DataTable>
-
-            {selectedEmployee && (
+        {/* EDIT mode: Show current employee with option to change */}
+        {!isCreateMode && !showEmployeeList ? (
+          <div style={{ marginBottom: '12px' }}>
+            {selectedEmployee ? (
               <div style={{
                 padding: '12px 16px',
                 backgroundColor: '#e3f2fd',
                 border: '1px solid #2196f3',
                 borderRadius: '4px',
                 color: '#1565c0',
+                fontSize: '14px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
+              }}>
+                <div>
+                  <strong>Empleado actual:</strong> {selectedEmployee.name}
+                  {selectedEmployee.document && ` (${selectedEmployee.document})`}
+                </div>
+                <Button
+                  label="Cambiar empleado"
+                  icon="pi pi-search"
+                  onClick={() => {
+                    if (startTime && endTime) {
+                      setShowEmployeeList(true);
+                    } else {
+                      alert("Por favor ingrese hora de inicio y fin primero");
+                    }
+                  }}
+                  style={{
+                    background: '#094a90',
+                    border: 'none',
+                    color: 'white',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '12px'
+                  }}
+                />
+              </div>
+            ) : (
+              <div style={{
+                padding: '12px 16px',
+                backgroundColor: '#fff3cd',
+                border: '1px solid #ffc107',
+                borderRadius: '4px',
+                color: '#856404',
                 fontSize: '14px'
               }}>
-                <strong>Empleado seleccionado:</strong> {selectedEmployee.name} ({selectedEmployee.document})
+                {startTime && endTime ? "Cargando empleado..." : "Por favor ingrese hora de inicio y fin para ver el empleado"}
+              </div>
+            )}
+          </div>
+        ) : (
+          // CREATE mode or user clicked "Cambiar empleado" - show the list
+          <>
+            {(startTime && endTime) || isCreateMode ? (
+              <>
+                <InputText
+                  id="search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Buscar por nombre o documento..."
+                  disabled={loadingEmployees}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #dee2e6',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    marginBottom: '12px',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#094a90'}
+                  onBlur={(e) => e.target.style.borderColor = '#dee2e6'}
+                />
+
+                <DataTable
+                  value={filteredEmployees}
+                  selectionMode="single"
+                  selection={selectedEmployee}
+                  onSelectionChange={(e) => setSelectedEmployee(e.value)}
+                  dataKey="id"
+                  loading={loadingEmployees}
+                  scrollable
+                  scrollHeight="200px"
+                  emptyMessage={loadingEmployees ? "Cargando empleados disponibles..." : "No hay empleados disponibles para este horario"}
+                  className="p-datatable-sm"
+                  style={{
+                    border: '1px solid #dee2e6',
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                    marginBottom: '12px'
+                  }}
+                >
+                  <Column field="name" header="Nombre" sortable style={{ fontSize: '14px' }} />
+                  <Column field="document" header="Documento" sortable style={{ fontSize: '14px' }} />
+                </DataTable>
+
+                {selectedEmployee && (
+                  <div style={{
+                    padding: '12px 16px',
+                    backgroundColor: '#e3f2fd',
+                    border: '1px solid #2196f3',
+                    borderRadius: '4px',
+                    color: '#1565c0',
+                    fontSize: '14px'
+                  }}>
+                    <strong>Empleado seleccionado:</strong> {selectedEmployee.name} ({selectedEmployee.document})
+                  </div>
+                )}
+              </>
+            ) : (
+              <div style={{
+                padding: '12px 16px',
+                backgroundColor: '#fff3cd',
+                border: '1px solid #ffc107',
+                borderRadius: '4px',
+                color: '#856404',
+                fontSize: '14px'
+              }}>
+                Por favor ingrese hora de inicio y fin para ver empleados disponibles
               </div>
             )}
           </>
-        ) : (
-          <div style={{
-            padding: '12px 16px',
-            backgroundColor: '#fff3cd',
-            border: '1px solid #ffc107',
-            borderRadius: '4px',
-            color: '#856404',
-            fontSize: '14px'
-          }}>
-            Por favor ingrese hora de inicio y fin para ver empleados disponibles
-          </div>
         )}
       </div>
 
