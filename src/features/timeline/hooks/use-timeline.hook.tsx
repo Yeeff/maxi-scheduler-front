@@ -863,19 +863,9 @@ export default function useTimelineHook() {
 
       // Validar que la respuesta sea exitosa
       if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
-        setMessage({
-          title: "Horario Creado",
-          description: "El horario ha sido creado exitosamente.",
-          show: true,
-          OkTitle: "Aceptar",
-          onOk: () => {
-            loadTimelineData(weekStart);
-            setMessage((prev) => ({ ...prev, show: false }));
-          },
-          background: true,
-        });
-
+        // Close modal and reload data automatically without showing success message
         setShowTimeBlockEditorModal(false);
+        loadTimelineData(weekStart);
       } else {
         // Si la respuesta tiene código FAIL, mostrar error
         throw new Error(response.operation.message || "Error al crear el horario");
@@ -888,7 +878,7 @@ export default function useTimelineHook() {
         description: errorMessage,
         show: true,
         OkTitle: "Aceptar",
-        background: true,
+        onOk: () => setMessage((prev) => ({ ...prev, show: false })),
       });
     } finally {
       setIsGeneratingSchedules(false);
