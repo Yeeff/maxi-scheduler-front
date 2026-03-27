@@ -22,6 +22,10 @@ interface ITimelineGridProps {
     onUnassignEmployee?: (position: ITimelineRow) => void;
     currentWeekStart?: string | null; // Fecha de inicio de la semana actual
     selectedCell?: { positionId: string, employeeId: string, day: string } | null;
+    // New prop for add employee row
+    onAddEmployeeClick?: (position: ITimelineRow, day: string, date: string) => void;
+    showAddEmployeeRow?: Record<string, boolean>;
+    setShowAddEmployeeRow?: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   }
 
 const DAYS_OF_WEEK = [
@@ -93,10 +97,18 @@ export const TimelineGrid = ({
     onUnassignEmployee,
     currentWeekStart,
     selectedCell,
+    onAddEmployeeClick,
+    showAddEmployeeRow: externalShowAddEmployeeRow,
+    setShowAddEmployeeRow: externalSetShowAddEmployeeRow,
   }: ITimelineGridProps) => {
    const contextMenuRef = useRef<ContextMenu>(null);
    const gridRef = useRef<HTMLDivElement>(null);
    const [contextMenuTarget, setContextMenuTarget] = useState<any>(null);
+   // State to track which positions show the "add employee" row
+   // Use external state if provided, otherwise use local state
+   const [internalShowAddEmployeeRow, setInternalShowAddEmployeeRow] = useState<Record<string, boolean>>({});
+   const showAddEmployeeRow = externalShowAddEmployeeRow ?? internalShowAddEmployeeRow;
+   const setShowAddEmployeeRow = externalSetShowAddEmployeeRow ?? setInternalShowAddEmployeeRow;
 
   // Calculate week dates for header display
   const weekDates = getWeekDates(currentWeekStart);
@@ -216,6 +228,9 @@ export const TimelineGrid = ({
           <div style={{ flex: 1 }}>
             {index === 0 && (
               <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
                 fontSize: '13px',
                 color: '#094a90',
                 fontWeight: 'bold',
@@ -224,7 +239,26 @@ export const TimelineGrid = ({
                 padding: '2px 4px',
                 borderRadius: '2px'
               }}>
-                {position.position.name} - {position.position.location}
+                <span>
+                  {position.position.name} - {position.position.location}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowAddEmployeeRow(prev => ({ ...prev, [position.id]: !prev[position.id] }))}
+                  style={{
+                    background: showAddEmployeeRow[position.id] ? '#28a745' : '#6c757d',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '3px',
+                    padding: '2px 6px',
+                    fontSize: '11px',
+                    cursor: 'pointer',
+                    marginLeft: '8px'
+                  }}
+                  title={showAddEmployeeRow[position.id] ? 'Ocultar' : 'Agregar empleado'}
+                >
+                  {showAddEmployeeRow[position.id] ? '✓' : '+'}
+                </button>
               </div>
             )}
             <div style={{ 
@@ -499,7 +533,7 @@ export const TimelineGrid = ({
       </div>
 
       {/* Employee Rows */}
-      {data.length > 0 ? (
+      {data && data.length > 0 ? (
         data.flatMap(row => {
           // Check if this is a company header row (negative ID)
           if (row.position.id < 0) {
@@ -555,97 +589,72 @@ export const TimelineGrid = ({
           }
 
           // Regular position row
-          return row.employees && row.employees.length > 0
+          const employeeRows = row.employees && row.employees.length > 0
             ? row.employees.map((employee, index) => renderEmployeeRow(employee, row, index, row.employees))
-            : [
-                <div key={row.id} className="no-employees-row" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  borderBottom: '1px solid #e0e0e0',
-                  backgroundColor: '#f8f9fa',
-                  minHeight: '32px'
-                }}>
-                  {/* Position Column */}
-                  <div style={{
-                    width: '220px',
-                    padding: '6px 12px',
-                    fontSize: '12px',
-                    color: '#6c757d',
-                    borderRight: '1px solid #dee2e6',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginLeft: '-6px'
-                  }}>
-                    <Checkbox
-                      checked={selectedRows.some(selected => selected.id === row.id)}
-                      onChange={() => handleRowSelection(row)}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <div style={{
-                        fontSize: '13px',
-                        color: '#6c757d',
-                        fontWeight: 'bold',
-                        marginBottom: '2px',
-                        backgroundColor: 'rgba(108, 117, 125, 0.08)',
-                        padding: '2px 4px',
-                        borderRadius: '2px'
-                      }}>
-                        {row.position.name} - {row.position.location}
-                      </div>
-                      <div style={{
-                        fontSize: '11px',
-                        color: '#6c757d',
-                        fontStyle: 'italic'
-                      }}>
-                        Sin empleado asignado
-                      </div>
-                    </div>
+            : [];
+          
+          // Add employee row (shown when toggle is active)
+          const addEmployeeRow = showAddEmployeeRow[row.id] ? (
+            <div key={`${row.id}-add`} style={{
+              display: 'flex',
+              alignItems: 'center',
+              borderBottom: '1px solid #e0e0e0',
+              backgroundColor: '#e8f5e9',
+              minHeight: '32px',
+              borderLeft: '6px solid #28a745'
+            }}>
+              <div style={{
+                width: '220px',
+                padding: '6px 12px',
+                fontSize: '12px',
+                color: '#28a745',
+                fontWeight: 'bold',
+                borderRight: '1px solid #dee2e6',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                marginLeft: '-6px'
+              }}>
+                <span>➕ Agregar empleado</span>
+              </div>
+              
+              {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => {
+                const dayDate = weekDates[day];
+                return (
+                  <div
+                    key={day}
+                    style={{
+                      flex: 1,
+                      minHeight: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRight: '1px solid #dee2e6',
+                      cursor: 'pointer',
+                      backgroundColor: '#c8e6c9'
+                    }}
+                    onClick={() => {
+                      if (onAddEmployeeClick && dayDate) {
+                        onAddEmployeeClick(row, day, dayDate);
+                      }
+                    }}
+                    title={`Agregar empleado para ${day}`}
+                  >
+                    <span style={{
+                      color: '#28a745',
+                      fontSize: '16px',
+                      fontWeight: 'bold'
+                    }}>+</span>
                   </div>
-
-                  {/* Days Columns - Clickable even without employees */}
-                  {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => {
-                    const isSelected = selectedCell?.positionId === row.id.toString() && selectedCell?.employeeId === 'null' && selectedCell?.day === day;
-
-                    return (
-                      <div
-                        key={day}
-                        className="time-blocks-cell"
-                        data-position={row.id}
-                        data-employee="null"
-                        data-day={day}
-                        onClick={() => {
-                          console.log("Cell clicked - position:", row.position.name, "day:", day, "(no employee assigned)");
-                          onCellClick(row, day);
-                        }}
-                        onMouseEnter={() => handleCellHover(row.id.toString(), 'null', day, true)}
-                        onMouseLeave={() => handleCellHover(row.id.toString(), 'null', day, false)}
-                        style={{
-                          cursor: 'pointer',
-                          minHeight: '32px',
-                          position: 'relative',
-                          flex: 1,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRight: '1px solid #dee2e6',
-                          padding: '4px',
-                          backgroundColor: isSelected ? '#fff3cd' : 'rgba(220, 53, 69, 0.03)',
-                          transition: 'background-color 0.2s ease'
-                        }}
-                      >
-                      <div className="no-schedule text-gray small" style={{
-                        fontSize: '10px',
-                        color: '#6c757d',
-                        fontStyle: 'italic'
-                      }}>
-                        -
-                      </div>
-                    </div>
-                    );
-                  })}
-                </div>
-              ];
+                );
+              })}
+            </div>
+          ) : null;
+          
+          return [
+            ...employeeRows,
+            addEmployeeRow
+          ];
         })
       ) : (
         <div style={{

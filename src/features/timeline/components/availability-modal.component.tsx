@@ -19,11 +19,17 @@ interface IEmployeeCache {
 interface IAvailabilityModalProps {
   visible: boolean;
   onHide: () => void;
+  initialDate?: string;  // Fecha inicial pre-seleccionada (YYYY-MM-DD)
+  positionId?: number;   // ID de la posición
+  positionName?: string; // Nombre de la posición para mostrar en header
 }
 
 const AvailabilityModal = ({
   visible,
   onHide,
+  initialDate,
+  positionId,
+  positionName,
 }: IAvailabilityModalProps): React.JSX.Element => {
   // Initialize with next day
   const getDefaultDate = () => {
@@ -55,7 +61,11 @@ const AvailabilityModal = ({
   // Reset state when modal opens
   useEffect(() => {
     if (visible) {
-      setDateInputValue(formatDateForInput(getDefaultDate()));
+      // Use initialDate if provided, otherwise use default (tomorrow)
+      const defaultDate = initialDate 
+        ? initialDate 
+        : formatDateForInput(getDefaultDate());
+      setDateInputValue(defaultDate);
       setStartTime("06:00");
       setEndTime("22:00");
       setEmployees([]);
@@ -63,7 +73,7 @@ const AvailabilityModal = ({
       setFilteredEmployees([]);
       setHasSearched(false);
     }
-  }, [visible]);
+  }, [visible, initialDate]);
 
   // Filter employees based on search term
   useEffect(() => {
@@ -171,7 +181,7 @@ const AvailabilityModal = ({
     <Dialog
       visible={visible}
       style={{ width: "600px" }}
-      header="Ver Disponibilidad de Empleados"
+      header={positionName ? `Ver Disponibilidad - ${positionName}` : "Ver Disponibilidad de Empleados"}
       modal
       footer={footer}
       onHide={handleHide}

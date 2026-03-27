@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { TimelineGrid } from "../components/timeline-grid.component";
 import { TimelineActions } from "../components/timeline-actions.component";
@@ -28,6 +28,12 @@ if (typeof document !== 'undefined') {
 }
 
 const TimelinePage = (): React.JSX.Element => {
+  // Local state for availability modal
+  const [availabilityModalInitialDate, setAvailabilityModalInitialDate] = useState<string | undefined>(undefined);
+  const [availabilityModalPositionName, setAvailabilityModalPositionName] = useState<string | undefined>(undefined);
+  // State for add employee row visibility
+  const [showAddEmployeeRow, setShowAddEmployeeRow] = useState<Record<string, boolean>>({});
+
   const {
     timelineData,
     companies,
@@ -296,6 +302,12 @@ const TimelinePage = (): React.JSX.Element => {
             loading={loading}
             currentWeekStart={weekStart}
             selectedCell={selectedCell}
+            onAddEmployeeClick={(position, day, date) => {
+              // Open the time block editor modal directly for creating a new block
+              handleTimeBlockCreateFromManager(position, date);
+            }}
+            showAddEmployeeRow={showAddEmployeeRow}
+            setShowAddEmployeeRow={setShowAddEmployeeRow}
           />
         </div>
 
@@ -331,7 +343,10 @@ const TimelinePage = (): React.JSX.Element => {
 
         <TimeBlockEditorModal
           visible={showTimeBlockEditorModal}
-          onHide={() => setShowTimeBlockEditorModal(false)}
+          onHide={() => {
+            setShowTimeBlockEditorModal(false);
+            setShowAddEmployeeRow({}); // Hide all add employee rows when modal closes
+          }}
           onSave={handleTimeBlockSave}
           onCreate={handleTimeBlockCreate}
           timeBlock={selectedTimeBlock}
@@ -361,7 +376,13 @@ const TimelinePage = (): React.JSX.Element => {
 
         <AvailabilityModal
           visible={showAvailabilityModal}
-          onHide={() => setShowAvailabilityModal(false)}
+          onHide={() => {
+            setShowAvailabilityModal(false);
+            setAvailabilityModalInitialDate(undefined);
+            setAvailabilityModalPositionName(undefined);
+          }}
+          initialDate={availabilityModalInitialDate}
+          positionName={availabilityModalPositionName}
         />
       </div>
     </div>
