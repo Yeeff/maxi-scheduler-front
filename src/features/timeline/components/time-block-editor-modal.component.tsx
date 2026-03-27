@@ -97,11 +97,27 @@ const TimeBlockEditorModal = ({
     }
   };
 
+  // Pre-select the assigned employee when modal opens in create mode
   useEffect(() => {
-    if (visible) {
-      loadLeaveTypes();
+    console.log('DEBUG: isCreateMode:', isCreateMode, 'timeBlock:', timeBlock);
+    if (visible && isCreateMode) {
+      if (timeBlock?.employeeId) {
+        console.log('DEBUG: Setting employee:', timeBlock.employeeId, timeBlock.employeeName);
+        setSelectedEmployee({
+          id: timeBlock.employeeId,
+          name: timeBlock.employeeName || 'Empleado',
+          document: '',
+          status: true
+        });
+        setInitialEmployeeId(timeBlock.employeeId);
+      } else {
+        // Reset if no employee in create mode
+        console.log('DEBUG: No employee, resetting');
+        setSelectedEmployee(null);
+        setInitialEmployeeId(null);
+      }
     }
-  }, [visible]);
+  }, [visible, isCreateMode, timeBlock?.employeeId, timeBlock?.employeeName]);
 
   useEffect(() => {
     // Filter employees based on search term
@@ -216,6 +232,17 @@ const TimeBlockEditorModal = ({
         setSearchTerm("");
         setEmployees([]);
         setInitialEmployeeId(null);
+        
+        // Pre-select the assigned employee from the position if available
+        if (timeBlock?.employeeId) {
+          setSelectedEmployee({
+            id: timeBlock.employeeId,
+            name: timeBlock.employeeName || 'Empleado',
+            document: '',
+            status: true
+          });
+          setInitialEmployeeId(timeBlock.employeeId);
+        }
       } else {
         // EDIT mode: fetch fresh data from API
         if (timeBlock?.id) {

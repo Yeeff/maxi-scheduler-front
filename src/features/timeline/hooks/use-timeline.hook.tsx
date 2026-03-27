@@ -951,7 +951,15 @@ export default function useTimelineHook() {
 
   const handleCreateBlockClick = (position: ITimelineRow, day: string) => {
     const realDate = getDayDate(day);
-    setSelectedTimeBlock(null); // Ensure create mode
+    
+    // Get the employee assigned to this position (if any)
+    const assignedEmployee = position.employees?.find(emp => emp.currentEmployee);
+    
+    // Pre-fill the time block with the assigned employee
+    setSelectedTimeBlock({
+      employeeId: assignedEmployee?.id || position.position.employeeCache?.id,
+      employeeName: assignedEmployee?.name || position.position.employeeCache?.name,
+    });
     setSelectedRowForTimeBlock(position);
     setSelectedDateForTimeBlock(realDate);
     setShowTimeBlockEditorModal(true);
