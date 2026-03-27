@@ -235,12 +235,11 @@ export default function useTimelineHook() {
     // Delay the action to allow double click detection
     setTimeout(() => {
       if (!doubleClickRef.current) {
-        // Open the time block manager modal for the position and day
+        // Open the time block editor modal for creating a new block (instead of manager modal)
         const realDate = getDayDate(day);
-        console.log("Cell clicked - opening manager modal for position:", row.position.name, "day:", day, "date:", realDate);
-        setSelectedPositionForManager(row.position.id);
-        setSelectedDayForManager(day);
-        setShowTimeBlockManagerModal(true);
+        console.log("Cell clicked - cell selected:", row.position.name, "day:", day, "date:", realDate);
+        // Just select the cell - don't open any modal
+        setSelectedCell({ positionId: row.position.id.toString(), employeeId: '', day });
       }
     }, 300);
   };
@@ -254,14 +253,11 @@ export default function useTimelineHook() {
   const [showCreateCompanyModal, setShowCreateCompanyModal] = useState(false);
   const [showCreatePositionModal, setShowCreatePositionModal] = useState(false);
   const [showTimeBlockEditorModal, setShowTimeBlockEditorModal] = useState(false);
-  const [showTimeBlockManagerModal, setShowTimeBlockManagerModal] = useState(false);
   const [showGenerateMonthModal, setShowGenerateMonthModal] = useState(false);
   const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
   const [selectedTimeBlock, setSelectedTimeBlock] = useState<any>(null);
   const [selectedRowForTimeBlock, setSelectedRowForTimeBlock] = useState<ITimelineRow | null>(null);
   const [selectedDateForTimeBlock, setSelectedDateForTimeBlock] = useState<string | null>(null);
-  const [selectedPositionForManager, setSelectedPositionForManager] = useState<number | null>(null);
-  const [selectedDayForManager, setSelectedDayForManager] = useState<string | null>(null);
   const [selectedCell, setSelectedCell] = useState<{ positionId: string, employeeId: string, day: string } | null>(null);
   const [copiedBlock, setCopiedBlock] = useState<any>(null);
 
@@ -940,22 +936,14 @@ export default function useTimelineHook() {
     }
   };
 
-  // Time block manager handlers
+  // Time block editor handlers
   const handleTimeBlockEdit = (timeBlock: any, row: ITimelineRow) => {
-    const realDate = getDayDate(selectedDayForManager!);
     setSelectedTimeBlock({
       ...timeBlock,
       employeeName: timeBlock.employeeName,
       positionId: row.position.id,
-      date: realDate
+      date: timeBlock.date
     });
-    setShowTimeBlockEditorModal(true);
-  };
-
-  const handleTimeBlockCreateFromManager = (row: ITimelineRow, date: string) => {
-    setSelectedTimeBlock(null);
-    setSelectedRowForTimeBlock(row);
-    setSelectedDateForTimeBlock(date);
     setShowTimeBlockEditorModal(true);
   };
 
@@ -1194,15 +1182,12 @@ export default function useTimelineHook() {
     selectedTimeBlock,
     setSelectedTimeBlock,
     selectedRowForTimeBlock,
+    setSelectedRowForTimeBlock,
     selectedDateForTimeBlock,
+    setSelectedDateForTimeBlock,
     handleTimeBlockSave,
     handleTimeBlockCreate,
     handleTimeBlockDelete,
-    // Time block manager modal state
-    showTimeBlockManagerModal,
-    setShowTimeBlockManagerModal,
-    selectedPositionForManager,
-    selectedDayForManager,
     // Generate month modal state
     showGenerateMonthModal,
     setShowGenerateMonthModal,
@@ -1213,7 +1198,6 @@ export default function useTimelineHook() {
     copiedBlock,
     setCopiedBlock,
     handleTimeBlockEdit,
-    handleTimeBlockCreateFromManager,
     handleBlockClick,
     handleCreateBlockClick,
     handleCreateBlockDoubleClick,

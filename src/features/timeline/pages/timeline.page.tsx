@@ -8,7 +8,6 @@ import { CreateCompanyModal } from "../components/create-company-modal.component
 import { CreatePositionModal } from "../components/create-position-modal.component";
 import { GenerateMonthModal } from "../components/generate-month-modal.component";
 import TimeBlockEditorModal from "../components/time-block-editor-modal.component";
-import TimeBlockManagerModal from "../components/time-block-manager-modal.component";
 import AvailabilityModal from "../components/availability-modal.component";
 import useTimelineHook from "../hooks/use-timeline.hook";
 
@@ -101,20 +100,18 @@ const TimelinePage = (): React.JSX.Element => {
     showTimeBlockEditorModal,
     setShowTimeBlockEditorModal,
     selectedTimeBlock,
+    setSelectedTimeBlock,
     selectedRowForTimeBlock,
+    setSelectedRowForTimeBlock,
     selectedDateForTimeBlock,
+    setSelectedDateForTimeBlock,
     handleTimeBlockSave,
     handleTimeBlockCreate,
     handleTimeBlockDelete,
-    showTimeBlockManagerModal,
-    setShowTimeBlockManagerModal,
-    selectedPositionForManager,
-    selectedDayForManager,
     selectedCell,
     copiedBlock,
     setCopiedBlock,
     handleTimeBlockEdit,
-    handleTimeBlockCreateFromManager,
     handleBlockClick,
     handleCreateBlockClick,
     handleCreateBlockDoubleClick,
@@ -336,7 +333,10 @@ const TimelinePage = (): React.JSX.Element => {
             selectedCell={selectedCell}
             onAddEmployeeClick={(position, day, date) => {
               // Open the time block editor modal directly for creating a new block
-              handleTimeBlockCreateFromManager(position, date);
+              setSelectedTimeBlock(null);
+              setSelectedRowForTimeBlock(position);
+              setSelectedDateForTimeBlock(date);
+              setShowTimeBlockEditorModal(true);
             }}
             showAddEmployeeRow={showAddEmployeeRow}
             setShowAddEmployeeRow={setShowAddEmployeeRow}
@@ -387,17 +387,6 @@ const TimelinePage = (): React.JSX.Element => {
           positionName={selectedRowForTimeBlock?.position.name || selectedRows[0]?.position.name}
           positionId={selectedRowForTimeBlock?.position.id || selectedRows[0]?.position.id}
           companyId={selectedCompanyId}
-        />
-
-        <TimeBlockManagerModal
-          visible={showTimeBlockManagerModal}
-          onHide={() => setShowTimeBlockManagerModal(false)}
-          onRefresh={() => loadTimelineData(weekStart)}
-          positionId={selectedPositionForManager || 0}
-          positionName={timelineData.find(row => row.position.id === selectedPositionForManager)?.position.name || ''}
-          date={getDayDate(selectedDayForManager || '') || ''}
-          dayKey={selectedDayForManager || ''}
-          companyId={selectedCompanyId || 0}
         />
 
         <GenerateMonthModal
