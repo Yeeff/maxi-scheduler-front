@@ -31,6 +31,7 @@ interface ITimeBlockEditorModalProps {
   onHide: () => void;
   onSave: (timeBlockId: number, employeeId: number, startTime: string, endTime: string, leaveTypeId: number) => void;
   onCreate?: (positionId: number, employeeId: number, date: string, startTime: string, endTime: string, leaveTypeId: number) => void;
+  onDelete?: (timeBlockId: number) => void;
   timeBlock?: ITimeBlock | null;
   selectedDate?: string;
   positionName?: string;
@@ -43,6 +44,7 @@ const TimeBlockEditorModal = ({
   onHide,
   onSave,
   onCreate,
+  onDelete,
   timeBlock,
   selectedDate,
   positionName,
@@ -315,9 +317,42 @@ const TimeBlockEditorModal = ({
   };
 
   const footer = (
-    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-      <Button
-        label="Cancelar"
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+      <div>
+        {!isCreateMode && onDelete && timeBlock?.id && (
+          <Button
+            label="Eliminar"
+            icon="pi pi-trash"
+            className="p-button-danger p-button-text"
+            onClick={() => {
+              onDelete(timeBlock.id!);
+              onHide();
+            }}
+            style={{
+              background: 'transparent',
+              border: '1px solid #dc3545',
+              color: '#dc3545',
+              padding: '8px 16px',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#dc3545';
+              e.currentTarget.style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = '#dc3545';
+            }}
+          />
+        )}
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <Button
+          label="Cancelar"
         icon="pi pi-times"
         className="p-button-text"
         onClick={handleHide}
@@ -369,6 +404,7 @@ const TimeBlockEditorModal = ({
           }
         }}
       />
+      </div>
     </div>
   );
 

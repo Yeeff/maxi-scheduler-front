@@ -381,6 +381,7 @@ const TimelinePage = (): React.JSX.Element => {
           }}
           onSave={handleTimeBlockSave}
           onCreate={handleTimeBlockCreate}
+          onDelete={handleTimeBlockDelete}
           timeBlock={selectedTimeBlock}
           selectedDate={selectedDateForTimeBlock || selectedTimeBlock?.date}
           positionName={selectedRowForTimeBlock?.position.name || selectedRows[0]?.position.name}
