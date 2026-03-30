@@ -773,7 +773,7 @@ export default function useTimelineHook() {
         referenceDate: referenceDate
       };
 
-      const response = await post("/api/daily-schedules/generate-month", request);
+      const response = await post("/api/daily-schedules/generate-month-from-previous-month", request);
 
       if (response.operation.code === EResponseCodes.OK || response.operation.code === EResponseCodes.SUCCESS) {
         const result = (response as any).data?.data || (response as any).data || {};
