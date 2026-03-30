@@ -571,10 +571,138 @@ export const TimelineGrid = ({
             );
           }
 
-          // Regular position row
-          const employeeRows = row.employees && row.employees.length > 0
-            ? row.employees.map((employee, index) => renderEmployeeRow(employee, row, index, row.employees))
-            : [];
+          // Renderizar fila vacía cuando no hay empleados en la posición
+  const renderEmptyEmployeeRow = (position: ITimelineRow) => {
+    const getPositionColor = (positionId: string) => {
+      const colors = [
+        '#094a90', // Azul oscuro
+        '#5B8FD4', // Azul claro
+      ];
+      const hash = positionId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+      return colors[hash % colors.length];
+    };
+    
+    const positionColor = getPositionColor(position.id);
+    
+    return (
+      <div key={`${position.id}-empty`} className="employee-timeline-row" style={{
+        display: 'flex',
+        alignItems: 'center',
+        borderBottom: '1px solid #e0e0e0',
+        backgroundColor: '#fafafa',
+        position: 'relative',
+        minHeight: '32px',
+        borderLeft: `6px solid ${positionColor}`,
+        borderTopLeftRadius: '4px',
+        borderBottomLeftRadius: '4px'
+      }}>
+        {/* Position-Employee Column */}
+        <div className="position-employee-column" style={{
+          width: '220px',
+          padding: '6px 12px',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          color: '#6c757d',
+          borderRight: '1px solid #dee2e6',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginLeft: '-6px'
+        }}>
+          <Checkbox
+            checked={selectedRows.some(selected => selected.id === position.id)}
+            onChange={() => handleRowSelection(position)}
+          />
+          <div style={{ flex: 1 }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '13px',
+              color: '#094a90',
+              fontWeight: 'bold',
+              marginBottom: '2px',
+              backgroundColor: 'rgba(9, 74, 144, 0.08)',
+              padding: '2px 4px',
+              borderRadius: '2px'
+            }}>
+              <span>
+                {position.position.name} - {position.position.location}
+              </span>
+            </div>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '6px',
+              marginLeft: '16px',
+              fontWeight: 'normal',
+              color: '#6c757d',
+              fontStyle: 'italic'
+            }}>
+              Sin empleados - Click para agregar
+            </div>
+          </div>
+        </div>
+
+        {/* Days Columns - Clickable to add blocks */}
+        {['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].map(day => {
+          const dayDate = weekDates[day];
+          return (
+            <div
+              key={day}
+              className="time-blocks-cell"
+              data-position={position.id}
+              data-employee="empty"
+              data-day={day}
+              onClick={() => {
+                console.log("Empty cell clicked - position:", position.position.name, "day:", day);
+                onCellClick(position, day);
+              }}
+              style={{
+                cursor: 'pointer',
+                minHeight: '32px',
+                position: 'relative',
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRight: '1px solid #dee2e6',
+                padding: '4px',
+                backgroundColor: '#f8f9fa'
+              }}
+            >
+              <div
+                className="no-schedule text-gray small"
+                style={{
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  opacity: 0.6,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'opacity 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '0.6'}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  onCreateBlockDoubleClick?.(position, day);
+                }}
+                title="Crear nuevo bloque"
+              >
+                <i className="pi pi-plus" style={{ fontSize: '10px' }}></i>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // Regular position row
+  const employeeRows = row.employees && row.employees.length > 0
+    ? row.employees.map((employee, index) => renderEmployeeRow(employee, row, index, row.employees))
+    : renderEmptyEmployeeRow(row);
           
           // Add employee row (shown when toggle is active)
           const addEmployeeRow = showAddEmployeeRow[row.id] ? (
@@ -634,8 +762,9 @@ export const TimelineGrid = ({
             </div>
           ) : null;
           
+          const rowsArray = Array.isArray(employeeRows) ? employeeRows : [employeeRows];
           return [
-            ...employeeRows,
+            ...rowsArray,
             addEmployeeRow
           ];
         })
